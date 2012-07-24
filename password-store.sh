@@ -40,6 +40,7 @@ if [[ $1 == "--init" ]]; then
 	exit 0
 elif [[ $1 == "--help" ]]; then
 	usage
+	exit 0
 fi
 
 if ! [[ -f $ID ]]; then
