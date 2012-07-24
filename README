@@ -8,6 +8,9 @@ This is a very simple password store that encrypts passwords using gpg and
 places the encrypted password in a directory. It can generate new passwords
 and keep track of old ones.
 
+If the password storage directory ($HOME/.password-store) is also a git
+repository, add/remove/change operations will create a corresponding git
+commit.
 
 Usage:
     pass --init gpg-id
@@ -22,6 +25,10 @@ Usage:
         Generate a new password of pass-length with optionally no symbols.
     pass --remove pass-name
         Remove existing password.
+    pass --push
+        If the password store is a git repository, push the latest changes.
+    pass --pull
+        If the password store is a git repository, pull the latest changes.
     pass --help
         Show help text.
 

@@ -4,6 +4,10 @@ umask 077
 
 PREFIX="$HOME/.password-store"
 ID="$PREFIX/.gpg-id"
+GIT="$PREFIX/.git"
+
+export GIT_DIR="$GIT"
+export GIT_WORK_TREE="$PREFIX"
 
 usage() {
 	cat <<_EOF
@@ -24,6 +28,10 @@ Usage:
         Generate a new password of pass-length with optionally no symbols.
     $0 --remove pass-name
         Remove existing password.
+    $0 --push
+        If the password store is a git repository, push the latest changes.
+    $0 --pull
+        If the password store is a git repository, pull the latest changes.
     $0 --help
         Show this text.
 _EOF
@@ -68,13 +76,18 @@ elif [[ $1 == "--insert" ]]; then
 	fi
 	mkdir -p -v "$PREFIX/$(dirname "$2")"
 
+	passfile="$PREFIX/$2.gpg"
 	if [[ $ml -eq 0 ]]; then
 		echo -n "Enter password for $2: "
-		head -n 1 | gpg -e -r "$ID" > "$PREFIX/$2.gpg"
+		head -n 1 | gpg -e -r "$ID" > "$passfile"
 	else
 		echo "Enter contents of $2 and press Ctrl+D when finished:"
 		echo
-		cat | gpg -e -r "$ID" > "$PREFIX/$2.gpg"
+		cat | gpg -e -r "$ID" > "$passfile"
+	fi
+	if [[ -d $GIT ]]; then
+		git add "$passfile"
+		git commit -m "Added given password for $2 to store."
 	fi
 elif [[ $1 == "--generate" ]]; then
 	if [[ $# -lt 3 ]]; then
@@ -92,7 +105,12 @@ elif [[ $1 == "--generate" ]]; then
 	fi
 	mkdir -p -v "$PREFIX/$(dirname "$2")"
 	pass="$(pwgen -s $symbols $3 1)"
-	echo $pass | gpg -e -r "$ID" > "$PREFIX/$2.gpg"
+	passfile="$PREFIX/$2.gpg"
+	echo $pass | gpg -e -r "$ID" > "$passfile"
+	if [[ -d $GIT ]]; then
+		git add "$passfile"
+		git commit -m "Added generated password for $2 to store."
+	fi
 	echo "The generated password to $2 is:"
 	echo "$pass"
 elif [[ $1 == "--remove" ]]; then
@@ -106,6 +124,26 @@ elif [[ $1 == "--remove" ]]; then
 		exit 1
 	fi
 	rm -i -v "$passfile"
+	if [[ -d $GIT ]] && ! [[ -f "$passfile" ]]; then
+		git rm -f "$passfile"
+		git commit -m "Removed $2 from store."
+	fi
+elif [[ $1 == "--push" ]]; then
+	if [[ -d $GIT ]]; then
+		shift
+		exec git push $@
+	else
+		echo "Error: the password store is not a git repository."
+		exit 1
+	fi
+elif [[ $1 == "--pull" ]]; then
+	if [[ -d $GIT ]]; then
+		shift
+		exec git pull $@
+	else
+		echo "Error: the password store is not a git repository."
+		exit 1
+	fi
 elif [[ $# -eq 1 ]]; then
 	passfile="$PREFIX/$1.gpg"
 	if ! [[ -f $passfile ]]; then
