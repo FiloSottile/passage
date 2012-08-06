@@ -45,9 +45,25 @@ isCommand() {
 	esac
 }
 clip() {
-	before="$(xclip -o -selection clipboard)"
-	echo "$1" | xclip -selection clipboard
-	(sleep 45s; echo "$before" | xclip -selection clipboard) & disown
+	# This base64 business is a disgusting hack to deal with newline inconsistancies
+	# in shell. There must be a better way to deal with this, but because I'm a dolt,
+	# we're going with this for now.
+
+	before="$(xclip -o -selection clipboard | base64)"
+	echo -n "$1" | xclip -selection clipboard
+	(
+		sleep 5s
+		now="$(xclip -o -selection clipboard | base64)"
+		if [[ $now != $(echo -n "$1" | base64) ]]; then
+			before="$now"
+		fi
+		# It might be nice to programatically check to see if klipper exists,
+		# as well as checking for other common clipboard managers. But for now,
+		# this works fine. Clipboard managers frequently write their history
+		# out in plaintext, so we axe it here.
+		qdbus org.kde.klipper /klipper org.kde.klipper.klipper.clearClipboardHistory >/dev/null 2>&1
+		echo "$before" | base64 -d | xclip -selection clipboard
+	) & disown
 	echo "Copied $2 to clipboard. Will clear in 45 seconds."
 }
 
