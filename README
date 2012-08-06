@@ -13,24 +13,26 @@ repository, add/remove/change operations will create a corresponding git
 commit.
 
 Usage:
-    pass --init gpg-id
+    pass init gpg-id
         Initialize new password storage and use gpg-id for encryption.
-    pass [--ls]
+    pass [ls] [subfolder]
         List passwords.
-    pass pass-name
-        Show existing password.
-    pass --insert [--multiline] pass-name
+    pass [show] [--clip,-c] pass-name
+        Show existing password and optionally put it on the clipboard.
+        If put on the clipboard, it will be cleared in 45 seconds.
+    pass insert [--multiline,-m] pass-name
         Insert new optionally multiline password.
-    pass --generate [--no-symbols] pass-name pass-length
+    pass generate [--no-symbols,-n] [--clip,-c] pass-name pass-length
         Generate a new password of pass-length with optionally no symbols.
-    pass --remove pass-name
+        Optionally put it on the clipboard and clear board after 45 seconds.
+    pass remove pass-name
         Remove existing password.
-    pass --push
+    pass push
         If the password store is a git repository, push the latest changes.
-    pass --pull
+    pass pull
         If the password store is a git repository, pull the latest changes.
-    pass --help
-        Show help text.
+    pass help
+        Show this text.
 
 Examples:
 
