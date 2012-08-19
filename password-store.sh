@@ -83,8 +83,8 @@ case "$command" in
 		fi
 		gpg_id="$1"
 		mkdir -v -p "$PREFIX"
-		echo "gpg_id" > "$ID"
-		echo "Password store initialized for gpg_id."
+		echo "$gpg_id" > "$ID"
+		echo "Password store initialized for $gpg_id."
 		exit 0
 		;;
 	help)
