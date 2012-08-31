@@ -40,7 +40,7 @@ _EOF
 }
 isCommand() {
 	case "$1" in
-		init|ls|show|insert|generate|remove|push|pull|help) return 0 ;;
+		init|ls|show|insert|generate|remove|rm|delete|push|pull|help) return 0 ;;
 		*) return 1 ;;
 	esac
 }
@@ -198,7 +198,7 @@ case "$command" in
 			clip "$pass" "$path"
 		fi
 		;;
-	remove)
+	delete|rm|remove)
 		if [[ $# -ne 1 ]]; then
 			echo "Usage: $program $command pass-name"
 			exit
