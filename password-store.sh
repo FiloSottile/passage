@@ -66,8 +66,7 @@ clip() {
 	) & disown
 	echo "Copied $2 to clipboard. Will clear in 45 seconds."
 }
-
-program="$0"
+program="$(basename "$0")"
 command="$1"
 if isCommand "$command"; then
 	shift
