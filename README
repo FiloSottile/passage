@@ -23,5 +23,5 @@ commands:
 
 - Produce a PDF document:
 
-    $ groff -mandoc ./man/pass.1 pass-man-page.ps
+    $ groff -mandoc ./man/pass.1 > pass-man-page.ps
     $ ps2pdf pass-man-page.ps
