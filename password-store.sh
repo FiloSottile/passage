@@ -34,13 +34,16 @@ Usage:
         If the password store is a git repository, push the latest changes.
     $program pull
         If the password store is a git repository, pull the latest changes.
+    $program git git-command-args...
+        If the password store is a git repository, execute a git command
+	specified by git-command-args.
     $program help
         Show this text.
 _EOF
 }
 isCommand() {
 	case "$1" in
-		init|ls|show|insert|generate|remove|rm|delete|push|pull|help) return 0 ;;
+		init|ls|show|insert|generate|remove|rm|delete|push|pull|git|help) return 0 ;;
 		*) return 1 ;;
 	esac
 }
@@ -218,6 +221,14 @@ case "$command" in
 	push|pull)
 		if [[ -d $GIT ]]; then
 			exec git $command $@
+		else
+			echo "Error: the password store is not a git repository."
+			exit 1
+		fi
+		;;
+	git)
+		if [[ -d $GIT ]]; then
+			exec git $@
 		else
 			echo "Error: the password store is not a git repository."
 			exit 1

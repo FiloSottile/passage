@@ -31,6 +31,9 @@ Usage:
         If the password store is a git repository, push the latest changes.
     pass pull
         If the password store is a git repository, pull the latest changes.
+    pass git git-command-args...
+        If the password store is a git repository, execute a git command
+	specified by git-command-args.
     pass help
         Show this text.
 
