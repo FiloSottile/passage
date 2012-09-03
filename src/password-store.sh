@@ -97,7 +97,7 @@ esac
 
 if ! [[ -f $ID ]]; then
 	echo "You must run:"
-	echo "    $0 init your-gpg-id"
+	echo "    $program init your-gpg-id"
 	echo "before you may use the password store."
 	echo
 	usage
