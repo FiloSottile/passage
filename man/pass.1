@@ -36,10 +36,16 @@ the valid commands listed below.
 Several of the commands below rely on or provide additional functionality if
 the password store directory is also a git repository. If the password store
 directory is a git repository, all password store modification commands will
-cause a corresponding git commit.
+cause a corresponding git commit. See the \fIEXAMPLES\fP section for an
+extended description using \fBinit\fP and
+.BR git (1).
 
 The \fBinit\fP command must be run before other commands in order to initialize
 the password store with the correct gpg key id.
+
+There is a corresponding bash completion script for use with tab completing
+password names in
+.BR bash (1).
 
 .SH COMMANDS
 
@@ -100,13 +106,195 @@ using the password store as the git repository.
 \fBhelp\fP
 Show usage message.
 
+.SH EXAMPLES
+
+.TP
+Initialize password store
+.B zx2c4@laptop ~ $ pass init Jason@zx2c4.com 
+.br
+mkdir: created directory \[u2018]/home/zx2c4/.password-store\[u2019] 
+.br
+Password store initialized for Jason@zx2c4.com.
+.TP
+List existing passwords in store
+.B zx2c4@laptop ~ $ pass 
+.br
+Password Store
+.br
+\[u251C]\[u2500]\[u2500] Business 
+.br
+\[u2502]   \[u251C]\[u2500]\[u2500] some-silly-business-site.com 
+.br
+\[u2502]   \[u2514]\[u2500]\[u2500] another-business-site.net 
+.br
+\[u251C]\[u2500]\[u2500] Email 
+.br
+\[u2502]   \[u251C]\[u2500]\[u2500] donenfeld.com 
+.br
+\[u2502]   \[u2514]\[u2500]\[u2500] zx2c4.com 
+.br
+\[u2514]\[u2500]\[u2500] France 
+.br
+    \[u251C]\[u2500]\[u2500] bank 
+.br
+    \[u251C]\[u2500]\[u2500] freebox 
+.br
+    \[u2514]\[u2500]\[u2500] mobilephone  
+.br
+
+.br
+Alternatively, "\fBpass ls\fP".
+.TP
+Show existing password
+.B zx2c4@laptop ~ $ pass Email/zx2c4.com 
+.br
+sup3rh4x3rizmynam3 
+.TP
+Copy existing password to clipboard
+.B zx2c4@laptop ~ $ pass -c Email/zx2c4.com 
+.br
+Copied Email/jason@zx2c4.com to clipboard. Will clear in 45 seconds.
+.TP
+Add password to store
+.B zx2c4@laptop ~ $ pass insert Business/cheese-whiz-factory 
+.br
+Enter password for Business/cheese-whiz-factory: omg so much cheese what am i gonna do
+.TP
+Add multiline password to store 
+.B zx2c4@laptop ~ $ pass insert -m Business/cheese-whiz-factory 
+.br
+Enter contents of Business/cheese-whiz-factory and press Ctrl+D when finished: 
+.br
+ 
+.br
+Hey this is my 
+.br
+awesome 
+.br
+multi 
+.br
+line 
+.br
+passworrrrrrrrd. 
+.br
+^D 
+.TP
+Generate new password
+.B zx2c4@laptop ~ $ pass generate Email/jasondonenfeld.com 15 
+.br
+The generated password to Email/jasondonenfeld.com is: 
+.br
+$(-QF&Q=IN2nFBx
+.TP
+Generate new alphanumeric password
+.B zx2c4@laptop ~ $ pass -n generate Email/jasondonenfeld.com 12
+.br
+The generated password to Email/jasondonenfeld.com is: 
+.br
+YqFsMkBeO6di
+.TP
+Generate new password and copy it to the clipboard
+.B zx2c4@laptop ~ $ pass -c generate Email/jasondonenfeld.com 19
+.br
+Copied Email/jasondonenfeld.com to clipboard. Will clear in 45 seconds.
+.TP
+Remove password from store
+.B zx2c4@laptop ~ $ pass remove Business/cheese-whiz-factory 
+.br
+rm: remove regular file \[u2018]/home/zx2c4/.password-store/Business/cheese-whiz-factory.gpg\[u2019]? y 
+.br
+removed \[u2018]/home/zx2c4/.password-store/Business/cheese-whiz-factory.gpg\[u2019]
+.TP
+Initialize new password store, create a git repository, and then manipulate and sync passwords
+.B zx2c4@laptop ~ $ pass init Jason@zx2c4.com 
+.br
+mkdir: created directory \[u2018]/home/zx2c4/.password-store\[u2019] 
+.br
+Password store initialized for Jason@zx2c4.com. 
+.br
+.B zx2c4@laptop ~ $ pass git init 
+.br
+Initialized empty Git repository in /home/zx2c4/.password-store/.git/ 
+.br
+.B zx2c4@laptop ~ $ pass git remote add origin kexec.com:pass-store 
+.br
+.B zx2c4@laptop ~ $ pass generate Amazon/amazonemail@email.com 21 
+.br
+mkdir: created directory \[u2018]/home/zx2c4/.password-store/Amazon\[u2019] 
+.br
+[master (root-commit) 30fdc1e] Added generated password for Amazon/amazonemail@email.com to store. 
+.br
+1 file changed, 0 insertions(+), 0 deletions(-) 
+.br
+create mode 100644 Amazon/amazonemail@email.com.gpg 
+.br
+The generated password to Amazon/amazonemail@email.com is: 
+.br
+<5m,_BrZY`antNDxKN<0A 
+.br
+.B zx2c4@laptop ~ $ pass push -u --all 
+.br
+Counting objects: 4, done. 
+.br
+Delta compression using up to 2 threads. 
+.br
+Compressing objects: 100% (3/3), done. 
+.br
+Writing objects: 100% (4/4), 921 bytes, done. 
+.br
+Total 4 (delta 0), reused 0 (delta 0) 
+.br
+To kexec.com:pass-store 
+.br
+* [new branch]      master -> master 
+.br
+Branch master set up to track remote branch master from origin. 
+.br
+.B zx2c4@laptop ~ $ pass insert Amazon/otheraccount@email.com 
+.br
+Enter password for Amazon/otheraccount@email.com: som3r3a11yb1gp4ssw0rd!!88** 
+.br
+[master b9b6746] Added given password for Amazon/otheraccount@email.com to store. 
+.br
+1 file changed, 0 insertions(+), 0 deletions(-) 
+.br
+create mode 100644 Amazon/otheraccount@email.com.gpg 
+.br
+.B zx2c4@laptop ~ $ pass rm Amazon/amazonemail@email.com 
+.br
+rm: remove regular file \[u2018]/home/zx2c4/.password-store/Amazon/amazonemail@email.com.gpg\[u2019]? y 
+.br
+removed \[u2018]/home/zx2c4/.password-store/Amazon/amazonemail@email.com.gpg\[u2019] 
+.br
+rm 'Amazon/amazonemail@email.com.gpg' 
+.br
+[master 288b379] Removed Amazon/amazonemail@email.com from store. 
+.br
+1 file changed, 0 insertions(+), 0 deletions(-) 
+.br
+delete mode 100644 Amazon/amazonemail@email.com.gpg 
+.br
+.B zx2c4@laptop ~ $ pass push 
+.br
+Counting objects: 9, done. 
+.br
+Delta compression using up to 2 threads. 
+.br
+Compressing objects: 100% (5/5), done. 
+.br
+Writing objects: 100% (7/7), 1.25 KiB, done. 
+.br
+Total 7 (delta 0), reused 0 (delta 0) 
+.br
+To kexec.com:pass-store
+
 .SH FILES
 
 .TP
-\fB~/.password-store\fP
+.B ~/.password-store
 The password storage directory.
 .TP
-\fB~/.password-store/.gpg-id\fP
+.B ~/.password-store/.gpg-id
 Contains the gpg key identification used for encryption and decryption. This should
 be set using the \fBinit\fP command.
 

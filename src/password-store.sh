@@ -227,7 +227,7 @@ case "$command" in
 		fi
 		;;
 	git)
-		if [[ -d $GIT ]]; then
+		if [[ $1 == "init" ]] || [[ -d $GIT ]]; then
 			exec git $@
 		else
 			echo "Error: the password store is not a git repository."

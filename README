@@ -8,99 +8,20 @@ This is a very simple password store that encrypts passwords using gpg and
 places the encrypted password in a directory. It can generate new passwords
 and keep track of old ones.
 
-If the password storage directory ($HOME/.password-store) is also a git
-repository, add/remove/change operations will create a corresponding git
-commit.
+Please see the man page for considerable more documentation and examples.
 
-Usage:
-    pass init gpg-id
-        Initialize new password storage and use gpg-id for encryption.
-    pass [ls] [subfolder]
-        List passwords.
-    pass [show] [--clip,-c] pass-name
-        Show existing password and optionally put it on the clipboard.
-        If put on the clipboard, it will be cleared in 45 seconds.
-    pass insert [--multiline,-m] pass-name
-        Insert new optionally multiline password.
-    pass generate [--no-symbols,-n] [--clip,-c] pass-name pass-length
-        Generate a new password of pass-length with optionally no symbols.
-        Optionally put it on the clipboard and clear board after 45 seconds.
-    pass rm pass-name
-        Remove existing password.
-    pass push
-        If the password store is a git repository, push the latest changes.
-    pass pull
-        If the password store is a git repository, pull the latest changes.
-    pass git git-command-args...
-        If the password store is a git repository, execute a git command
-	specified by git-command-args.
-    pass help
-        Show this text.
+You may read the man page without installing the package by one of these
+commands:
 
-See the man page for more options -- man 1 pass.
+- Show it in man:
 
+    $ man ./man/pass.1
 
-Examples:
+- Produce an HTML page:
 
-    - Initialize password store:
-    
-        zx2c4@laptop ~ $ pass init Jason@zx2c4.com
-        mkdir: created directory ‘/home/zx2c4/.password-store’
-        Password store initialized for Jason@zx2c4.com.
-    
-    - List existing passwords in store:
+    $ groff -mandoc -T html ./man/pass.1 > pass-man-page.html
 
-        zx2c4@laptop ~ $ pass
-        ├── Business
-        │   ├── some-silly-business-site.com
-        │   └── another-business-site.net
-        ├── Email
-        │   ├── donenfeld.com
-        │   └── zx2c4.com
-        └── France
-            ├── bank
-            ├── freebox
-            └── mobilephone
-        
-        Alternatively, "pass ls".
+- Produce a PDF document:
 
-    - Show existing password:
-
-        zx2c4@laptop ~ $ pass Email/zx2c4.com
-	sup3rh4x3rizmynam3
-    
-    - Add password to store:
-
-        zx2c4@laptop ~ $ pass insert Business/cheese-whiz-factory
-        Enter password for Business/cheese-whiz-factory: omg so much cheese what am i gonna do
-
-        Or, multiline passwords:
-
-        zx2c4@laptop ~ $ pass insert --multiline Business/cheese-whiz-factory
-        Enter contents of Business/cheese-whiz-factory and press Ctrl+D when finished:
-
-        Hey this is my 
-        awesome
-        multi
-        line
-        passworrrrrrrrd.
-        ^D
-
-    - Generate new password:
-
-        zx2c4@laptop ~ $ pass generate Email/jasondonenfeld.com 15
-        The generated password to Email/jasondonenfeld.com is:
-        $(-QF&Q=IN2nFBx
-
-        Or, with no symbols:
-
-        zx2c4@laptop ~ $ pass generate --no-symbols Email/jasondonenfeld.com 12
-        The generated password to Email/jasondonenfeld.com is:
-        YqFsMkBeO6di
-
-    - Remove password from store:
-
-        zx2c4@laptop ~ $ pass remove Business/cheese-whiz-factory
-        rm: remove regular file ‘/home/zx2c4/.password-store/Business/cheese-whiz-factory.gpg’? y
-        removed ‘/home/zx2c4/.password-store/Business/cheese-whiz-factory.gpg’
-
+    $ groff -mandoc ./man/pass.1 pass-man-page.ps
+    $ ps2pdf pass-man-page.ps
