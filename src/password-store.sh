@@ -28,7 +28,7 @@ Usage:
     $program generate [--no-symbols,-n] [--clip,-c] pass-name pass-length
         Generate a new password of pass-length with optionally no symbols.
         Optionally put it on the clipboard and clear board after 45 seconds.
-    $program remove pass-name
+    $program rm pass-name
         Remove existing password.
     $program push
         If the password store is a git repository, push the latest changes.
@@ -43,7 +43,7 @@ _EOF
 }
 isCommand() {
 	case "$1" in
-		init|ls|show|insert|generate|remove|rm|delete|push|pull|git|help) return 0 ;;
+		init|ls|list|show|insert|generate|remove|rm|delete|push|pull|git|help) return 0 ;;
 		*) return 1 ;;
 	esac
 }
@@ -107,7 +107,7 @@ else
 fi
 
 case "$command" in
-	show|ls)
+	show|ls|list)
 		clip=0
 		if [[ $1 == "--clip" || $1 == "-c" ]]; then
 			clip=1

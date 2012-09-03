@@ -1,0 +1,135 @@
+.TH PASS 1 "2012 Sept 2" ZX2C4 "Password Store"
+
+.SH NAME
+pass - stores, retrieves, generates, and synchronizes passwords securely
+
+.SH SYNOPSIS
+.B pass
+[ 
+.I COMMAND
+] [ 
+.I OPTIONS
+]... [ 
+.I ARGS
+]...
+
+.SH DESCRIPTION
+
+.B pass 
+is a very simple password store that keeps passwords inside 
+.BR gpg (1)
+encrypted files inside a simple directory tree residing at 
+.IR $HOME/.password-store .
+The
+.B pass
+utility provides a series of commands for manipulating the password store,
+allowing the user to add, remove, edit, synchronize, generate, and manipulate
+passwords.
+
+If no COMMAND is specified, COMMAND defaults to either
+.B show
+or
+.BR ls ,
+depending on the type of specifier in ARGS. Otherwise COMMAND must be one of
+the valid commands listed below.
+
+Several of the commands below rely on or provide additional functionality if
+the password store directory is also a git repository. If the password store
+directory is a git repository, all password store modification commands will
+cause a corresponding git commit.
+
+The \fBinit\fP command must be run before other commands in order to initialize
+the password store with the correct gpg key id.
+
+.SH COMMANDS
+
+.TP
+\fBinit\fP \fIgpg-id\fP
+Initialize new password storage and use
+.I gpg-id
+for encryption. This command must be run first before a password store can be
+used.
+.TP
+\fBls\fP \fIsubfolder\fP
+List names of passwords inside the tree at
+.I subfolder
+by using the
+.BR tree (1)
+program. This command is alternatively named \fBlist\fP.
+.TP
+\fBshow\fP [ \fI--clip\fP, \fI-c\fP ] \fIpass-name\fP
+Decrypt and print a password named \fIpass-name\fP. If \fI--clip\fP or \fI-c\fP
+is specified, do not print the password but instead copy it to the clipboard
+using
+.BR xclip (1)
+and then restore the clipboard after 45 seconds.
+.TP
+\fBinsert\fP [ \fI--multiline\fP, \fI-m\fP ] \fIpass-name\fP
+Insert a new password into the password store called \fIpass-name\fP. This will
+read the new password from standard in. If \fI--multiline\fP or \fI-m\fP is
+specified, lines will be read until EOF or Ctrl+D is reached. Otherwise, only
+a single line from standard in is read.
+.TP
+\fBgenerate\fP [ \fI--no-symbols\fP, \fI-n\fP ] [ \fI--clip\fP, \fI-c\fP ] \fIpass-name pass-length\fP
+Generate a new password using
+.BR pwgen (1)
+of length \fIpass-length\fP and insert into \fIpass-name\fP. If \fI--no-symbols\fP or \fI-n\fP
+is specified, do not use any non-alphanumeric characters in the generated password.
+If \fI--clip\fP or \fI-c\fP is specified, do not print the password but instead copy
+it to the clipboard using
+.BR xclip (1)
+and then restore the clipboard after 45 seconds.
+.TP
+\fBrm\fP \fIpass-name\fP
+Remove the password named \fIpass-name\fP from the password store. This command is
+alternatively named \fBremove\fP.
+.TP
+\fBpush\fP
+If the password store is a git repository, push the latest changes using
+.BR git-push (1).
+.TP
+\fBpull\fP
+If the password store is a git repository, pull the latest changes using
+.BR git-pull (1).
+.TP
+\fBgit\fP \fIgit-command-args\fP...
+If the password store is a git repository, pass \fIgit-command-args\fP as arguments to
+.BR git (1)
+using the password store as the git repository.
+.TP
+\fBhelp\fP
+Show usage message.
+
+.SH FILES
+
+.TP
+\fB~/.password-store\fP
+The password storage directory.
+.TP
+\fB~/.password-store/.gpg-id\fP
+Contains the gpg key identification used for encryption and decryption. This should
+be set using the \fBinit\fP command.
+
+.SH SEE ALSO
+.BR gpg (1),
+.BR pwgen (1),
+.BR git (1),
+.BR xclip (1).
+
+.SH AUTHOR
+Jason A. Donenfeld <Jason@zx2c4.com>
+
+.SH COPYING
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.

@@ -25,7 +25,7 @@ Usage:
     pass generate [--no-symbols,-n] [--clip,-c] pass-name pass-length
         Generate a new password of pass-length with optionally no symbols.
         Optionally put it on the clipboard and clear board after 45 seconds.
-    pass remove pass-name
+    pass rm pass-name
         Remove existing password.
     pass push
         If the password store is a git repository, push the latest changes.
@@ -36,6 +36,9 @@ Usage:
 	specified by git-command-args.
     pass help
         Show this text.
+
+See the man page for more options -- man 1 pass.
+
 
 Examples:
 
