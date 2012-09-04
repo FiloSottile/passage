@@ -130,7 +130,7 @@ case "$command" in
 			if [ $clip -eq 0 ]; then
 				exec gpg -q -d "$passfile"
 			else
-				clip $(gpg -q -d "$passfile") $path
+				clip "$(gpg -q -d "$passfile")" $path
 			fi
 		fi
 		;;
