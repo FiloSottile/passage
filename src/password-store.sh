@@ -23,8 +23,9 @@ Usage:
     $program [show] [--clip,-c] pass-name
         Show existing password and optionally put it on the clipboard.
         If put on the clipboard, it will be cleared in 45 seconds.
-    $program insert [--multiline,-m] pass-name
-        Insert new optionally multiline password.
+    $program insert [--no-echo,-n | --multiline,-m] pass-name
+        Insert new password. Optionally, the console can be enabled to not
+        echo the password back. Or, optionally, it may be multiline.
     $program generate [--no-symbols,-n] [--clip,-c] pass-name pass-length
         Generate a new password of pass-length with optionally no symbols.
         Optionally put it on the clipboard and clear board after 45 seconds.
@@ -136,25 +137,49 @@ case "$command" in
 		;;
 	insert)
 		ml=0
-		if [[ $1 == "--multiline" || $1 == "-m" ]]; then
-			ml=1
-			shift
-		fi
-		if [[ $# -ne 1 ]]; then
-			echo "Usage: $program $command [--multiline,-m] pass-name"
+		noecho=0
+		while true; do
+			if [[ $1 == "--multiline" || $1 == "-m" ]]; then
+				ml=1
+				shift
+			elif [[ $1 == "--no-echo" || $1 == "-n" ]]; then
+				noecho=1
+				shift
+			else
+				break
+			fi
+		done
+		if [[ ( $ml -eq 1 && $noecho -eq 1 ) || $# -ne 1 ]]; then
+			echo "Usage: $program $command [--no-echo,-n | --multiline,-m] pass-name"
 			exit 1
 		fi
 		path="$1"
 		mkdir -p -v "$PREFIX/$(dirname "$path")"
 
 		passfile="$PREFIX/$path.gpg"
-		if [[ $ml -eq 0 ]]; then
-			echo -n "Enter password for $path: "
-			head -n 1 | gpg -e -r "$ID" > "$passfile"
-		else
+		if [[ $ml -eq 1 ]]; then
 			echo "Enter contents of $path and press Ctrl+D when finished:"
 			echo
 			cat | gpg -e -r "$ID" > "$passfile"
+		elif [[ $noecho -eq 1 ]]; then
+			stty -echo
+			echo -n "Enter password for $path: "
+			read password
+			echo
+			echo -n "Retype password for $path: "
+			read password_again
+			echo
+			stty echo
+			if [[ $password == $password_again ]]; then
+				gpg -e -r "$ID" > "$passfile" <<<"$password"
+			else
+				echo "Error: the entered passwords do not match."
+				exit 1
+			fi
+
+		else
+			echo -n "Enter password for $path: "
+			head -n 1 | gpg -e -r "$ID" > "$passfile"
 		fi
 		if [[ -d $GIT ]]; then
 			git add "$passfile"
