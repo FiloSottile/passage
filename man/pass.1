@@ -106,7 +106,7 @@ using the password store as the git repository.
 \fBhelp\fP
 Show usage message.
 
-.SH EXAMPLES
+.SH SIMPLE EXAMPLES
 
 .TP
 Initialize password store
@@ -204,20 +204,24 @@ Remove password from store
 rm: remove regular file \[u2018]/home/zx2c4/.password-store/Business/cheese-whiz-factory.gpg\[u2019]? y 
 .br
 removed \[u2018]/home/zx2c4/.password-store/Business/cheese-whiz-factory.gpg\[u2019]
-.TP
-Initialize new password store, create a git repository, and then manipulate and sync passwords
+
+.SH EXTENDED GIT EXAMPLE
+Here, we initialize new password store, create a git repository, and then manipulate and sync passwords. Make note of the arguments to the first call of \fBpass push\fP; consult
+.BR git-push (1)
+for more information.
+
 .B zx2c4@laptop ~ $ pass init Jason@zx2c4.com 
 .br
 mkdir: created directory \[u2018]/home/zx2c4/.password-store\[u2019] 
 .br
 Password store initialized for Jason@zx2c4.com. 
-.br
+
 .B zx2c4@laptop ~ $ pass git init 
 .br
 Initialized empty Git repository in /home/zx2c4/.password-store/.git/ 
-.br
+
 .B zx2c4@laptop ~ $ pass git remote add origin kexec.com:pass-store 
-.br
+
 .B zx2c4@laptop ~ $ pass generate Amazon/amazonemail@email.com 21 
 .br
 mkdir: created directory \[u2018]/home/zx2c4/.password-store/Amazon\[u2019] 
@@ -231,7 +235,7 @@ create mode 100644 Amazon/amazonemail@email.com.gpg
 The generated password to Amazon/amazonemail@email.com is: 
 .br
 <5m,_BrZY`antNDxKN<0A 
-.br
+
 .B zx2c4@laptop ~ $ pass push -u --all 
 .br
 Counting objects: 4, done. 
@@ -249,7 +253,7 @@ To kexec.com:pass-store
 * [new branch]      master -> master 
 .br
 Branch master set up to track remote branch master from origin. 
-.br
+
 .B zx2c4@laptop ~ $ pass insert Amazon/otheraccount@email.com 
 .br
 Enter password for Amazon/otheraccount@email.com: som3r3a11yb1gp4ssw0rd!!88** 
@@ -259,7 +263,7 @@ Enter password for Amazon/otheraccount@email.com: som3r3a11yb1gp4ssw0rd!!88**
 1 file changed, 0 insertions(+), 0 deletions(-) 
 .br
 create mode 100644 Amazon/otheraccount@email.com.gpg 
-.br
+
 .B zx2c4@laptop ~ $ pass rm Amazon/amazonemail@email.com 
 .br
 rm: remove regular file \[u2018]/home/zx2c4/.password-store/Amazon/amazonemail@email.com.gpg\[u2019]? y 
@@ -273,7 +277,7 @@ rm 'Amazon/amazonemail@email.com.gpg'
 1 file changed, 0 insertions(+), 0 deletions(-) 
 .br
 delete mode 100644 Amazon/amazonemail@email.com.gpg 
-.br
+
 .B zx2c4@laptop ~ $ pass push 
 .br
 Counting objects: 9, done. 
