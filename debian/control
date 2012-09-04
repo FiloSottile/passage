@@ -1,0 +1,11 @@
+Source: password-store
+Maintainer: Jason A. Donenfeld <Jason@zx2c4.com>
+Section: admin
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends:
+
+Package: password-store
+Architecture: all
+Depends: xclip, pwgen, git-core, gnupg, tree
+Description: Stores, retrieves, generates, and synchronizes passwords securely using gpg, pwgen, and git.

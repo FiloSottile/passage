@@ -1,0 +1,5 @@
+password-store (1.0-1) stable; urgency=low
+
+  * Initial release.
+
+ -- Jason A. Donenfeld <Jason@zx2c4.com>  Mon, 03 Sep 2012 20:38:44 -0400
