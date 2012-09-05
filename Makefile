@@ -1,6 +1,8 @@
 PREFIX ?= /usr
 DESTDIR ?=
 
+.PHONY: install
+
 all:
 	@echo "Password store is a shell script, so there is nothing to do. Try \"make install\" instead."
 
