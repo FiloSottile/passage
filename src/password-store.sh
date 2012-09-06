@@ -56,7 +56,7 @@ clip() {
 	before="$(xclip -o -selection clipboard | base64)"
 	echo -n "$1" | xclip -selection clipboard
 	(
-		sleep 45s
+		sleep 45
 		now="$(xclip -o -selection clipboard | base64)"
 		if [[ $now != $(echo -n "$1" | base64) ]]; then
 			before="$now"
