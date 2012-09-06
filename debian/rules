@@ -3,4 +3,4 @@
 	dh $@
 
 override_dh_auto_install:
-	$(MAKE) DESTDIR=$$(pwd)/debian/password-store PREFIX=/usr install
+	$(MAKE) DESTDIR=$$(pwd)/debian/pass PREFIX=/usr install
