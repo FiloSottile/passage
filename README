@@ -25,3 +25,11 @@ commands:
 
     $ groff -mandoc ./man/pass.1 > pass-man-page.ps
     $ ps2pdf pass-man-page.ps
+
+Depends on:
+
+- gpg2
+- git
+- xclip
+- pwgen
+- tree
