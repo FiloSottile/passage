@@ -1,4 +1,8 @@
 # completion file for bash
+
+# (C) Copyright 2012 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
+# This is released under the GPLv2+. Please see COPYING for more information.
+
 _pass()
 {
 	local cur prev prefix suffix gen
