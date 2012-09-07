@@ -3,3 +3,12 @@ Simply typing
     make install
 
 should install pass to the standard locations.
+
+The makefile is aware of the following environment variables:
+
+PREFIX      default: /usr
+DESTDIR     default: 
+BINDIR	    default: $(PREFIX)/bin
+MANDIR      default: $(PREFIX)/share/man
+SYSCONFDIR  default: /etc
+
