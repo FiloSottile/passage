@@ -1,4 +1,4 @@
-#!/bin/bash
+# completion file for bash
 _pass()
 {
 	local cur prev prefix suffix gen
