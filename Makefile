@@ -4,7 +4,7 @@ BINDIR ?= $(PREFIX)/bin
 MANDIR ?= $(PREFIX)/share/man
 SYSCONFDIR ?= /etc
 
-.PHONY: install
+.PHONY: install uninstall
 
 all:
 	@echo "Password store is a shell script, so there is nothing to do. Try \"make install\" instead."
