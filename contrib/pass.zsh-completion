@@ -30,6 +30,7 @@ _pass () {
       "pull[pull the latest changes using git-pull(1)]" \
       "git[Call git]" \
       "help[Help]"
+    _pass_cmd_show
   fi
 }
 
