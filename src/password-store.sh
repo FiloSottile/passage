@@ -42,7 +42,7 @@ Usage:
         If the password store is a git repository, pull the latest changes.
     $program git git-command-args...
         If the password store is a git repository, execute a git command
-	specified by git-command-args.
+        specified by git-command-args.
     $program help
         Show this text.
 _EOF
