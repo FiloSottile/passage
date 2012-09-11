@@ -201,9 +201,10 @@ case "$command" in
 		path="$1"
 		mkdir -p -v "$PREFIX/$(dirname "$path")"
 		passfile="$PREFIX/$path.gpg"
+		template="$program.XXXXXXXXXXXXX"
 
 		if [ -d /dev/shm -a -w /dev/shm -a -x /dev/shm ]; then
-			tmp_dir="$(mktemp -d --tmpdir=/dev/shm)"
+			tmp_dir="$(TMPDIR=/dev/shm mktemp -t $template -d)"
 		else
 			echo    "Your system does not have /dev/shm, which means that it may"
 			echo    "be difficult to entirely erase the temporary non-encrypted"
@@ -213,9 +214,9 @@ case "$command" in
 			if ! [[ $yesno == "y" || $yesno == "Y" ]]; then
 				exit 1
 			fi
-			tmp_dir="$(mktemp -d)"
+			tmp_dir="$(mktemp -t $template -d)"
 		fi
-		tmp_file="$(mktemp --tmpdir="$tmp_dir")"
+		tmp_file="$(TMPDIR="$tmp_dir" mktemp -t $template)"
 
 		action="Added"
 		if [[ -f $passfile ]]; then
