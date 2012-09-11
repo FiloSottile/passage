@@ -29,6 +29,8 @@ Usage:
     $program insert [--no-echo,-n | --multiline,-m] pass-name
         Insert new password. Optionally, the console can be enabled to not
         echo the password back. Or, optionally, it may be multiline.
+    $program edit pass-name
+        Insert a new password or edit an existing password using ${EDITOR:-vi}.
     $program generate [--no-symbols,-n] [--clip,-c] pass-name pass-length
         Generate a new password of pass-length with optionally no symbols.
         Optionally put it on the clipboard and clear board after 45 seconds.
@@ -47,7 +49,7 @@ _EOF
 }
 isCommand() {
 	case "$1" in
-		init|ls|list|show|insert|generate|remove|rm|delete|push|pull|git|help) return 0 ;;
+		init|ls|list|show|insert|edit|generate|remove|rm|delete|push|pull|git|help|--help) return 0 ;;
 		*) return 1 ;;
 	esac
 }
@@ -93,7 +95,7 @@ case "$command" in
 		echo "Password store initialized for $gpg_id."
 		exit 0
 		;;
-	help)
+	help|--help)
 		usage
 		exit 0
 		;;
@@ -132,9 +134,9 @@ case "$command" in
 				exit 1
 			fi
 			if [ $clip -eq 0 ]; then
-				exec gpg -q -d "$passfile"
+				exec gpg -q -d --yes "$passfile"
 			else
-				clip "$(gpg -q -d "$passfile" | head -n 1)" "$path"
+				clip "$(gpg -q -d --yes "$passfile" | head -n 1)" "$path"
 			fi
 		fi
 		;;
@@ -163,30 +165,76 @@ case "$command" in
 		if [[ $ml -eq 1 ]]; then
 			echo "Enter contents of $path and press Ctrl+D when finished:"
 			echo
-			cat | gpg -e -r "$ID" > "$passfile"
+			cat | gpg -e -r "$ID" -o "$passfile" --yes
 		elif [[ $noecho -eq 1 ]]; then
-			stty -echo
-			echo -n "Enter password for $path: "
-			read password
-			echo
-			echo -n "Retype password for $path: "
-			read password_again
-			echo
-			stty echo
-			if [[ $password == $password_again ]]; then
-				gpg -e -r "$ID" > "$passfile" <<<"$password"
-			else
-				echo "Error: the entered passwords do not match."
-				exit 1
-			fi
-
+			while true; do
+				stty -echo
+				echo -n "Enter password for $path: "
+				read password
+				echo
+				echo -n "Retype password for $path: "
+				read password_again
+				echo
+				stty echo
+				if [[ $password == $password_again ]]; then
+					gpg -q -e -r "$ID" -o "$passfile" --yes <<<"$password"
+					break
+				else
+					echo "Error: the entered passwords do not match."
+				fi
+			done
 		else
 			echo -n "Enter password for $path: "
-			head -n 1 | gpg -e -r "$ID" > "$passfile"
+			head -n 1 | gpg -q -e -r "$ID" -o "$passfile" --yes
 		fi
 		if [[ -d $GIT ]]; then
 			git add "$passfile"
 			git commit -m "Added given password for $path to store."
+		fi
+		;;
+	edit)
+		if [[ $# -ne 1 ]]; then
+			echo "Usage $program $command pass-name"
+			exit 1
+		fi
+
+		path="$1"
+		mkdir -p -v "$PREFIX/$(dirname "$path")"
+		passfile="$PREFIX/$path.gpg"
+
+		if [ -d /dev/shm -a -w /dev/shm -a -x /dev/shm ]; then
+			tmp_dir="$(mktemp -d --tmpdir=/dev/shm)"
+		else
+			echo    "Your system does not have /dev/shm, which means that it may"
+			echo    "be difficult to entirely erase the temporary non-encrypted"
+			echo    "password file after editing. Are you sure you would like to"
+			echo -n "continue? [y/N] "
+			read yesno
+			if ! [[ $yesno == "y" || $yesno == "Y" ]]; then
+				exit 1
+			fi
+			tmp_dir="$(mktemp -d)"
+		fi
+		tmp_file="$(mktemp --tmpdir="$tmp_dir")"
+
+		action="Added"
+		if [[ -f $passfile ]]; then
+			if ! gpg -q -d -o "$tmp_file" --yes "$passfile";  then
+				rm -rf "$tmp_file" "$tmp_dir"
+				exit 1
+			fi
+			action="Edited"
+		fi
+		"${EDITOR:-vi}" "$tmp_file"
+		while ! gpg -q -e -r "$ID" -o "$passfile" --yes "$tmp_file"; do
+			echo "GPG encryption failed. Retrying."
+			sleep 1
+		done
+		rm -rf "$tmp_file" "$tmp_dir"
+
+		if [[ -d $GIT ]]; then
+			git add "$passfile"
+			git commit -m "$action password for $path using ${EDITOR:-vi}."
 		fi
 		;;
 	generate)
@@ -216,7 +264,7 @@ case "$command" in
 		mkdir -p -v "$PREFIX/$(dirname "$path")"
 		pass="$(pwgen -s $symbols $length 1)"
 		passfile="$PREFIX/$path.gpg"
-		echo $pass | gpg -e -r "$ID" > "$passfile"
+		gpg -q -e -r "$ID" -o "$passfile" --yes <<<"$pass"
 		if [[ -d $GIT ]]; then
 			git add "$passfile"
 			git commit -m "Added generated password for $path to store."
@@ -248,7 +296,7 @@ case "$command" in
 		;;
 	push|pull)
 		if [[ -d $GIT ]]; then
-			exec git $command $@
+			exec git $command "$@"
 		else
 			echo "Error: the password store is not a git repository."
 			exit 1
@@ -256,7 +304,7 @@ case "$command" in
 		;;
 	git)
 		if [[ $1 == "init" ]] || [[ -d $GIT ]]; then
-			exec git $@
+			exec git "$@"
 		else
 			echo "Error: the password store is not a git repository."
 			exit 1
