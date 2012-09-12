@@ -226,7 +226,7 @@ case "$command" in
 			fi
 			action="Edited"
 		fi
-		"${EDITOR:-vi}" "$tmp_file"
+		${EDITOR:-vi} "$tmp_file"
 		while ! gpg -q -e -r "$ID" -o "$passfile" --yes "$tmp_file"; do
 			echo "GPG encryption failed. Retrying."
 			sleep 1
