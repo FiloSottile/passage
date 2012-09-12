@@ -12,11 +12,21 @@ GIT="$PREFIX/.git"
 export GIT_DIR="$GIT"
 export GIT_WORK_TREE="$PREFIX"
 
-usage() {
+version() {
 	cat <<_EOF
-Password Store
-by Jason Donenfeld
-   Jason@zx2c4.com
+|-----------------------|
+|   Password Store      |
+|        v.1.2.2        |
+|       by zx2c4        |
+|                       |
+|    Jason@zx2c4.com    |
+|  Jason A. Donenfeld   |
+|-----------------------|
+_EOF
+}
+usage() {
+	version
+	cat <<_EOF
 
 Usage:
     $program init gpg-id
@@ -45,11 +55,13 @@ Usage:
         specified by git-command-args.
     $program help
         Show this text.
+    $program version
+        Show version information.
 _EOF
 }
 isCommand() {
 	case "$1" in
-		init|ls|list|show|insert|edit|generate|remove|rm|delete|push|pull|git|help|--help) return 0 ;;
+		init|ls|list|show|insert|edit|generate|remove|rm|delete|push|pull|git|help|--help|version|--version) return 0 ;;
 		*) return 1 ;;
 	esac
 }
@@ -97,6 +109,10 @@ case "$command" in
 		;;
 	help|--help)
 		usage
+		exit 0
+		;;
+	version|--version)
+		version
 		exit 0
 		;;
 esac
