@@ -212,7 +212,9 @@ case "$command" in
 		passfile="$PREFIX/$path.gpg"
 		template="$program.XXXXXXXXXXXXX"
 
-		if [ -d /dev/shm -a -w /dev/shm -a -x /dev/shm ]; then
+		trap 'rm -rf "$tmp_dir" "$tmp_file"' INT TERM EXIT
+
+		if [[ -d /dev/shm && -w /dev/shm && -x /dev/shm ]]; then
 			tmp_dir="$(TMPDIR=/dev/shm mktemp -t $template -d)"
 		else
 			echo    "Your system does not have /dev/shm, which means that it may"
@@ -229,10 +231,7 @@ case "$command" in
 
 		action="Added"
 		if [[ -f $passfile ]]; then
-			if ! gpg -q -d -o "$tmp_file" --yes "$passfile";  then
-				rm -rf "$tmp_file" "$tmp_dir"
-				exit 1
-			fi
+			gpg -q -d -o "$tmp_file" --yes "$passfile" || exit 1
 			action="Edited"
 		fi
 		${EDITOR:-vi} "$tmp_file"
@@ -240,7 +239,6 @@ case "$command" in
 			echo "GPG encryption failed. Retrying."
 			sleep 1
 		done
-		rm -rf "$tmp_file" "$tmp_dir"
 
 		if [[ -d $GIT ]]; then
 			git add "$passfile"
