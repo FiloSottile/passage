@@ -5,7 +5,7 @@
 
 umask 077
 
-PREFIX="$HOME/.password-store"
+PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 ID="$PREFIX/.gpg-id"
 GIT="$PREFIX/.git"
 

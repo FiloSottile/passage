@@ -19,7 +19,8 @@ pass - stores, retrieves, generates, and synchronizes passwords securely
 is a very simple password store that keeps passwords inside 
 .BR gpg (1)
 encrypted files inside a simple directory tree residing at 
-.IR $HOME/.password-store .
+.IR $HOME/.password-store ,
+or the environment variable \fBPASSWORD_STORE_DIR\fP if it is set.
 The
 .B pass
 utility provides a series of commands for manipulating the password store,
@@ -82,8 +83,8 @@ Insert a new password or edit an existing password using the default text editor
 by the environment variable \fBEDITOR\fP or using
 .BR vi (1)
 as a fallback. This mode makes use of temporary files for editing, but care is taken to
-ensure that temporary files are created in \fB/dev/shm\fP in order to avoid writing to
-difficult-to-erase disk sectors. If \fB/dev/shm\fP is not accessible, fallback to
+ensure that temporary files are created in \fI/dev/shm\fP in order to avoid writing to
+difficult-to-erase disk sectors. If \fI/dev/shm\fP is not accessible, fallback to
 the ordinary \fBTMPDIR\fP location, and print a warning.
 .TP
 \fBgenerate\fP [ \fI--no-symbols\fP, \fI-n\fP ] [ \fI--clip\fP, \fI-c\fP ] \fIpass-name pass-length\fP
