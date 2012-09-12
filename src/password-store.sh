@@ -115,10 +115,20 @@ fi
 case "$command" in
 	show|ls|list)
 		clip=0
-		if [[ $1 == "--clip" || $1 == "-c" ]]; then
-			clip=1
-			shift
+
+		opts="$(getopt -o c -l clip -n $program -- "$@")"
+		err=$?
+		eval set -- "$opts"
+		while true; do case $1 in
+			-c|--clip) clip=1; shift ;;
+			--) shift; break ;;
+		esac done
+
+		if [[ $err -ne 0 ]]; then
+			echo "Usage: $program $command [--clip,-c] [pass-name]"
+			exit 1
 		fi
+
 		path="$1"
 		if [[ -d $PREFIX/$path ]]; then
 			if [[ $path == "" ]]; then
@@ -143,18 +153,17 @@ case "$command" in
 	insert)
 		ml=0
 		noecho=0
-		while true; do
-			if [[ $1 == "--multiline" || $1 == "-m" ]]; then
-				ml=1
-				shift
-			elif [[ $1 == "--no-echo" || $1 == "-n" ]]; then
-				noecho=1
-				shift
-			else
-				break
-			fi
-		done
-		if [[ ( $ml -eq 1 && $noecho -eq 1 ) || $# -ne 1 ]]; then
+
+		opts="$(getopt -o mn -l multiline,no-echo -n $program -- "$@")"
+		err=$?
+		eval set -- "$opts"
+		while true; do case $1 in
+			-m|--multiline) ml=1; shift ;;
+			-n|--no-echo) noecho=1; shift ;;
+			--) shift; break ;;
+		esac done
+
+		if [[ $err -ne 0 || ( $ml -eq 1 && $noecho -eq 1 ) || $# -ne 1 ]]; then
 			echo "Usage: $program $command [--no-echo,-n | --multiline,-m] pass-name"
 			exit 1
 		fi
@@ -241,18 +250,17 @@ case "$command" in
 	generate)
 		clip=0
 		symbols="-y"
-		while true; do
-			if [[ $1 == "--no-symbols" || $1 == "-n" ]]; then
-				symbols=""
-				shift
-			elif [[ $1 == "--clip" || $1 == "-c" ]]; then
-				clip=1
-				shift
-			else
-				break
-			fi
-		done
-		if [[ $# -ne 2 ]]; then
+
+		opts="$(getopt -o nc -l no-symbols,clip -n $program -- "$@")"
+		err=$?
+		eval set -- "$opts"
+		while true; do case $1 in
+			-n|--no-symbols) symbols=""; shift ;;
+			-c|--clip) clip=1; shift ;;
+			--) shift; break ;;
+		esac done
+
+		if [[ $err -ne 0 || $# -ne 2 ]]; then
 			echo "Usage: $program $command [--no-symbols,-n] [--clip,-c] pass-name pass-length"
 			exit 1
 		fi
