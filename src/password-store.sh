@@ -37,9 +37,10 @@ Usage:
     $program [show] [--clip,-c] pass-name
         Show existing password and optionally put it on the clipboard.
         If put on the clipboard, it will be cleared in 45 seconds.
-    $program insert [--no-echo,-n | --multiline,-m] pass-name
+    $program insert [--no-echo,-n | --multiline,-m] [--force,-f] pass-name
         Insert new password. Optionally, the console can be enabled to not
-        echo the password back. Or, optionally, it may be multiline.
+        echo the password back. Or, optionally, it may be multiline. Prompt
+        before overwriting existing password unless forced.
     $program edit pass-name
         Insert a new password or edit an existing password using ${EDITOR:-vi}.
     $program generate [--no-symbols,-n] [--clip,-c] pass-name pass-length
@@ -170,24 +171,26 @@ case "$command" in
 	insert)
 		ml=0
 		noecho=0
+		force=0
 
-		opts="$(getopt -o mn -l multiline,no-echo -n $program -- "$@")"
+		opts="$(getopt -o mnf -l multiline,no-echo,force -n $program -- "$@")"
 		err=$?
 		eval set -- "$opts"
 		while true; do case $1 in
 			-m|--multiline) ml=1; shift ;;
 			-n|--no-echo) noecho=1; shift ;;
+			-f|--force) force=1; shift ;;
 			--) shift; break ;;
 		esac done
 
 		if [[ $err -ne 0 || ( $ml -eq 1 && $noecho -eq 1 ) || $# -ne 1 ]]; then
-			echo "Usage: $program $command [--no-echo,-n | --multiline,-m] pass-name"
+			echo "Usage: $program $command [--no-echo,-n | --multiline,-m] [--force,-f] pass-name"
 			exit 1
 		fi
 		path="$1"
 		passfile="$PREFIX/$path.gpg"
 
-		if [[ -e $passfile ]]; then
+		if [[ $force -eq 0 && -e $passfile ]]; then
 			prompt="An entry already exists for $path. Overwrite it [y/N]? "
 			read -p "$prompt" yesno
 			[[ $yesno == "y" || $yesno == "Y" ]] || exit 1
