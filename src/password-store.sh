@@ -8,6 +8,7 @@ umask 077
 PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 ID="$PREFIX/.gpg-id"
 GIT="$PREFIX/.git"
+GPG_OPTS="--quiet --yes --batch"
 
 export GIT_DIR="$GIT"
 export GIT_WORK_TREE="$PREFIX"
@@ -197,7 +198,7 @@ case "$command" in
 		if [[ $ml -eq 1 ]]; then
 			echo "Enter contents of $path and press Ctrl+D when finished:"
 			echo
-			cat | gpg -e -r "$ID" -o "$passfile" --yes
+			cat | gpg -e -r "$ID" -o "$passfile" $GPG_OPTS
 		elif [[ $noecho -eq 1 ]]; then
 			while true; do
 				read -p "Enter password for $path: " -s password
@@ -205,7 +206,7 @@ case "$command" in
 				read -p "Retype password for $path: " -s password_again
 				echo
 				if [[ $password == $password_again ]]; then
-					gpg -q -e -r "$ID" -o "$passfile" --yes <<<"$password"
+					gpg -e -r "$ID" -o "$passfile" $GPG_OPTS <<<"$password"
 					break
 				else
 					echo "Error: the entered passwords do not match."
@@ -213,7 +214,7 @@ case "$command" in
 			done
 		else
 			read -p "Enter password for $path: " -e password
-			gpg -q -e -r "$ID" -o "$passfile" --yes <<<"$password"
+			gpg -e -r "$ID" -o "$passfile" $GPG_OPTS <<<"$password"
 		fi
 		if [[ -d $GIT ]]; then
 			git add "$passfile"
@@ -248,11 +249,11 @@ case "$command" in
 
 		action="Added"
 		if [[ -f $passfile ]]; then
-			gpg -q -d -o "$tmp_file" --yes --batch "$passfile" || exit 1
+			gpg -d -o "$tmp_file" $GPG_OPTS "$passfile" || exit 1
 			action="Edited"
 		fi
 		${EDITOR:-vi} "$tmp_file"
-		while ! gpg -q -e -r "$ID" -o "$passfile" --yes "$tmp_file"; do
+		while ! gpg -e -r "$ID" -o "$passfile" $GPG_OPTS "$tmp_file"; do
 			echo "GPG encryption failed. Retrying."
 			sleep 1
 		done
@@ -288,7 +289,7 @@ case "$command" in
 		mkdir -p -v "$PREFIX/$(dirname "$path")"
 		pass="$(pwgen -s $symbols $length 1)"
 		passfile="$PREFIX/$path.gpg"
-		gpg -q -e -r "$ID" -o "$passfile" --yes <<<"$pass"
+		gpg -e -r "$ID" -o "$passfile" $GPG_OPTS <<<"$pass"
 		if [[ -d $GIT ]]; then
 			git add "$passfile"
 			git commit -m "Added generated password for $path to store."
