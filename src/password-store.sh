@@ -226,7 +226,7 @@ case "$command" in
 		;;
 	edit)
 		if [[ $# -ne 1 ]]; then
-			echo "Usage $program $command pass-name"
+			echo "Usage: $program $command pass-name"
 			exit 1
 		fi
 
