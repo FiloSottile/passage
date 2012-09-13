@@ -193,14 +193,10 @@ case "$command" in
 			cat | gpg -e -r "$ID" -o "$passfile" --yes
 		elif [[ $noecho -eq 1 ]]; then
 			while true; do
-				stty -echo
-				echo -n "Enter password for $path: "
-				read password
+				read -p "Enter password for $path: " -s password
 				echo
-				echo -n "Retype password for $path: "
-				read password_again
+				read -p "Retype password for $path: " -s password_again
 				echo
-				stty echo
 				if [[ $password == $password_again ]]; then
 					gpg -q -e -r "$ID" -o "$passfile" --yes <<<"$password"
 					break
@@ -233,14 +229,12 @@ case "$command" in
 		if [[ -d /dev/shm && -w /dev/shm && -x /dev/shm ]]; then
 			tmp_dir="$(TMPDIR=/dev/shm mktemp -t $template -d)"
 		else
-			echo    "Your system does not have /dev/shm, which means that it may"
-			echo    "be difficult to entirely erase the temporary non-encrypted"
-			echo    "password file after editing. Are you sure you would like to"
-			echo -n "continue? [y/N] "
-			read yesno
-			if ! [[ $yesno == "y" || $yesno == "Y" ]]; then
-				exit 1
-			fi
+			prompt=$(echo    "Your system does not have /dev/shm, which means that it may"
+			         echo    "be difficult to entirely erase the temporary non-encrypted"
+			         echo    "password file after editing. Are you sure you would like to"
+			         echo -n "continue? [y/N] ")
+			read -p "$prompt" yesno
+			[[ $yesno == "y" || $yesno == "Y" ]] || exit 1
 			tmp_dir="$(mktemp -t $template -d)"
 		fi
 		tmp_file="$(TMPDIR="$tmp_dir" mktemp -t $template)"
