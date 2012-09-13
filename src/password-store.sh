@@ -160,9 +160,9 @@ case "$command" in
 				exit 1
 			fi
 			if [ $clip -eq 0 ]; then
-				exec gpg -q -d --yes "$passfile"
+				exec gpg -q -d --yes --batch "$passfile"
 			else
-				clip "$(gpg -q -d --yes "$passfile" | head -n 1)" "$path"
+				clip "$(gpg -q -d --yes --batch "$passfile" | head -n 1)" "$path"
 			fi
 		fi
 		;;
@@ -248,7 +248,7 @@ case "$command" in
 
 		action="Added"
 		if [[ -f $passfile ]]; then
-			gpg -q -d -o "$tmp_file" --yes "$passfile" || exit 1
+			gpg -q -d -o "$tmp_file" --yes --batch "$passfile" || exit 1
 			action="Edited"
 		fi
 		${EDITOR:-vi} "$tmp_file"
