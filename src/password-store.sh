@@ -212,8 +212,8 @@ case "$command" in
 				fi
 			done
 		else
-			echo -n "Enter password for $path: "
-			head -n 1 | gpg -q -e -r "$ID" -o "$passfile" --yes
+			read -p "Enter password for $path: " -e password
+			gpg -q -e -r "$ID" -o "$passfile" --yes <<<"$password"
 		fi
 		if [[ -d $GIT ]]; then
 			git add "$passfile"
