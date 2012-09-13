@@ -19,12 +19,13 @@ _pass () {
     (( $+functions[_pass_cmd_$cmd] )) && _pass_cmd_$cmd
 
   else
-    _values : \
+    _values 'command' \
       "init[Initialize new password storage]" \
       "ls[subfolder List names of passwords]" \
       "show[Decrypt and print a password]" \
       "insert[Insert a new password]" \
       "generate[Generate a new password using pwgen]" \
+      "edit[Edit a password with \$EDITOR]" \
       "rm[Remove the password]" \
       "push[push the latest changes using git-push(1)]" \
       "pull[pull the latest changes using git-pull(1)]" \
@@ -49,6 +50,11 @@ _pass_cmd_show () {
     #'::pass id:_files -W ~/.password-store -g "*.gpg(|.*)(-.)"'
 }
 
+_pass_cmd_edit () {
+  _arguments : \
+    '::edit:_get_stored_pwd'
+}
+
 _pass_cmd_insert () {
   _arguments : \
     "-n[no console output]" \
@@ -70,4 +76,5 @@ _pass_cmd_rm () {
 
 _get_stored_pwd () {
   compadd `find ~/.password-store \( -name .git -o -name .gpg-id \) -prune -o -type f -print | sed 's#.*\.password-store*.##'| sed 's#\.gpg##' | sort`
+
 }
