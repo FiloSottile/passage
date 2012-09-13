@@ -69,5 +69,5 @@ _pass_cmd_rm () {
 }
 
 _get_stored_pwd () {
-  compadd `find ~/.password-store \( -name .git -o -name .gpg-id \) -prune -o -print | sed 's#.*\.password-store*.##'| sed 's#\.gpg##' | sort`
+  compadd `find ~/.password-store \( -name .git -o -name .gpg-id \) -prune -o -type f -print | sed 's#.*\.password-store*.##'| sed 's#\.gpg##' | sort`
 }
