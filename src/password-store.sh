@@ -184,9 +184,16 @@ case "$command" in
 			exit 1
 		fi
 		path="$1"
+		passfile="$PREFIX/$path.gpg"
+
+		if [[ -e $passfile ]]; then
+			prompt="An entry already exists for $path. Overwrite it [y/N]? "
+			read -p "$prompt" yesno
+			[[ $yesno == "y" || $yesno == "Y" ]] || exit 1
+		fi
+
 		mkdir -p -v "$PREFIX/$(dirname "$path")"
 
-		passfile="$PREFIX/$path.gpg"
 		if [[ $ml -eq 1 ]]; then
 			echo "Enter contents of $path and press Ctrl+D when finished:"
 			echo
