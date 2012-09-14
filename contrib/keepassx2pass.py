@@ -13,7 +13,7 @@ def path_for(element, path=''):
 def import_entry(element, path=''):
     """ Import new password entry to password-store using pass insert
     command """
-    proc = Popen(['pass', 'insert', path_for(element, path)],
+    proc = Popen(['pass', 'insert', '--force', path_for(element, path)],
               stdin=PIPE, stdout=PIPE)
     proc.communicate(element.find('password').text + "\n")
     proc.wait()
