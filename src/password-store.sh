@@ -162,14 +162,14 @@ case "$command" in
 				exit 1
 			fi
 			if [ $clip -eq 0 ]; then
-				exec gpg -q -d --yes --batch "$passfile"
+				exec gpg -d $GPG_OPTS "$passfile"
 			else
-				clip "$(gpg -q -d --yes --batch "$passfile" | head -n 1)" "$path"
+				clip "$(gpg -d $GPG_OPTS "$passfile" | head -n 1)" "$path"
 			fi
 		fi
 		;;
 	insert)
-		ml=0
+		multiline=0
 		noecho=0
 		force=0
 
@@ -177,13 +177,13 @@ case "$command" in
 		err=$?
 		eval set -- "$opts"
 		while true; do case $1 in
-			-m|--multiline) ml=1; shift ;;
+			-m|--multiline) multiline=1; shift ;;
 			-n|--no-echo) noecho=1; shift ;;
 			-f|--force) force=1; shift ;;
 			--) shift; break ;;
 		esac done
 
-		if [[ $err -ne 0 || ( $ml -eq 1 && $noecho -eq 1 ) || $# -ne 1 ]]; then
+		if [[ $err -ne 0 || ( $multiline -eq 1 && $noecho -eq 1 ) || $# -ne 1 ]]; then
 			echo "Usage: $program $command [--no-echo,-n | --multiline,-m] [--force,-f] pass-name"
 			exit 1
 		fi
@@ -198,7 +198,7 @@ case "$command" in
 
 		mkdir -p -v "$PREFIX/$(dirname "$path")"
 
-		if [[ $ml -eq 1 ]]; then
+		if [[ $multiline -eq 1 ]]; then
 			echo "Enter contents of $path and press Ctrl+D when finished:"
 			echo
 			cat | gpg -e -r "$ID" -o "$passfile" $GPG_OPTS
@@ -308,7 +308,7 @@ case "$command" in
 	delete|rm|remove)
 		if [[ $# -ne 1 ]]; then
 			echo "Usage: $program $command pass-name"
-			exit
+			exit 1
 		fi
 		path="$1"
 		passfile="$PREFIX/$path.gpg"
@@ -317,7 +317,7 @@ case "$command" in
 			exit 1
 		fi
 		rm -i -v "$passfile"
-		if [[ -d $GIT ]] && ! [[ -f $passfile ]]; then
+		if [[ -d $GIT && ! -f $passfile ]]; then
 			git rm -f "$passfile"
 			git commit -m "Removed $path from store."
 		fi
@@ -331,7 +331,7 @@ case "$command" in
 		fi
 		;;
 	git)
-		if [[ $1 == "init" ]] || [[ -d $GIT ]]; then
+		if [[ $1 == "init" || -d $GIT ]]; then
 			exec git "$@"
 		else
 			echo "Error: the password store is not a git repository."
