@@ -46,8 +46,8 @@ Usage:
     $program generate [--no-symbols,-n] [--clip,-c] pass-name pass-length
         Generate a new password of pass-length with optionally no symbols.
         Optionally put it on the clipboard and clear board after 45 seconds.
-    $program rm pass-name
-        Remove existing password.
+    $program rm [--recursive,-r] [--force,-f] pass-name
+        Remove existing password or directory, optionally forcefully.
     $program push
         If the password store is a git repository, push the latest changes.
     $program pull
@@ -306,19 +306,33 @@ case "$command" in
 		fi
 		;;
 	delete|rm|remove)
+		recursive=""
+		force="-i"
+		opts="$(getopt -o rf -l recursive,force -n $program -- "$@")"
+		err=$?
+		eval set -- "$opts"
+		while true; do case $1 in
+			-r|--recursive) recursive="-r"; shift ;;
+			-f|--force) force="-f"; shift ;;
+			--) shift; break ;;
+		esac done
 		if [[ $# -ne 1 ]]; then
-			echo "Usage: $program $command pass-name"
+			echo "Usage: $program $command [--recursive,-r] [--force,-f] pass-name"
 			exit 1
 		fi
 		path="$1"
-		passfile="$PREFIX/$path.gpg"
-		if ! [[ -f $passfile ]]; then
-			echo "$path is not in the password store."
-			exit 1
+
+		passfile="$PREFIX/$path"
+		if ! [[ -d $passfile ]]; then
+			passfile="$PREFIX/$path.gpg"
+			if ! [[ -f $passfile ]]; then
+				echo "$path is not in the password store."
+				exit 1
+			fi
 		fi
-		rm -i -v "$passfile"
-		if [[ -d $GIT && ! -f $passfile ]]; then
-			git rm -f "$passfile"
+		rm $recursive $force -v "$passfile"
+		if [[ -d $GIT && ! -e $passfile ]]; then
+			git rm -r "$passfile"
 			git commit -m "Removed $path from store."
 		fi
 		;;

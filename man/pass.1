@@ -98,9 +98,11 @@ it to the clipboard using
 .BR xclip (1)
 and then restore the clipboard after 45 seconds.
 .TP
-\fBrm\fP \fIpass-name\fP
+\fBrm\fP [ \fI--recursive\fP, \fI-r\fP ] [ \fI--force\fP, \fI-f\fP ]\fI pass-name\fP
 Remove the password named \fIpass-name\fP from the password store. This command is
-alternatively named \fBremove\fP.
+alternatively named \fBremove\fP or \fBdelete\fP. If \fI--recursive\fP or \fI-r\fP
+is specified, delete pass-name recursively if it is a directory. If \fI--force\fP
+or \fI-f\fP is specified, do not interactively prompt before removal.
 .TP
 \fBpush\fP
 If the password store is a git repository, push the latest changes using
