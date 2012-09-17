@@ -161,7 +161,7 @@ case "$command" in
 	show|ls|list)
 		clip=0
 
-		opts="$($GETOPT -o c -l clip -n $program -- "$@")"
+		opts="$($GETOPT -o c -l clip -n "$program" -- "$@")"
 		err=$?
 		eval set -- "$opts"
 		while true; do case $1 in
@@ -200,7 +200,7 @@ case "$command" in
 		noecho=0
 		force=0
 
-		opts="$($GETOPT -o mnf -l multiline,no-echo,force -n $program -- "$@")"
+		opts="$($GETOPT -o mnf -l multiline,no-echo,force -n "$program" -- "$@")"
 		err=$?
 		eval set -- "$opts"
 		while true; do case $1 in
@@ -287,7 +287,7 @@ case "$command" in
 		clip=0
 		symbols="-y"
 
-		opts="$($GETOPT -o nc -l no-symbols,clip -n $program -- "$@")"
+		opts="$($GETOPT -o nc -l no-symbols,clip -n "$program" -- "$@")"
 		err=$?
 		eval set -- "$opts"
 		while true; do case $1 in
@@ -325,7 +325,7 @@ case "$command" in
 	delete|rm|remove)
 		recursive=""
 		force="-i"
-		opts="$($GETOPT -o rf -l recursive,force -n $program -- "$@")"
+		opts="$($GETOPT -o rf -l recursive,force -n "$program" -- "$@")"
 		err=$?
 		eval set -- "$opts"
 		while true; do case $1 in
