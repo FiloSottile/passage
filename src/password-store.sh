@@ -7,11 +7,11 @@ umask 077
 
 PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 ID="$PREFIX/.gpg-id"
-GIT="$PREFIX/.git"
+GIT_DIR="$PREFIX/.git"
 GPG_OPTS="--quiet --yes --batch"
 
-export GIT_DIR="$GIT"
-export GIT_WORK_TREE="$PREFIX"
+export GIT_DIR
+export GIT_DIR_WORK_TREE="$PREFIX"
 
 version() {
 	cat <<_EOF
@@ -67,6 +67,10 @@ isCommand() {
 		*) return 1 ;;
 	esac
 }
+
+#
+# BEGIN Platform definable
+#
 clip() {
 	# This base64 business is a disgusting hack to deal with newline inconsistancies
 	# in shell. There must be a better way to deal with this, but because I'm a dolt,
@@ -89,6 +93,29 @@ clip() {
 	) & disown
 	echo "Copied $2 to clipboard. Will clear in 45 seconds."
 }
+tmpdir() {
+	if [[ -d /dev/shm && -w /dev/shm && -x /dev/shm ]]; then
+		tmp_dir="$(TMPDIR=/dev/shm mktemp -t "$template" -d)"
+	else
+		prompt=$(echo    "Your system does not have /dev/shm, which means that it may"
+		         echo    "be difficult to entirely erase the temporary non-encrypted"
+		         echo    "password file after editing. Are you sure you would like to"
+		         echo -n "continue? [y/N] ")
+		read -p "$prompt" yesno
+		[[ $yesno == "y" || $yesno == "Y" ]] || exit 1
+		tmp_dir="$(mktemp -t "$template" -d)"
+	fi
+
+}
+GPG="gpg"
+GETOPT="getopt"
+
+# source /path/to/platform-defined-functions
+#
+# END Platform definable
+#
+
+
 program="$(basename "$0")"
 command="$1"
 if isCommand "$command"; then
@@ -134,7 +161,7 @@ case "$command" in
 	show|ls|list)
 		clip=0
 
-		opts="$(getopt -o c -l clip -n $program -- "$@")"
+		opts="$($GETOPT -o c -l clip -n $program -- "$@")"
 		err=$?
 		eval set -- "$opts"
 		while true; do case $1 in
@@ -162,9 +189,9 @@ case "$command" in
 				exit 1
 			fi
 			if [ $clip -eq 0 ]; then
-				exec gpg -d $GPG_OPTS "$passfile"
+				exec $GPG -d $GPG_OPTS "$passfile"
 			else
-				clip "$(gpg -d $GPG_OPTS "$passfile" | head -n 1)" "$path"
+				clip "$($GPG -d $GPG_OPTS "$passfile" | head -n 1)" "$path"
 			fi
 		fi
 		;;
@@ -173,7 +200,7 @@ case "$command" in
 		noecho=0
 		force=0
 
-		opts="$(getopt -o mnf -l multiline,no-echo,force -n $program -- "$@")"
+		opts="$($GETOPT -o mnf -l multiline,no-echo,force -n $program -- "$@")"
 		err=$?
 		eval set -- "$opts"
 		while true; do case $1 in
@@ -201,7 +228,7 @@ case "$command" in
 		if [[ $multiline -eq 1 ]]; then
 			echo "Enter contents of $path and press Ctrl+D when finished:"
 			echo
-			cat | gpg -e -r "$ID" -o "$passfile" $GPG_OPTS
+			cat | $GPG -e -r "$ID" -o "$passfile" $GPG_OPTS
 		elif [[ $noecho -eq 1 ]]; then
 			while true; do
 				read -p "Enter password for $path: " -s password
@@ -209,7 +236,7 @@ case "$command" in
 				read -p "Retype password for $path: " -s password_again
 				echo
 				if [[ $password == $password_again ]]; then
-					gpg -e -r "$ID" -o "$passfile" $GPG_OPTS <<<"$password"
+					$GPG -e -r "$ID" -o "$passfile" $GPG_OPTS <<<"$password"
 					break
 				else
 					echo "Error: the entered passwords do not match."
@@ -217,9 +244,9 @@ case "$command" in
 			done
 		else
 			read -p "Enter password for $path: " -e password
-			gpg -e -r "$ID" -o "$passfile" $GPG_OPTS <<<"$password"
+			$GPG -e -r "$ID" -o "$passfile" $GPG_OPTS <<<"$password"
 		fi
-		if [[ -d $GIT ]]; then
+		if [[ -d $GIT_DIR ]]; then
 			git add "$passfile"
 			git commit -m "Added given password for $path to store."
 		fi
@@ -237,31 +264,21 @@ case "$command" in
 
 		trap 'rm -rf "$tmp_dir" "$tmp_file"' INT TERM EXIT
 
-		if [[ -d /dev/shm && -w /dev/shm && -x /dev/shm ]]; then
-			tmp_dir="$(TMPDIR=/dev/shm mktemp -t $template -d)"
-		else
-			prompt=$(echo    "Your system does not have /dev/shm, which means that it may"
-			         echo    "be difficult to entirely erase the temporary non-encrypted"
-			         echo    "password file after editing. Are you sure you would like to"
-			         echo -n "continue? [y/N] ")
-			read -p "$prompt" yesno
-			[[ $yesno == "y" || $yesno == "Y" ]] || exit 1
-			tmp_dir="$(mktemp -t $template -d)"
-		fi
-		tmp_file="$(TMPDIR="$tmp_dir" mktemp -t $template)"
+		tmpdir #Defines $tmp_dir
+		tmp_file="$(TMPDIR="$tmp_dir" mktemp -t "$template")"
 
 		action="Added"
 		if [[ -f $passfile ]]; then
-			gpg -d -o "$tmp_file" $GPG_OPTS "$passfile" || exit 1
+			$GPG -d -o "$tmp_file" $GPG_OPTS "$passfile" || exit 1
 			action="Edited"
 		fi
 		${EDITOR:-vi} "$tmp_file"
-		while ! gpg -e -r "$ID" -o "$passfile" $GPG_OPTS "$tmp_file"; do
+		while ! $GPG -e -r "$ID" -o "$passfile" $GPG_OPTS "$tmp_file"; do
 			echo "GPG encryption failed. Retrying."
 			sleep 1
 		done
 
-		if [[ -d $GIT ]]; then
+		if [[ -d $GIT_DIR ]]; then
 			git add "$passfile"
 			git commit -m "$action password for $path using ${EDITOR:-vi}."
 		fi
@@ -270,7 +287,7 @@ case "$command" in
 		clip=0
 		symbols="-y"
 
-		opts="$(getopt -o nc -l no-symbols,clip -n $program -- "$@")"
+		opts="$($GETOPT -o nc -l no-symbols,clip -n $program -- "$@")"
 		err=$?
 		eval set -- "$opts"
 		while true; do case $1 in
@@ -292,8 +309,8 @@ case "$command" in
 		mkdir -p -v "$PREFIX/$(dirname "$path")"
 		pass="$(pwgen -s $symbols $length 1)"
 		passfile="$PREFIX/$path.gpg"
-		gpg -e -r "$ID" -o "$passfile" $GPG_OPTS <<<"$pass"
-		if [[ -d $GIT ]]; then
+		$GPG -e -r "$ID" -o "$passfile" $GPG_OPTS <<<"$pass"
+		if [[ -d $GIT_DIR ]]; then
 			git add "$passfile"
 			git commit -m "Added generated password for $path to store."
 		fi
@@ -308,7 +325,7 @@ case "$command" in
 	delete|rm|remove)
 		recursive=""
 		force="-i"
-		opts="$(getopt -o rf -l recursive,force -n $program -- "$@")"
+		opts="$($GETOPT -o rf -l recursive,force -n $program -- "$@")"
 		err=$?
 		eval set -- "$opts"
 		while true; do case $1 in
@@ -331,13 +348,13 @@ case "$command" in
 			fi
 		fi
 		rm $recursive $force -v "$passfile"
-		if [[ -d $GIT && ! -e $passfile ]]; then
+		if [[ -d $GIT_DIR && ! -e $passfile ]]; then
 			git rm -r "$passfile"
 			git commit -m "Removed $path from store."
 		fi
 		;;
 	push|pull)
-		if [[ -d $GIT ]]; then
+		if [[ -d $GIT_DIR ]]; then
 			exec git $command "$@"
 		else
 			echo "Error: the password store is not a git repository."
@@ -345,7 +362,7 @@ case "$command" in
 		fi
 		;;
 	git)
-		if [[ $1 == "init" || -d $GIT ]]; then
+		if [[ $1 == "init" || -d $GIT_DIR ]]; then
 			exec git "$@"
 		else
 			echo "Error: the password store is not a git repository."
