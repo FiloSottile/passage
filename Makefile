@@ -19,7 +19,7 @@ install:
 	@install -m 0644 -v contrib/pass.bash-completion $(DESTDIR)$(SYSCONFDIR)/bash_completion.d/password-store
 #	Uncomment to install the zsh completion file too.
 #	@install -m 0644 -v contrib/pass.zsh-completion $(DESTDIR)$(PREFIX)/share/zsh/site-functions/_pass
-	@$(MAKE) install-platform
+	@$(MAKE) -s install-platform
 
 ifneq ($(strip $(wildcard $(PLATFORMFILE))),)
 install-platform:
