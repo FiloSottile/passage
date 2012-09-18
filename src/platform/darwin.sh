@@ -21,7 +21,7 @@ tmpdir() {
 		rmdir "$tmp_dir"
 	}
 	trap cleanup_tmp INT TERM EXIT
-	tmp_dir="$(mktemp -t $template -d)"
+	tmp_dir="$(mktemp -t "$template" -d)"
 	ramdisk_dev="$(hdid -drivekey system-image=yes -nomount 'ram://32768' | cut -d ' ' -f 1)" # 32768 sectors = 16 mb
 	[[ -z $ramdisk_dev ]] && exit 1
 	newfs_hfs -M 700 "$ramdisk_dev" &>/dev/null || exit 1
