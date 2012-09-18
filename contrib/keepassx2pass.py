@@ -1,5 +1,6 @@
 #! /usr/bin/env python
-
+# -*- coding: utf-8 -*-
+#
 # (C) Copyright 2012 Juhamatti Niemelä <iiska@iki.fi>. All Rights
 # Reserved. This file is licensed under the GPLv2+. Please see COPYING
 # for more information.
@@ -14,12 +15,23 @@ def path_for(element, path=''):
     title = element.find('title').text
     return '/'.join([path, title])
 
+def password_data(element):
+    """ Return password data and additional info if available from
+    password entry element. """
+    ret = element.find('password').text + "\n"
+    for field in ['username', 'url', 'comment']:
+        fel = element.find(field)
+        if fel.text is not None:
+            ret = "%s%s: %s\n" % (ret, fel.tag, fel.text)
+    return ret
+
 def import_entry(element, path=''):
     """ Import new password entry to password-store using pass insert
     command """
-    proc = Popen(['pass', 'insert', '--force', path_for(element, path)],
+    proc = Popen(['pass', 'insert', '--multiline', '--force',
+                  path_for(element, path)],
               stdin=PIPE, stdout=PIPE)
-    proc.communicate(element.find('password').text + "\n")
+    proc.communicate(password_data(element).encode('utf8'))
     proc.wait()
 
 def import_group(element, path=''):
