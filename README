@@ -13,9 +13,18 @@ Visit the project page for more information: http://zx2c4.com/projects/password-
 Please see the man page for documentation and examples.
 
 Depends on:
-- gpg2
+- bash
+  http://www.gnu.org/software/bash/
+- GnuPG2
+  http://www.gnupg.org/
 - git
+  http://www.git-scm.com/
 - xclip
+  http://sourceforge.net/projects/xclip/
 - pwgen
+  http://sourceforge.net/projects/pwgen/
 - tree
+  http://mama.indstate.edu/users/ice/tree/
 - GNU getopt
+  http://www.kernel.org/pub/linux/utils/util-linux/
+  http://software.frodo.looijaard.name/getopt/
