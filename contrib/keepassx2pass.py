@@ -1,5 +1,9 @@
 #! /usr/bin/env python
 
+# (C) Copyright 2012 Juhamatti Niemelä <iiska@iki.fi>. All Rights
+# Reserved. This file is licensed under the GPLv2+. Please see COPYING
+# for more information.
+
 import sys
 
 from subprocess import Popen, PIPE
