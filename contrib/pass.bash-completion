@@ -5,7 +5,7 @@
 
 _pass()
 {
-	local cur prev prefix suffix gen
+	local cur prev prefix suffix
 	COMPREPLY=()
 	cur="${COMP_WORDS[COMP_CWORD]}"
 	prev="${COMP_WORDS[COMP_CWORD-1]}"
@@ -16,6 +16,8 @@ _pass()
 		return 0
 	fi
 	
+	local IFS=$'\n'
+	local i=0
 	for item in $(compgen -f $prefix$cur); do
 		if [[ $item == $prefix.* ]]; then
 			continue
@@ -24,9 +26,8 @@ _pass()
 			item="$item/"
 		fi
 		item="${item%$suffix}"
-		gen="$gen ${item#$prefix}"
+		COMPREPLY[$i]="${item#$prefix}" 
+		(( i++ ))
 	done
-
-	COMPREPLY=( $gen )
 }
 complete -o filenames -o nospace -F _pass pass
