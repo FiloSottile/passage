@@ -80,11 +80,16 @@ clip() {
 		if [[ $now != $(echo -n "$1" | base64) ]]; then
 			before="$now"
 		fi
+
 		# It might be nice to programatically check to see if klipper exists,
 		# as well as checking for other common clipboard managers. But for now,
-		# this works fine. Clipboard managers frequently write their history
-		# out in plaintext, so we axe it here.
-		qdbus org.kde.klipper /klipper org.kde.klipper.klipper.clearClipboardHistory >/dev/null 2>&1
+		# this works fine -- if qdbus isn't there or if klipper isn't running,
+		# this essentially becomes a no-op.
+		#
+		# Clipboard managers frequently write their history out in plaintext,
+		# so we axe it here:
+		qdbus org.kde.klipper /klipper org.kde.klipper.klipper.clearClipboardHistory &>/dev/null
+
 		echo "$before" | base64 -d | xclip -selection clipboard
 	) & disown
 	echo "Copied $2 to clipboard. Will clear in 45 seconds."
