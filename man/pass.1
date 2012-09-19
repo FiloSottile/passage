@@ -104,14 +104,6 @@ alternatively named \fBremove\fP or \fBdelete\fP. If \fI--recursive\fP or \fI-r\
 is specified, delete pass-name recursively if it is a directory. If \fI--force\fP
 or \fI-f\fP is specified, do not interactively prompt before removal.
 .TP
-\fBpush\fP
-If the password store is a git repository, push the latest changes using
-.BR git-push (1).
-.TP
-\fBpull\fP
-If the password store is a git repository, pull the latest changes using
-.BR git-pull (1).
-.TP
 \fBgit\fP \fIgit-command-args\fP...
 If the password store is a git repository, pass \fIgit-command-args\fP as arguments to
 .BR git (1)
@@ -223,7 +215,7 @@ rm: remove regular file \[u2018]/home/zx2c4/.password-store/Business/cheese-whiz
 removed \[u2018]/home/zx2c4/.password-store/Business/cheese-whiz-factory.gpg\[u2019]
 
 .SH EXTENDED GIT EXAMPLE
-Here, we initialize new password store, create a git repository, and then manipulate and sync passwords. Make note of the arguments to the first call of \fBpass push\fP; consult
+Here, we initialize new password store, create a git repository, and then manipulate and sync passwords. Make note of the arguments to the first call of \fBpass git push\fP; consult
 .BR git-push (1)
 for more information.
 
@@ -235,7 +227,13 @@ Password store initialized for Jason@zx2c4.com.
 
 .B zx2c4@laptop ~ $ pass git init 
 .br
-Initialized empty Git repository in /home/zx2c4/.password-store/.git/ 
+Initialized empty Git repository in /home/zx2c4/.password-store/.git/
+.br
+[master (root-commit) 998c8fd] Added current contents of password store.
+.br
+ 1 file changed, 1 insertion(+)
+.br
+ create mode 100644 .gpg-id
 
 .B zx2c4@laptop ~ $ pass git remote add origin kexec.com:pass-store 
 
@@ -243,7 +241,7 @@ Initialized empty Git repository in /home/zx2c4/.password-store/.git/
 .br
 mkdir: created directory \[u2018]/home/zx2c4/.password-store/Amazon\[u2019] 
 .br
-[master (root-commit) 30fdc1e] Added generated password for Amazon/amazonemail@email.com to store. 
+[master 30fdc1e] Added generated password for Amazon/amazonemail@email.com to store.
 .br
 1 file changed, 0 insertions(+), 0 deletions(-) 
 .br
@@ -253,7 +251,7 @@ The generated password to Amazon/amazonemail@email.com is:
 .br
 <5m,_BrZY`antNDxKN<0A 
 
-.B zx2c4@laptop ~ $ pass push -u --all 
+.B zx2c4@laptop ~ $ pass git push -u --all
 .br
 Counting objects: 4, done. 
 .br
@@ -295,7 +293,7 @@ rm 'Amazon/amazonemail@email.com.gpg'
 .br
 delete mode 100644 Amazon/amazonemail@email.com.gpg 
 
-.B zx2c4@laptop ~ $ pass push 
+.B zx2c4@laptop ~ $ pass git push
 .br
 Counting objects: 9, done. 
 .br
