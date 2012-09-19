@@ -27,9 +27,7 @@ _pass () {
       "generate[Generate a new password using pwgen]" \
       "edit[Edit a password with \$EDITOR]" \
       "rm[Remove the password]" \
-      "push[push the latest changes using git-push(1)]" \
-      "pull[pull the latest changes using git-pull(1)]" \
-      "git[Call git]" \
+      "git[Call git on the password store]" \
       "help[Help]"
     _pass_cmd_show
   fi
