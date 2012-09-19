@@ -11,7 +11,7 @@ GIT_DIR="$PREFIX/.git"
 GPG_OPTS="--quiet --yes --batch"
 
 export GIT_DIR
-export GIT_DIR_WORK_TREE="$PREFIX"
+export GIT_WORK_TREE="$PREFIX"
 
 version() {
 	cat <<_EOF
