@@ -231,7 +231,7 @@ case "$command" in
 		if [[ $multiline -eq 1 ]]; then
 			echo "Enter contents of $path and press Ctrl+D when finished:"
 			echo
-			cat | $GPG -e -r "$ID" -o "$passfile" $GPG_OPTS
+			$GPG -e -r "$ID" -o "$passfile" $GPG_OPTS
 		elif [[ $noecho -eq 1 ]]; then
 			while true; do
 				read -p "Enter password for $path: " -s password
