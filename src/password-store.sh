@@ -312,6 +312,7 @@ case "$command" in
 		[[ $force -eq 0 && -e $passfile ]] && yesno "An entry already exists for $path. Overwrite it?"
 
 		pass="$(pwgen -s $symbols $length 1)"
+		[[ -n $pass ]] || exit 1
 		$GPG -e -r "$ID" -o "$passfile" $GPG_OPTS <<<"$pass"
 		git_add_file "$passfile" "Added generated password for $path to store."
 		
