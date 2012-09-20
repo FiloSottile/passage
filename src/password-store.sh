@@ -43,9 +43,10 @@ Usage:
         before overwriting existing password unless forced.
     $program edit pass-name
         Insert a new password or edit an existing password using ${EDITOR:-vi}.
-    $program generate [--no-symbols,-n] [--clip,-c] pass-name pass-length
+    $program generate [--no-symbols,-n] [--clip,-c] [--force,-f] pass-name pass-length
         Generate a new password of pass-length with optionally no symbols.
         Optionally put it on the clipboard and clear board after 45 seconds.
+        Prompt before overwriting existing password unless forced.
     $program rm [--recursive,-r] [--force,-f] pass-name
         Remove existing password or directory, optionally forcefully.
     $program git git-command-args...
@@ -63,7 +64,16 @@ is_command() {
 		*) return 1 ;;
 	esac
 }
-
+git_add_file() {
+	[[ -d $GIT_DIR ]] || return
+	git add "$1" || return
+	[[ -n $(git status --porcelain "$1") ]] || return
+	git commit -m "$2"
+}
+yesno() {
+	read -p "$1 [y/N] " response
+	[[ $response == "y" || $response == "Y" ]] || exit 1
+}
 #
 # BEGIN Platform definable
 #
@@ -98,12 +108,10 @@ tmpdir() {
 	if [[ -d /dev/shm && -w /dev/shm && -x /dev/shm ]]; then
 		tmp_dir="$(TMPDIR=/dev/shm mktemp -t "$template" -d)"
 	else
-		prompt=$(echo    "Your system does not have /dev/shm, which means that it may"
+		yesno "$(echo    "Your system does not have /dev/shm, which means that it may"
 		         echo    "be difficult to entirely erase the temporary non-encrypted"
 		         echo    "password file after editing. Are you sure you would like to"
-		         echo -n "continue? [y/N] ")
-		read -p "$prompt" yesno
-		[[ $yesno == "y" || $yesno == "Y" ]] || exit 1
+		         echo -n "continue?")"
 		tmp_dir="$(mktemp -t "$template" -d)"
 	fi
 
@@ -115,13 +123,6 @@ GETOPT="getopt"
 #
 # END Platform definable
 #
-
-function git_add_file() {
-	[[ -d $GIT_DIR ]] || return
-	git add "$1" || return
-	[[ -n $(git status --porcelain "$1") ]] || return
-	git commit -m "$2"
-}
 
 program="$(basename "$0")"
 command="$1"
@@ -225,11 +226,7 @@ case "$command" in
 		path="$1"
 		passfile="$PREFIX/$path.gpg"
 
-		if [[ $force -eq 0 && -e $passfile ]]; then
-			prompt="An entry already exists for $path. Overwrite it [y/N]? "
-			read -p "$prompt" yesno
-			[[ $yesno == "y" || $yesno == "Y" ]] || exit 1
-		fi
+		[[ $force -eq 0 && -e $passfile ]] && yesno "An entry already exists for $path. Overwrite it?"
 
 		mkdir -p -v "$PREFIX/$(dirname "$path")"
 
@@ -286,19 +283,21 @@ case "$command" in
 		;;
 	generate)
 		clip=0
+		force=0
 		symbols="-y"
 
-		opts="$($GETOPT -o nc -l no-symbols,clip -n "$program" -- "$@")"
+		opts="$($GETOPT -o ncf -l no-symbols,clip,force -n "$program" -- "$@")"
 		err=$?
 		eval set -- "$opts"
 		while true; do case $1 in
 			-n|--no-symbols) symbols=""; shift ;;
 			-c|--clip) clip=1; shift ;;
+			-f|--force) force=1; shift ;;
 			--) shift; break ;;
 		esac done
 
 		if [[ $err -ne 0 || $# -ne 2 ]]; then
-			echo "Usage: $program $command [--no-symbols,-n] [--clip,-c] pass-name pass-length"
+			echo "Usage: $program $command [--no-symbols,-n] [--clip,-c] [--force,-f] pass-name pass-length"
 			exit 1
 		fi
 		path="$1"
@@ -308,8 +307,11 @@ case "$command" in
 			exit 1
 		fi
 		mkdir -p -v "$PREFIX/$(dirname "$path")"
-		pass="$(pwgen -s $symbols $length 1)"
 		passfile="$PREFIX/$path.gpg"
+
+		[[ $force -eq 0 && -e $passfile ]] && yesno "An entry already exists for $path. Overwrite it?"
+
+		pass="$(pwgen -s $symbols $length 1)"
 		$GPG -e -r "$ID" -o "$passfile" $GPG_OPTS <<<"$pass"
 		git_add_file "$passfile" "Added generated password for $path to store."
 		

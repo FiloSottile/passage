@@ -71,7 +71,7 @@ clipboard using
 .BR xclip (1)
 and then restore the clipboard after 45 seconds.
 .TP
-\fBinsert\fP [ \fI--no-echo\fP, \fI-n\fP | \fI--multiline\fP, \fI-m\fP ] [ \fI--force\fP, \fI-f\fP ]\fIpass-name\fP
+\fBinsert\fP [ \fI--no-echo\fP, \fI-n\fP | \fI--multiline\fP, \fI-m\fP ] [ \fI--force\fP, \fI-f\fP ] \fIpass-name\fP
 Insert a new password into the password store called \fIpass-name\fP. This will
 read the new password from standard in. If \fI--no-echo\fP or \fI-n\fP is specified, do
 disable keyboard echo when the password is entered and confirm the password by asking
@@ -88,7 +88,7 @@ ensure that temporary files are created in \fI/dev/shm\fP in order to avoid writ
 difficult-to-erase disk sectors. If \fI/dev/shm\fP is not accessible, fallback to
 the ordinary \fBTMPDIR\fP location, and print a warning.
 .TP
-\fBgenerate\fP [ \fI--no-symbols\fP, \fI-n\fP ] [ \fI--clip\fP, \fI-c\fP ] \fIpass-name pass-length\fP
+\fBgenerate\fP [ \fI--no-symbols\fP, \fI-n\fP ] [ \fI--clip\fP, \fI-c\fP ] [ \fI--force\fP, \fI-f\fP ] \fIpass-name pass-length\fP
 Generate a new password using
 .BR pwgen (1)
 of length \fIpass-length\fP and insert into \fIpass-name\fP. If \fI--no-symbols\fP or \fI-n\fP
@@ -96,9 +96,10 @@ is specified, do not use any non-alphanumeric characters in the generated passwo
 If \fI--clip\fP or \fI-c\fP is specified, do not print the password but instead copy
 it to the clipboard using
 .BR xclip (1)
-and then restore the clipboard after 45 seconds.
+and then restore the clipboard after 45 seconds. Prompt before overwriting an existing password,
+unless \fI--force\fP or \fI-f\fP is specified.
 .TP
-\fBrm\fP [ \fI--recursive\fP, \fI-r\fP ] [ \fI--force\fP, \fI-f\fP ]\fI pass-name\fP
+\fBrm\fP [ \fI--recursive\fP, \fI-r\fP ] [ \fI--force\fP, \fI-f\fP ] \fIpass-name\fP
 Remove the password named \fIpass-name\fP from the password store. This command is
 alternatively named \fBremove\fP or \fBdelete\fP. If \fI--recursive\fP or \fI-r\fP
 is specified, delete pass-name recursively if it is a directory. If \fI--force\fP
