@@ -10,7 +10,6 @@ _pass_complete_entries () {
 	autoexpand=${1:-0}
 
 	local IFS=$'\n'
-	local i=0
 	for item in $(compgen -f $prefix$cur); do
 		if [[ $item == $prefix.* ]]; then
 			continue
@@ -30,8 +29,7 @@ _pass_complete_entries () {
 			fi
 		done
 		item="${item%$suffix}"
-		COMPREPLY[$i]=$(printf "%q" "${item#$prefix}" )
-		(( i++ ))
+		COMPREPLY+=($(printf "%q" "${item#$prefix}" ))
 	done
 }
 
