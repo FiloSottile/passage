@@ -1,12 +1,13 @@
 # completion file for bash
 
-# (C) Copyright 2012 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
+# (C) Copyright 2012 Jason A. Donenfeld <Jason@zx2c4.com> and
+# Brian Mattern <rephorm@rephorm.com>. All Rights Reserved.
 # This is released under the GPLv2+. Please see COPYING for more information.
 
 _pass_complete_entries () {
-	prefix="$HOME/.password-store/"
+	prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store/}"
 	suffix=".gpg"
-  autoexpand=${1:-0}
+	autoexpand=${1:-0}
 
 	local IFS=$'\n'
 	local i=0
@@ -14,68 +15,72 @@ _pass_complete_entries () {
 		if [[ $item == $prefix.* ]]; then
 			continue
 		fi
-    # append / to directories and recursively expand single-entry dirs
-    while [[ -d $item ]]; do
-      item="$item/"
-      if [[ $autoexpand -eq 1 ]]; then
-        subitems=($(compgen -f $item))
-        if [[ ${#subitems[@]} -eq 1 ]]; then
-          item="${subitems[0]}"
-        else
-          break
-        fi
-      else
-        break
-      fi
-    done
+		# append / to directories and recursively expand single-entry dirs
+		while [[ -d $item ]]; do
+			item="$item/"
+			if [[ $autoexpand -eq 1 ]]; then
+				subitems=($(compgen -f $item))
+				if [[ ${#subitems[@]} -eq 1 ]]; then
+					item="${subitems[0]}"
+				else
+					break
+				fi
+			else
+				break
+			fi
+		done
 		item="${item%$suffix}"
-    COMPREPLY[$i]=$(printf "%q" "${item#$prefix}" )
+		COMPREPLY[$i]=$(printf "%q" "${item#$prefix}" )
 		(( i++ ))
 	done
 }
 
 _pass()
 {
-  local cur prev opts base
+	local cur prev opts base
 
-  COMPREPLY=()
-  cur="${COMP_WORDS[COMP_CWORD]}"
-  prev="${COMP_WORDS[COMP_CWORD-1]}"
+	COMPREPLY=()
+	cur="${COMP_WORDS[COMP_CWORD]}"
+	prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-  commands="init ls show insert generate edit rm git help version --version"
-  if [[ $COMP_CWORD -gt 1 ]]; then
-    case "${COMP_WORDS[1]}" in
-      init)
-        keys=$(gpg --list-keys |grep uid |sed 's/.*<\(.*\)>/\1/')
-        COMPREPLY+=($(compgen -W "${keys}" -- ${cur}))
-        ;;
-      ls)
-        _pass_complete_entries
-        ;;
-      show|-*)
-        COMPREPLY+=($(compgen -W "-c --clip" -- ${cur}))
-        _pass_complete_entries 1
-        ;;
-      insert)
-        COMPREPLY+=($(compgen -W "-n --no-echo -m --multiline -f --force" -- ${cur}))
-        _pass_complete_entries
-        ;;
-      generate)
-        COMPREPLY+=($(compgen -W "-n --no-symbols -c --clip" -- ${cur}))
-        _pass_complete_entries
-        ;;
-      edit)
-        _pass_complete_entries
-        ;;
-      rm)
-        COMPREPLY+=($(compgen -W "-r --recursive -f --force" -- ${cur}))
-        _pass_complete_entries
-        ;;
-    esac
-  else
-    COMPREPLY+=($(compgen -W "${commands}" -- ${cur}))
-    _pass_complete_entries 1
-  fi
+	commands="init ls show insert generate edit rm git help --help version --version"
+	if [[ $COMP_CWORD -gt 1 ]]; then
+		case "${COMP_WORDS[1]}" in
+			init)
+				COMPREPLY+=($(compgen -W "-e --reencrypt" -- ${cur}))
+				keys=$(gpg --list-keys |grep uid |sed 's/.*<\(.*\)>/\1/')
+				COMPREPLY+=($(compgen -W "${keys}" -- ${cur}))
+				;;
+			ls|list)
+				_pass_complete_entries
+				;;
+			show|-*)
+				COMPREPLY+=($(compgen -W "-c --clip" -- ${cur}))
+				_pass_complete_entries 1
+				;;
+			insert)
+				COMPREPLY+=($(compgen -W "-n --no-echo -m --multiline -f --force" -- ${cur}))
+				_pass_complete_entries
+				;;
+			generate)
+				COMPREPLY+=($(compgen -W "-n --no-symbols -c --clip -f --force" -- ${cur}))
+				_pass_complete_entries
+				;;
+			edit)
+				_pass_complete_entries
+				;;
+			rm|remove|delete)
+				COMPREPLY+=($(compgen -W "-r --recursive -f --force" -- ${cur}))
+				_pass_complete_entries
+				;;
+			git)
+				COMPREPLY+=($(compgen -W "init push pull config log reflog" -- ${cur}))
+				;;
+		esac
+	else
+		COMPREPLY+=($(compgen -W "${commands}" -- ${cur}))
+		_pass_complete_entries 1
+	fi
 }
 
 complete -o nospace -F _pass pass
