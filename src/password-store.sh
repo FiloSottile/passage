@@ -175,7 +175,9 @@ case "$command" in
 		;;
 esac
 
-if ! [[ -f $ID ]]; then
+if [[ -n $PASSWORD_STORE_KEY ]]; then
+	ID="$PASSWORD_STORE_KEY"
+elif ! [[ -f $ID ]]; then
 	echo "You must run:"
 	echo "    $program init your-gpg-id"
 	echo "before you may use the password store."

@@ -42,7 +42,9 @@ extended description using \fBinit\fP and
 .BR git (1).
 
 The \fBinit\fP command must be run before other commands in order to initialize
-the password store with the correct gpg key id.
+the password store with the correct gpg key id. Passwords are encrypting using
+the gpg key set with \fBinit\fP, unless the \fBPASSWORD_STORE_KEY\fP environment
+variable is set to an alternative key id.
 
 There is a corresponding bash completion script for use with tab completing
 password names in
