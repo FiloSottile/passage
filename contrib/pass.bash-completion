@@ -3,31 +3,79 @@
 # (C) Copyright 2012 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
 # This is released under the GPLv2+. Please see COPYING for more information.
 
-_pass()
-{
-	local cur prev prefix suffix
-	COMPREPLY=()
-	cur="${COMP_WORDS[COMP_CWORD]}"
-	prev="${COMP_WORDS[COMP_CWORD-1]}"
+_pass_complete_entries () {
 	prefix="$HOME/.password-store/"
 	suffix=".gpg"
+  autoexpand=${1:-0}
 
-	if [[ $prev == --* ]]; then
-		return 0
-	fi
-	
 	local IFS=$'\n'
 	local i=0
 	for item in $(compgen -f $prefix$cur); do
 		if [[ $item == $prefix.* ]]; then
 			continue
 		fi
-		if [[ -d $item ]]; then
-			item="$item/"
-		fi
+    # append / to directories and recursively expand single-entry dirs
+    while [[ -d $item ]]; do
+      item="$item/"
+      if [[ $autoexpand -eq 1 ]]; then
+        subitems=($(compgen -f $item))
+        if [[ ${#subitems[@]} -eq 1 ]]; then
+          item="${subitems[0]}"
+        else
+          break
+        fi
+      else
+        break
+      fi
+    done
 		item="${item%$suffix}"
-		COMPREPLY[$i]="${item#$prefix}" 
+    COMPREPLY[$i]=$(printf "%q" "${item#$prefix}" )
 		(( i++ ))
 	done
 }
-complete -o filenames -o nospace -F _pass pass
+
+_pass()
+{
+  local cur prev opts base
+
+  COMPREPLY=()
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+  commands="init ls show insert generate edit rm git help version --version"
+  if [[ $COMP_CWORD -gt 1 ]]; then
+    case "${COMP_WORDS[1]}" in
+      init)
+        keys=$(gpg --list-keys |grep uid |sed 's/.*<\(.*\)>/\1/')
+        COMPREPLY+=($(compgen -W "${keys}" -- ${cur}))
+        ;;
+      ls)
+        _pass_complete_entries
+        ;;
+      show|-*)
+        COMPREPLY+=($(compgen -W "-c --clip" -- ${cur}))
+        _pass_complete_entries 1
+        ;;
+      insert)
+        COMPREPLY+=($(compgen -W "-n --no-echo -m --multiline -f --force" -- ${cur}))
+        _pass_complete_entries
+        ;;
+      generate)
+        COMPREPLY+=($(compgen -W "-n --no-symbols -c --clip" -- ${cur}))
+        _pass_complete_entries
+        ;;
+      edit)
+        _pass_complete_entries
+        ;;
+      rm)
+        COMPREPLY+=($(compgen -W "-r --recursive -f --force" -- ${cur}))
+        _pass_complete_entries
+        ;;
+    esac
+  else
+    COMPREPLY+=($(compgen -W "${commands}" -- ${cur}))
+    _pass_complete_entries 1
+  fi
+}
+
+complete -o nospace -F _pass pass
