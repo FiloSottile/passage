@@ -30,8 +30,9 @@ usage() {
 	cat <<_EOF
 
 Usage:
-    $program init gpg-id
+    $program init [--reencrypt,-e] gpg-id
         Initialize new password storage and use gpg-id for encryption.
+        Optionally reencrypt existing passwords using new gpg-id.
     $program [ls] [subfolder]
         List passwords.
     $program [show] [--clip,-c] pass-name
@@ -134,15 +135,34 @@ fi
 
 case "$command" in
 	init)
+		reencrypt=0
+
+		opts="$($GETOPT -o e -l reencrypt -n "$program" -- "$@")"
+		err=$?
+		eval set -- "$opts"
+		while true; do case $1 in
+			-e|--reencrypt) reencrypt=1; shift ;;
+			--) shift; break ;;
+		esac done
+
 		if [[ $# -ne 1 ]]; then
-			echo "Usage: $program $command gpg-id"
+			echo "Usage: $program $command [--reencrypt,-e] gpg-id"
 			exit 1
 		fi
+
 		gpg_id="$1"
 		mkdir -v -p "$PREFIX"
 		echo "$gpg_id" > "$ID"
 		echo "Password store initialized for $gpg_id."
 		git_add_file "$ID" "Set GPG id to $gpg_id."
+
+		if [[ $reencrypt -eq 1 ]]; then
+			find "$PREFIX" -iname '*.gpg' | while read passfile; do
+				$GPG -d $GPG_OPTS "$passfile" | $GPG -e -r "$gpg_id" -o "$passfile.new" $GPG_OPTS &&
+				mv -v "$passfile.new" "$passfile"
+			done
+			git_add_file "$PREFIX" "Reencrypted entire store using new GPG id $gpg_id."
+		fi
 		exit 0
 		;;
 	help|--help)

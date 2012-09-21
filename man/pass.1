@@ -51,11 +51,15 @@ password names in
 .SH COMMANDS
 
 .TP
-\fBinit\fP \fIgpg-id\fP
+\fBinit\fP [ \fI--reencrypt\fP, \fI-e\fP ] \fIgpg-id\fP
 Initialize new password storage and use
 .I gpg-id
 for encryption. This command must be run first before a password store can be
-used.
+used. If \fI--reencrypt\fP or \fI-e\fP is specified, reencrypt all existing
+passwords in the password store using \fIgpg-id\fP. Note that use of
+.BR gpg-agent (1)
+is recommended so that the batch decryption does not require as much user
+intervention.
 .TP
 \fBls\fP \fIsubfolder\fP
 List names of passwords inside the tree at
