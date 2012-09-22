@@ -10,7 +10,6 @@ _pass_complete_entries () {
 	autoexpand=${1:-0}
 
 	local IFS=$'\n'
-	local i=0
 	for item in $(compgen -f $prefix$cur); do
 		if [[ $item == $prefix.* ]]; then
 			continue
@@ -30,28 +29,28 @@ _pass_complete_entries () {
 			fi
 		done
 		item="${item%$suffix}"
-		COMPREPLY[$i]=$(printf "%q" "${item#$prefix}" )
-		(( i++ ))
+		item="${item// /\ }"
+		item="${item//'/\'}"
+		item="${item//\(/\(}"
+		item="${item//)/\)}"
+		item="${item//&/\&}"
+		COMPREPLY+=("${item#$prefix}")
 	done
 }
 
 _pass()
 {
-	local cur prev opts base
-
 	COMPREPLY=()
-	cur="${COMP_WORDS[COMP_CWORD]}"
-	prev="${COMP_WORDS[COMP_CWORD-1]}"
-
-	commands="init ls show insert generate edit rm git help --help version --version"
+	local cur="${COMP_WORDS[COMP_CWORD]}"
+	local commands="init ls show insert generate edit rm git help --help version --version"
 	if [[ $COMP_CWORD -gt 1 ]]; then
 		case "${COMP_WORDS[1]}" in
 			init)
 				COMPREPLY+=($(compgen -W "-e --reencrypt" -- ${cur}))
-				keys=$(gpg --list-keys |grep uid |sed 's/.*<\(.*\)>/\1/')
+				local keys=$(gpg --list-keys |grep uid |sed 's/.*<\(.*\)>/\1/')
 				COMPREPLY+=($(compgen -W "${keys}" -- ${cur}))
 				;;
-			ls|list)
+			ls|list|edit)
 				_pass_complete_entries
 				;;
 			show|-*)
@@ -64,9 +63,6 @@ _pass()
 				;;
 			generate)
 				COMPREPLY+=($(compgen -W "-n --no-symbols -c --clip -f --force" -- ${cur}))
-				_pass_complete_entries
-				;;
-			edit)
 				_pass_complete_entries
 				;;
 			rm|remove|delete)
