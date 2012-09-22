@@ -19,8 +19,7 @@ pass - stores, retrieves, generates, and synchronizes passwords securely
 is a very simple password store that keeps passwords inside 
 .BR gpg (1)
 encrypted files inside a simple directory tree residing at 
-.IR $HOME/.password-store ,
-or the environment variable \fBPASSWORD_STORE_DIR\fP if it is set.
+.IR ~/.password-store .
 The
 .B pass
 utility provides a series of commands for manipulating the password store,
@@ -43,8 +42,7 @@ extended description using \fBinit\fP and
 
 The \fBinit\fP command must be run before other commands in order to initialize
 the password store with the correct gpg key id. Passwords are encrypting using
-the gpg key set with \fBinit\fP, unless the \fBPASSWORD_STORE_KEY\fP environment
-variable is set to an alternative key id.
+the gpg key set with \fBinit\fP.
 
 There is a corresponding bash completion script for use with tab completing
 password names in
@@ -318,11 +316,28 @@ To kexec.com:pass-store
 
 .TP
 .B ~/.password-store
-The password storage directory.
+The default password storage directory.
 .TP
 .B ~/.password-store/.gpg-id
-Contains the gpg key identification used for encryption and decryption. This should
-be set using the \fBinit\fP command.
+Contains the default gpg key identification used for encryption and decryption.
+This should be set using the \fBinit\fP command.
+
+.SH ENVIRONMENT VARIABLES
+
+.TP
+.I PASSWORD_STORE_DIR
+Overrides the default password storage directory.
+.TP
+.I PASSWORD_STORE_KEY
+Overrides the default gpg key identification set by \fBinit\fP.
+.TP
+.I PASSWORD_STORE_GIT
+Overrides the default root of the git repository, which is helpful if
+\fIPASSWORD_STORE_DIR\fP is temporarily set to a sub-directory of the default
+password store.
+.TP
+.I EDITOR
+The location of the text editor used by \fBedit\fP.
 
 .SH SEE ALSO
 .BR gpg (1),

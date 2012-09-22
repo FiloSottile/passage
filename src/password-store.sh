@@ -7,11 +7,11 @@ umask 077
 
 PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 ID="$PREFIX/.gpg-id"
-GIT_DIR="$PREFIX/.git"
+GIT_DIR="${PASSWORD_STORE_GIT:-$PREFIX}/.git"
 GPG_OPTS="--quiet --yes --batch"
 
 export GIT_DIR
-export GIT_WORK_TREE="$PREFIX"
+export GIT_WORK_TREE="${PASSWORD_STORE_GIT:-$PREFIX}"
 
 version() {
 	cat <<_EOF
