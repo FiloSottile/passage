@@ -1,3 +1,6 @@
+# Copyright (C) 2012 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
+# This file is licensed under the GPLv2+. Please see COPYING for more information.
+
 clip() {
 	before="$(pbpaste | openssl base64)"
 	echo -n "$1" | pbcopy

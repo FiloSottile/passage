@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+# Copyright (C) 2012 Jeffrey Ratcliffe <jeffrey.ratcliffe@gmail.com>. All Rights Reserved.
+# This file is licensed under the GPLv2+. Please see COPYING for more information.
+
 use warnings;
 use strict;
 use XML::Simple;

@@ -1,9 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# (C) Copyright 2012 Juhamatti Niemelä <iiska@iki.fi>. All Rights
-# Reserved. This file is licensed under the GPLv2+. Please see COPYING
-# for more information.
+# Copyright (C) 2012 Juhamatti Niemelä <iiska@iki.fi>. All Rights Reserved.
+# This file is licensed under the GPLv2+. Please see COPYING for more information.
 
 import sys
 

@@ -1,12 +1,8 @@
 #compdef pass
 
-# This file is under the GPLv2+ license.
-# Heavily based on http://zsh.sf.net/Guide/zshguide06.html#l177
-# And Frédéric Perrin article http://tar-jx.bz/notes/zsh-completion.html
-# Originally by Johan Venant, September 2012
-# Modified substantially by Brian Mattern, September 2012
-
-
+# Copyright (C) 2012 Johan Venant <jvenant@invicem.pro> and
+# Brian Mattern <rephorm@rephorm.com>. All Rights Reserved.
+# This file is licensed under the GPLv2+. Please see COPYING for more information.
 
 _pass () {
 	local cmd

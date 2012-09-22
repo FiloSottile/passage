@@ -1,8 +1,8 @@
 # completion file for bash
 
-# (C) Copyright 2012 Jason A. Donenfeld <Jason@zx2c4.com> and
+# Copyright (C) 2012 Jason A. Donenfeld <Jason@zx2c4.com> and
 # Brian Mattern <rephorm@rephorm.com>. All Rights Reserved.
-# This is released under the GPLv2+. Please see COPYING for more information.
+# This file is licensed under the GPLv2+. Please see COPYING for more information.
 
 _pass_complete_entries () {
 	prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store/}"
