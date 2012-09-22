@@ -349,13 +349,13 @@ case "$command" in
 		;;
 	delete|rm|remove)
 		recursive=""
-		force="-i"
+		force=0
 		opts="$($GETOPT -o rf -l recursive,force -n "$program" -- "$@")"
 		err=$?
 		eval set -- "$opts"
 		while true; do case $1 in
 			-r|--recursive) recursive="-r"; shift ;;
-			-f|--force) force="-f"; shift ;;
+			-f|--force) force=1; shift ;;
 			--) shift; break ;;
 		esac done
 		if [[ $# -ne 1 ]]; then
@@ -364,7 +364,7 @@ case "$command" in
 		fi
 		path="$1"
 
-		passfile="$PREFIX/$path"
+		passfile="$PREFIX/${path%/}"
 		if ! [[ -d $passfile ]]; then
 			passfile="$PREFIX/$path.gpg"
 			if ! [[ -f $passfile ]]; then
@@ -372,9 +372,12 @@ case "$command" in
 				exit 1
 			fi
 		fi
-		rm $recursive $force -v "$passfile"
+
+		[[ $force -eq 1 ]] || yesno "Are you sure you would like to delete $path?"
+
+		rm $recursive -f -v "$passfile"
 		if [[ -d $GIT_DIR && ! -e $passfile ]]; then
-			git rm -r "$passfile"
+			git rm -qr "$passfile"
 			git commit -m "Removed $path from store."
 		fi
 		;;
