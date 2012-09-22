@@ -15,20 +15,23 @@ _pass_complete_entries () {
 		if [[ $item == $prefix.* ]]; then
 			continue
 		fi
-		# append / to directories and recursively expand single-entry dir
-		while [[ -d $item ]]; do
-			item="$item/"
-			if [[ ${#items[@]} -eq 1 && $autoexpand -eq 1 ]]; then
-				local subitems=($(compgen -f $item))
+
+		# if there is a unique match, and it is a directory with one entry
+		# autocomplete the subentry as well (recursively)
+		if [[ ${#items[@]} -eq 1 && $autoexpand -eq 1 ]]; then
+			while [[ -d $item ]]; do
+				local subitems=($(compgen -f "$item/"))
 				if [[ ${#subitems[@]} -eq 1 ]]; then
 					item="${subitems[0]}"
 				else
 					break
 				fi
-			else
-				break
-			fi
-		done
+			done
+		fi
+
+		# append / to directories
+		[[ -d $item ]] && item="$item/"
+
 		item="${item%$suffix}"
 		COMPREPLY+=("${item#$prefix}")
 	done
