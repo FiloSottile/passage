@@ -1,7 +1,10 @@
 #compdef pass
 
-# Copyright (C) 2012 Johan Venant <jvenant@invicem.pro> and
-# Brian Mattern <rephorm@rephorm.com>. All Rights Reserved.
+# Copyright (C) 2012:
+#    Johan Venant <jvenant@invicem.pro>
+#    Brian Mattern <rephorm@rephorm.com>
+#    Jason A. Donenfeld <Jason@zx2c4.com>.
+# All Rights Reserved.
 # This file is licensed under the GPLv2+. Please see COPYING for more information.
 
 _pass () {
@@ -49,30 +52,36 @@ _pass () {
 					_pass_complete_entries_with_subdirs
 				;;
 			git)
-				_values 'subcommands' \
-					"init[Initialize git repository]" \
-					"push[Push to remote repository]" \
-					"pull[Pull from remote repository]" \
-					"config[Show git config]" \
-					"log[Show git log]" \
-					"reflog[Show git reflog]"
+				local -a subcommands
+				subcommands=(
+					"init:Initialize git repository"
+					"push:Push to remote repository"
+					"pull:Pull from remote repository"
+					"config:Show git config"
+					"log:Show git log"
+					"reflog:Show git reflog"
+				)
+				_describe -t commands 'pass git' subcommands
 				;;
 			show|*)
 				_pass_cmd_show
 				;;
 		esac
 	else
-		_values 'command' \
-			"init[Initialize new password storage]" \
-			"ls[List passwords]" \
-			"show[Decrypt and print a password]" \
-			"insert[Insert a new password]" \
-			"generate[Generate a new password using pwgen]" \
-			"edit[Edit a password with \$EDITOR]" \
-			"rm[Remove the password]" \
-			"git[Call git on the password store]" \
-			"version[Output version information]" \
-			"help[Output help message]"
+		local -a subcommands
+		subcommands=(
+			"init:Initialize new password storage"
+			"ls:List passwords"
+			"show:Decrypt and print a password"
+			"insert:Insert a new password"
+			"generate:Generate a new password using pwgen"
+			"edit:Edit a password with \$EDITOR"
+			"rm:Remove the password"
+			"git:Call git on the password store"
+			"version:Output version information"
+			"help:Output help message"
+		)
+		_describe -t commands 'pass' subcommands
 		_arguments : \
 			"--version[Output version information]" \
 			"--help[Output help message]"
