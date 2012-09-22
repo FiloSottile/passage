@@ -37,6 +37,13 @@ _pass_complete_entries () {
 	done
 }
 
+_pass_complete_keys () {
+	local IFS=$'\n'
+	# Extract names and email addresses from gpg --list-keys
+	local keys="$(gpg --list-keys | grep uid | sed -e 's/uid *\([^<]*\)\(<\(.*\)>\)\?/\1\n\3/' | sed -e 's/\(^ *\| *$\)//g')"
+	COMPREPLY+=($(compgen -W "${keys}" -- ${cur}))
+}
+
 _pass()
 {
 	COMPREPLY=()
@@ -46,8 +53,7 @@ _pass()
 		case "${COMP_WORDS[1]}" in
 			init)
 				COMPREPLY+=($(compgen -W "-e --reencrypt" -- ${cur}))
-				local keys=$(gpg --list-keys |grep uid |sed 's/.*<\(.*\)>/\1/')
-				COMPREPLY+=($(compgen -W "${keys}" -- ${cur}))
+				_pass_complete_keys
 				;;
 			ls|list|edit)
 				_pass_complete_entries
