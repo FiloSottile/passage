@@ -8,7 +8,8 @@ The makefile is aware of the following environment variables:
 
 PREFIX      default: /usr
 DESTDIR     default: 
-BINDIR	    default: $(PREFIX)/bin
+BINDIR      default: $(PREFIX)/bin
+LIBDIR      default: $(PREFIX)/lib
 MANDIR      default: $(PREFIX)/share/man
 SYSCONFDIR  default: /etc
 
