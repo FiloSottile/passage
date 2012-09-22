@@ -85,12 +85,12 @@ before overwriting an existing password, unless \fI--force\fP or \fI-f\fP is spe
 .TP
 \fBedit\fP \fIpass-name\fP
 Insert a new password or edit an existing password using the default text editor specified
-by the environment variable \fBEDITOR\fP or using
+by the environment variable \fIEDITOR\fP or using
 .BR vi (1)
 as a fallback. This mode makes use of temporary files for editing, but care is taken to
 ensure that temporary files are created in \fI/dev/shm\fP in order to avoid writing to
 difficult-to-erase disk sectors. If \fI/dev/shm\fP is not accessible, fallback to
-the ordinary \fBTMPDIR\fP location, and print a warning.
+the ordinary \fITMPDIR\fP location, and print a warning.
 .TP
 \fBgenerate\fP [ \fI--no-symbols\fP, \fI-n\fP ] [ \fI--clip\fP, \fI-c\fP ] [ \fI--force\fP, \fI-f\fP ] \fIpass-name pass-length\fP
 Generate a new password using
