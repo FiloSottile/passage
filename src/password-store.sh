@@ -179,7 +179,7 @@ esac
 
 if [[ -n $PASSWORD_STORE_KEY ]]; then
 	ID="$PASSWORD_STORE_KEY"
-elif ! [[ -f $ID ]]; then
+elif [[ ! -f $ID ]]; then
 	echo "You must run:"
 	echo "    $program init your-gpg-id"
 	echo "before you may use the password store."
@@ -217,11 +217,11 @@ case "$command" in
 			tree --noreport "$PREFIX/$path" | tail -n +2 | sed 's/\(.*\)\.gpg$/\1/'
 		else
 			passfile="$PREFIX/$path.gpg"
-			if ! [[ -f $passfile ]]; then
+			if [[ ! -f $passfile ]]; then
 				echo "$path is not in the password store."
 				exit 1
 			fi
-			if [ $clip -eq 0 ]; then
+			if [[ $clip -eq 0 ]]; then
 				exec $GPG -d $GPG_OPTS "$passfile"
 			else
 				clip "$($GPG -d $GPG_OPTS "$passfile" | head -n 1)" "$path"
@@ -326,7 +326,7 @@ case "$command" in
 		fi
 		path="$1"
 		length="$2"
-		if ! [[ $length =~ ^[0-9]+$ ]]; then
+		if [[ ! $length =~ ^[0-9]+$ ]]; then
 			echo "pass-length \"$length\" must be a number."
 			exit 1
 		fi
@@ -340,7 +340,7 @@ case "$command" in
 		$GPG -e -r "$ID" -o "$passfile" $GPG_OPTS <<<"$pass"
 		git_add_file "$passfile" "Added generated password for $path to store."
 		
-		if [ $clip -eq 0 ]; then
+		if [[ $clip -eq 0 ]]; then
 			echo "The generated password to $path is:"
 			echo "$pass"
 		else
@@ -365,9 +365,9 @@ case "$command" in
 		path="$1"
 
 		passfile="$PREFIX/${path%/}"
-		if ! [[ -d $passfile ]]; then
+		if [[ ! -d $passfile ]]; then
 			passfile="$PREFIX/$path.gpg"
-			if ! [[ -f $passfile ]]; then
+			if [[ ! -f $passfile ]]; then
 				echo "$path is not in the password store."
 				exit 1
 			fi
