@@ -10,15 +10,16 @@ _pass_complete_entries () {
 	autoexpand=${1:-0}
 
 	local IFS=$'\n'
-	for item in $(compgen -f $prefix$cur); do
+	local items=($(compgen -f $prefix$cur))
+	for item in ${items[@]}; do
 		if [[ $item == $prefix.* ]]; then
 			continue
 		fi
-		# append / to directories and recursively expand single-entry dirs
+		# append / to directories and recursively expand single-entry dir
 		while [[ -d $item ]]; do
 			item="$item/"
-			if [[ $autoexpand -eq 1 ]]; then
-				subitems=($(compgen -f $item))
+			if [[ ${#items[@]} -eq 1 && $autoexpand -eq 1 ]]; then
+				local subitems=($(compgen -f $item))
 				if [[ ${#subitems[@]} -eq 1 ]]; then
 					item="${subitems[0]}"
 				else
@@ -29,11 +30,6 @@ _pass_complete_entries () {
 			fi
 		done
 		item="${item%$suffix}"
-		item="${item// /\ }"
-		item="${item//'/\'}"
-		item="${item//\(/\(}"
-		item="${item//)/\)}"
-		item="${item//&/\&}"
 		COMPREPLY+=("${item#$prefix}")
 	done
 }
@@ -79,4 +75,4 @@ _pass()
 	fi
 }
 
-complete -o nospace -F _pass pass
+complete -o filenames -o nospace -F _pass pass
