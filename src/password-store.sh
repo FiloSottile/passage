@@ -57,6 +57,8 @@ Usage:
         Show this text.
     $program version
         Show version information.
+
+More information may be found in the pass(1) man page.
 _EOF
 }
 is_command() {
