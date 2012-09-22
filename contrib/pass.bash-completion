@@ -40,7 +40,7 @@ _pass_complete_entries () {
 _pass_complete_keys () {
 	local IFS=$'\n'
 	# Extract names and email addresses from gpg --list-keys
-	local keys="$(gpg --list-keys | grep uid | sed -e 's/uid *\([^<]*\)\(<\(.*\)>\)\?/\1\n\3/' | sed -e 's/\(^ *\| *$\)//g')"
+	local keys="$(gpg --list-secret-keys --with-colons | cut -d : -f 10 | sort -u | sed '/^$/d')"
 	COMPREPLY+=($(compgen -W "${keys}" -- ${cur}))
 }
 
