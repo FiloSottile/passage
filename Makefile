@@ -30,10 +30,10 @@ ifneq ($(strip $(wildcard $(PLATFORMFILE))),)
 install-platform:
 	@install -m 0644 -v "$(PLATFORMFILE)" "$(DESTDIR)$(LIBDIR)/password-store.platform.sh"
 #	The -i "" doesn't work on GNU, where the extra argument isn't needed. Fortuantely, platform file is for non-GNU only.
-	sed -i "" 's:.*platform-defined-functions.*:source $(DESTDIR)$(LIBDIR)/password-store.platform.sh:' $(DESTDIR)$(BINDIR)/pass
+	sed -i "" 's:.*platform-defined-functions.*:source $(DESTDIR)$(LIBDIR)/password-store.platform.sh:' "$(DESTDIR)$(BINDIR)/pass"
 else
 install-platform:
 endif
 
 uninstall:
-	@rm -vf $(DESTDIR)$(BINDIR)/pass $(DESTDIR)$(MANDIR)/man1/pass.1 $(DESTDIR)$(SYSCONFDIR)/bash_completion.d/password-store $(DESTDIR)$(LIBDIR)/password-store.platform.sh
+	@rm -vf "$(DESTDIR)$(BINDIR)/pass" "$(DESTDIR)$(MANDIR)/man1/pass.1" "$(DESTDIR)$(SYSCONFDIR)/bash_completion.d/password-store" "$(DESTDIR)$(LIBDIR)/password-store.platform.sh"

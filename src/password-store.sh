@@ -209,7 +209,7 @@ case "$command" in
 
 		path="$1"
 		if [[ -d $PREFIX/$path ]]; then
-			if [[ $path == "" ]]; then
+			if [[ -z $path ]]; then
 				echo "Password Store"
 			else
 				echo $path
@@ -350,6 +350,7 @@ case "$command" in
 	delete|rm|remove)
 		recursive=""
 		force=0
+
 		opts="$($GETOPT -o rf -l recursive,force -n "$program" -- "$@")"
 		err=$?
 		eval set -- "$opts"

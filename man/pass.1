@@ -1,4 +1,4 @@
-.TH PASS 1 "2012 Sept 2" ZX2C4 "Password Store"
+.TH PASS 1 "2012 Sept 24" ZX2C4 "Password Store"
 
 .SH NAME
 pass - stores, retrieves, generates, and synchronizes passwords securely
@@ -36,8 +36,8 @@ the valid commands listed below.
 Several of the commands below rely on or provide additional functionality if
 the password store directory is also a git repository. If the password store
 directory is a git repository, all password store modification commands will
-cause a corresponding git commit. See the \fIEXAMPLES\fP section for an
-extended description using \fBinit\fP and
+cause a corresponding git commit. See the \fIEXTENDED GIT EXAMPLE\fP section
+for a detailed description using \fBinit\fP and
 .BR git (1).
 
 The \fBinit\fP command must be run before other commands in order to initialize
@@ -112,7 +112,9 @@ or \fI-f\fP is specified, do not interactively prompt before removal.
 \fBgit\fP \fIgit-command-args\fP...
 If the password store is a git repository, pass \fIgit-command-args\fP as arguments to
 .BR git (1)
-using the password store as the git repository.
+using the password store as the git repository. If \fIgit-command-args\fP is \fBinit\fP,
+in addition to initializing the git repository, add the current contents of the password
+store to the repository in an initial commit.
 .TP
 \fBhelp\fP
 Show usage message.

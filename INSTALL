@@ -12,4 +12,3 @@ BINDIR      default: $(PREFIX)/bin
 LIBDIR      default: $(PREFIX)/lib
 MANDIR      default: $(PREFIX)/share/man
 SYSCONFDIR  default: /etc
-
