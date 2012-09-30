@@ -15,5 +15,4 @@ tmpdir() {
 	fi
 }
 
-GPG="gpg2"
 GETOPT="/usr/local/bin/getopt"

@@ -31,7 +31,7 @@ function __fish_pass_uses_command
 end
 
 function __fish_pass_print_gpg_keys
-    gpg --list-keys | grep uid | sed 's/.*<\(.*\)>/\1/'
+    gpg2 --list-keys | grep uid | sed 's/.*<\(.*\)>/\1/'
 end
 function __fish_pass_print_entry_dirs
     set -l prefix (__fish_pass_get_prefix)

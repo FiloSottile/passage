@@ -31,5 +31,4 @@ tmpdir() {
 	mount -t hfs -o noatime -o nobrowse "$ramdisk_dev" "$tmp_dir" || exit 1
 }
 
-GPG="gpg2"
 GETOPT="$(brew --prefix gnu-getopt 2>/dev/null || echo /usr/local)/bin/getopt"
