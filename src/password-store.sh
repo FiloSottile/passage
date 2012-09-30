@@ -223,7 +223,9 @@ case "$command" in
 			if [[ $clip -eq 0 ]]; then
 				exec gpg2 -d $GPG_OPTS "$passfile"
 			else
-				clip "$(gpg2 -d $GPG_OPTS "$passfile" | head -n 1)" "$path"
+				pass="$(gpg2 -d $GPG_OPTS "$passfile" | head -n 1)"
+				[[ -n $pass ]] || exit 1
+				clip "$pass" "$path"
 			fi
 		fi
 		;;
