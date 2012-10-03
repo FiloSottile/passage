@@ -69,7 +69,7 @@ complete -c $PROG -f -A -n '__fish_pass_needs_command' -a ls -d 'Command: list p
 complete -c $PROG -f -A -n '__fish_pass_uses_command ls' -a "(__fish_pass_print_entry_dirs)"
 
 complete -c $PROG -f -A -n '__fish_pass_needs_command' -a insert -d 'Command: insert new password'
-complete -c $PROG -f -A -n '__fish_pass_uses_command insert' -s n -l no-echo -d 'Do not echo the password on console'
+complete -c $PROG -f -A -n '__fish_pass_uses_command insert' -s e -l echo -d 'Echo the password on console'
 complete -c $PROG -f -A -n '__fish_pass_uses_command insert' -s m -l multiline -d 'Provide multiline password entry'
 complete -c $PROG -f -A -n '__fish_pass_uses_command insert' -s f -l force -d 'Do not prompt before overwritting'
 complete -c $PROG -f -A -n '__fish_pass_uses_command insert' -a "(__fish_pass_print_entry_dirs)"
