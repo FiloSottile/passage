@@ -63,7 +63,7 @@ _pass()
 				_pass_complete_entries 1
 				;;
 			insert)
-				COMPREPLY+=($(compgen -W "-n --no-echo -m --multiline -f --force" -- ${cur}))
+				COMPREPLY+=($(compgen -W "-e --echo -m --multiline -f --force" -- ${cur}))
 				_pass_complete_entries
 				;;
 			generate)

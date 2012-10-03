@@ -29,8 +29,8 @@ _pass () {
 				;;
 			insert)
 				_arguments : \
-					"-n[no console output]" \
-					"--no-echo[no console output]" \
+					"-e[echo password to console]" \
+					"--echo[echo password to console]" \
 					"-m[multiline]" \
 					"--multiline[multiline]"
 				_pass_complete_entries_with_subdirs
