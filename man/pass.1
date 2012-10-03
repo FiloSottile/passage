@@ -75,9 +75,9 @@ clipboard using
 .BR xclip (1)
 and then restore the clipboard after 45 seconds.
 .TP
-\fBinsert\fP [ \fI--no-echo\fP, \fI-n\fP | \fI--multiline\fP, \fI-m\fP ] [ \fI--force\fP, \fI-f\fP ] \fIpass-name\fP
+\fBinsert\fP [ \fI--echo\fP, \fI-e\fP | \fI--multiline\fP, \fI-m\fP ] [ \fI--force\fP, \fI-f\fP ] \fIpass-name\fP
 Insert a new password into the password store called \fIpass-name\fP. This will
-read the new password from standard in. If \fI--no-echo\fP or \fI-n\fP is specified, do
+read the new password from standard in. If \fI--echo\fP or \fI-e\fP is \fInot\fPspecified,
 disable keyboard echo when the password is entered and confirm the password by asking
 for it twice. If \fI--multiline\fP or \fI-m\fP is specified, lines will be read until
 EOF or Ctrl+D is reached. Otherwise, only a single line from standard in is read. Prompt
