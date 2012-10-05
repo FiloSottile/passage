@@ -211,7 +211,7 @@ case "$command" in
 			if [[ -z $path ]]; then
 				echo "Password Store"
 			else
-				echo $path
+				echo "${path%\/}"
 			fi
 			tree --noreport "$PREFIX/$path" | tail -n +2 | sed 's/\(.*\)\.gpg$/\1/'
 		else
