@@ -36,7 +36,7 @@
 # Fire up a terminal and run the script, passing the file you saved as an argument.
 # It should look something like this:
 #
-# ./lastpass_importer.rb path/to/passwords_file
+# ./lastpass2pass.rb path/to/passwords_file
 
 
 # Set this variable to place all uncategorised records into a particular group
@@ -69,7 +69,7 @@ end
 
 # Check for a filename
 if ARGV.empty?
-  puts "Usage: lastpass_importer.rb <file>      import records from specified file"
+  puts "Usage: #{$0} <file>      import records from specified file"
   exit 0
 end
 
