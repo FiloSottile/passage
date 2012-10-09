@@ -244,7 +244,7 @@ case "$command" in
 			--) shift; break ;;
 		esac done
 
-		if [[ $err -ne 0 || $# -ne 1 ]]; then
+		if [[ $err -ne 0 || ( $multiline -eq 1 && $noecho -eq 0 ) || $# -ne 1 ]]; then
 			echo "Usage: $program $command [--echo,-e | --multiline,-m] [--force,-f] pass-name"
 			exit 1
 		fi
