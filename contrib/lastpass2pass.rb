@@ -1,25 +1,7 @@
 #!/usr/bin/env ruby
 
-# Copyright (C) Alex Sayers <alex.sayers@gmail.com>. All Rights Reserved. 
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met: 
-# 
-# 1. Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer. 
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-#    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution. 
-# 
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# Copyright (C) 2012 Alex Sayers <alex.sayers@gmail.com>. All Rights Reserved.
+# This file is licensed under the GPLv2+. Please see COPYING for more information.
 
 # LastPass Importer
 #
@@ -36,11 +18,32 @@
 # Fire up a terminal and run the script, passing the file you saved as an argument.
 # It should look something like this:
 #
-# ./lastpass2pass.rb path/to/passwords_file
+#$ ./lastpass2pass.rb path/to/passwords_file.csv
 
+# Parse flags
+require 'optparse'
+optparse = OptionParser.new do |opts|
+  opts.banner = "Usage: #{$0} [options] filename"
 
-# Set this variable to place all uncategorised records into a particular group
-DEFAULT_GROUP = ""
+  FORCE = false
+  opts.on("-f", "--force", "Overwrite existing records") { FORCE = true }
+  DEFAULT_GROUP = ""
+  opts.on("-d", "--default GROUP", "Place uncategorised records into GROUP") { |group| DEFAULT_GROUP = group }
+  opts.on("-h", "--help", "Display this screen") { puts opts; exit }
+
+  opts.parse!
+end
+
+# Check for a filename
+if ARGV.empty?
+  puts optparse
+  exit 0
+end
+
+# Get filename of csv file
+filename = ARGV.join(" ")
+puts "Reading '#{filename}'..."
+
 
 class Record
   def initialize name, url, username, password, extra, grouping, fav
@@ -66,16 +69,6 @@ class Record
     return s
   end
 end
-
-# Check for a filename
-if ARGV.empty?
-  puts "Usage: #{$0} <file>      import records from specified file"
-  exit 0
-end
-
-# Get filename of csv file
-filename = ARGV.join(" ")
-puts "Reading '#{filename}'..."
 
 # Extract individual records
 entries = []
@@ -118,7 +111,7 @@ successful = 0
 errors = []
 records.each do |r|
   print "Creating record #{r.name}..."
-  IO.popen("pass insert -m '#{r.name}' > /dev/null", 'w') do |io|
+  IO.popen("pass insert -m#{"f" if FORCE} '#{r.name}' > /dev/null", 'w') do |io|
     io.puts r
   end
   if $? == 0
