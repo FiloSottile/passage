@@ -261,11 +261,11 @@ case "$command" in
 			gpg2 -e -r "$ID" -o "$passfile" $GPG_OPTS
 		elif [[ $noecho -eq 1 ]]; then
 			while true; do
-				read -p "Enter password for $path: " -s password
+				read -r -p "Enter password for $path: " -s password
 				echo
-				read -p "Retype password for $path: " -s password_again
+				read -r -p "Retype password for $path: " -s password_again
 				echo
-				if [[ $password == $password_again ]]; then
+				if [[ $password == "$password_again" ]]; then
 					gpg2 -e -r "$ID" -o "$passfile" $GPG_OPTS <<<"$password"
 					break
 				else
@@ -273,7 +273,7 @@ case "$command" in
 				fi
 			done
 		else
-			read -p "Enter password for $path: " -e password
+			read -r -p "Enter password for $path: " -e password
 			gpg2 -e -r "$ID" -o "$passfile" $GPG_OPTS <<<"$password"
 		fi
 		git_add_file "$passfile" "Added given password for $path to store."
