@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2012 Juhamatti Niemelä <iiska@iki.fi>. All Rights Reserved.
