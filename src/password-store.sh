@@ -213,7 +213,7 @@ case "$command" in
 			else
 				echo "${path%\/}"
 			fi
-			tree --noreport "$PREFIX/$path" | tail -n +2 | sed 's/\(.*\)\.gpg$/\1/'
+			tree -l --noreport "$PREFIX/$path" | tail -n +2 | sed 's/\(.*\)\.gpg$/\1/'
 		else
 			passfile="$PREFIX/$path.gpg"
 			if [[ ! -f $passfile ]]; then
