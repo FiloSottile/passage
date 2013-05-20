@@ -207,19 +207,8 @@ case "$command" in
 		fi
 
 		path="$1"
-		if [[ -d $PREFIX/$path ]]; then
-			if [[ -z $path ]]; then
-				echo "Password Store"
-			else
-				echo "${path%\/}"
-			fi
-			tree -l --noreport "$PREFIX/$path" | tail -n +2 | sed 's/\.gpg$//'
-		else
-			passfile="$PREFIX/$path.gpg"
-			if [[ ! -f $passfile ]]; then
-				echo "$path is not in the password store."
-				exit 1
-			fi
+		passfile="$PREFIX/$path.gpg"
+		if [[ -f $passfile ]]; then
 			if [[ $clip -eq 0 ]]; then
 				exec gpg2 -d $GPG_OPTS "$passfile"
 			else
@@ -227,6 +216,16 @@ case "$command" in
 				[[ -n $pass ]] || exit 1
 				clip "$pass" "$path"
 			fi
+		elif [[ -d $PREFIX/$path ]]; then
+			if [[ -z $path ]]; then
+				echo "Password Store"
+			else
+				echo "${path%\/}"
+			fi
+			tree -l --noreport "$PREFIX/$path" | tail -n +2 | sed 's/\.gpg$//'
+		else
+			echo "$path is not in the password store."
+			exit 1
 		fi
 		;;
 	insert)
