@@ -3,7 +3,6 @@ DESTDIR ?=
 BINDIR ?= $(PREFIX)/bin
 LIBDIR ?= $(PREFIX)/lib
 MANDIR ?= $(PREFIX)/share/man
-SYSCONFDIR ?= /etc
 
 PLATFORMFILE := src/platform/$(shell uname | tr '[:upper:]' '[:lower:]').sh
 
@@ -16,7 +15,7 @@ install:
 	@mkdir -p "$(DESTDIR)$(BINDIR)" "$(DESTDIR)$(LIBDIR)" "$(DESTDIR)$(MANDIR)/man1" "$(DESTDIR)$(SYSCONFDIR)/bash_completion.d"
 	@install -m 0755 -v src/password-store.sh "$(DESTDIR)$(BINDIR)/pass"
 	@install -m 0644 -v man/pass.1 "$(DESTDIR)$(MANDIR)/man1/pass.1"
-	@install -m 0644 -v contrib/pass.bash-completion "$(DESTDIR)$(SYSCONFDIR)/bash_completion.d/password-store"
+	@install -m 0644 -v contrib/pass.bash-completion "$(DESTDIR)$(PREFIX)/share/bash-completion/completions/password-store"
 
 #	Uncomment to install the zsh completion file.
 #	@install -m 0644 -v contrib/pass.zsh-completion "$(DESTDIR)$(PREFIX)/share/zsh/site-functions/_pass"
@@ -36,4 +35,4 @@ install-platform:
 endif
 
 uninstall:
-	@rm -vf "$(DESTDIR)$(BINDIR)/pass" "$(DESTDIR)$(MANDIR)/man1/pass.1" "$(DESTDIR)$(SYSCONFDIR)/bash_completion.d/password-store" "$(DESTDIR)$(LIBDIR)/password-store.platform.sh"
+	@rm -vf "$(DESTDIR)$(BINDIR)/pass" "$(DESTDIR)$(MANDIR)/man1/pass.1" "$(DESTDIR)$(PREFIX)/share/bash-completion/completions/password-store" "$(DESTDIR)$(LIBDIR)/password-store.platform.sh"
