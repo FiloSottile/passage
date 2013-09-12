@@ -158,7 +158,7 @@ case "$command" in
 		git_add_file "$ID" "Set GPG id to $gpg_id."
 
 		if [[ $reencrypt -eq 1 ]]; then
-			find "$PREFIX" -iname '*.gpg' | while read passfile; do
+			find "$PREFIX/" -iname '*.gpg' | while read passfile; do
 				gpg2 -d $GPG_OPTS "$passfile" | gpg2 -e -r "$gpg_id" -o "$passfile.new" $GPG_OPTS &&
 				mv -v "$passfile.new" "$passfile"
 			done
