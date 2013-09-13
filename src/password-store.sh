@@ -75,7 +75,7 @@ git_add_file() {
 }
 yesno() {
 	read -p "$1 [y/N] " response
-	[[ $response == "y" || $response == "Y" ]] || exit 1
+	[[ $response == [yY] ]] || exit 1
 }
 #
 # BEGIN Platform definable
