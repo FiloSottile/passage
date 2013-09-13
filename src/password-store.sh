@@ -39,9 +39,9 @@ Usage:
         Show existing password and optionally put it on the clipboard.
         If put on the clipboard, it will be cleared in 45 seconds.
     $program insert [--echo,-e | --multiline,-m] [--force,-f] pass-name
-        Insert new password. Optionally, the console can be enabled echo
-        the password back. Or, optionally, it may be multiline. Prompt
-        before overwriting existing password unless forced.
+        Insert new password. Optionally, echo the password back to the console
+        during entry. Or, optionally, the entry may be multiline. Prompt before
+        overwriting existing password unless forced.
     $program edit pass-name
         Insert a new password or edit an existing password using ${EDITOR:-vi}.
     $program generate [--no-symbols,-n] [--clip,-c] [--force,-f] pass-name pass-length
