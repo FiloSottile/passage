@@ -158,7 +158,7 @@ SHRED="shred -f -z"
 # END Platform definable
 #
 
-program="$(basename "$0")"
+program="${0##*/}"
 command="$1"
 if is_command "$command"; then
 	shift
