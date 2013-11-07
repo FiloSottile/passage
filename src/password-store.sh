@@ -140,13 +140,13 @@ clip() {
 }
 tmpdir() {
 	if [[ -d /dev/shm && -w /dev/shm && -x /dev/shm ]]; then
-		tmp_dir="$(TMPDIR=/dev/shm mktemp -t "$template" -d)"
+		tmp_dir="$(TMPDIR=/dev/shm mktemp -d -t "$template")"
 	else
 		yesno "$(echo    "Your system does not have /dev/shm, which means that it may"
 		         echo    "be difficult to entirely erase the temporary non-encrypted"
 		         echo    "password file after editing. Are you sure you would like to"
 		         echo -n "continue?")"
-		tmp_dir="$(mktemp -t "$template" -d)"
+		tmp_dir="$(mktemp -d -t "$template")"
 	fi
 
 }
