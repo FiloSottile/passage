@@ -12,7 +12,7 @@ all:
 	@echo "Password store is a shell script, so there is nothing to do. Try \"make install\" instead."
 
 install:
-	@mkdir -p "$(DESTDIR)$(BINDIR)" "$(DESTDIR)$(LIBDIR)" "$(DESTDIR)$(MANDIR)/man1" "$(DESTDIR)$(SYSCONFDIR)/bash_completion.d"
+	@mkdir -p "$(DESTDIR)$(BINDIR)" "$(DESTDIR)$(LIBDIR)" "$(DESTDIR)$(MANDIR)/man1" "$(DESTDIR)$(PREFIX)/share/bash-completion/completions/"
 	@install -m 0755 -v src/password-store.sh "$(DESTDIR)$(BINDIR)/pass"
 	@install -m 0644 -v man/pass.1 "$(DESTDIR)$(MANDIR)/man1/pass.1"
 	@install -m 0644 -v contrib/pass.bash-completion "$(DESTDIR)$(PREFIX)/share/bash-completion/completions/password-store"
