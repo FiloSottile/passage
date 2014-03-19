@@ -8,7 +8,7 @@ umask 077
 PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 ID="$PREFIX/.gpg-id"
 GIT_DIR="${PASSWORD_STORE_GIT:-$PREFIX}/.git"
-GPG_OPTS="--quiet --yes --batch"
+GPG_OPTS="--quiet --yes --batch --compress-algo=none"
 
 export GIT_DIR
 export GIT_WORK_TREE="${PASSWORD_STORE_GIT:-$PREFIX}"
