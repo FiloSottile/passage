@@ -120,6 +120,7 @@ tmpdir() {
 
 }
 GETOPT="getopt"
+SHRED="shred -f -z"
 
 # source /path/to/platform-defined-functions
 #
@@ -288,7 +289,7 @@ case "$command" in
 		passfile="$PREFIX/$path.gpg"
 		template="$program.XXXXXXXXXXXXX"
 
-		trap 'rm -rf "$tmp_dir" "$tmp_file"' INT TERM EXIT
+		trap '$SHRED "$tmp_file"; rm -rf "$tmp_dir" "$tmp_file"' INT TERM EXIT
 
 		tmpdir #Defines $tmp_dir
 		tmp_file="$(TMPDIR="$tmp_dir" mktemp -t "$template")"

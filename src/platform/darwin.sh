@@ -32,3 +32,4 @@ tmpdir() {
 }
 
 GETOPT="$(brew --prefix gnu-getopt 2>/dev/null || echo /usr/local)/bin/getopt"
+SHRED="srm -f -z"
