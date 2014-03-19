@@ -51,15 +51,19 @@ password names in
 .SH COMMANDS
 
 .TP
-\fBinit\fP [ \fI--reencrypt\fP, \fI-e\fP ] \fIgpg-id\fP
+\fBinit\fP [ \fI--reencrypt\fP, \fI-e\fP ] [ \fI--path=sub-folder\fP, \fI-p sub-folder\fP ] \fIgpg-id...\fP
 Initialize new password storage and use
 .I gpg-id
-for encryption. This command must be run first before a password store can be
-used. If \fI--reencrypt\fP or \fI-e\fP is specified, reencrypt all existing
-passwords in the password store using \fIgpg-id\fP. Note that use of
+for encryption. Multiple gpg-ids may be specified, in order to encrypt each
+password with multiple ids. This command must be run first before a password
+store can be used. If \fI--reencrypt\fP or \fI-e\fP is specified, reencrypt
+all existing passwords in the password store using \fIgpg-id\fP. Note that
+use of
 .BR gpg-agent (1)
 is recommended so that the batch decryption does not require as much user
-intervention.
+intervention. If \fI--path\fP or \fI-p\fP is specified, along with an argument,
+a specific gpg-id or set of gpg-ids is assigned for that specific sub folder of
+the password store.
 .TP
 \fBls\fP \fIsubfolder\fP
 List names of passwords inside the tree at
@@ -322,7 +326,9 @@ The default password storage directory.
 .TP
 .B ~/.password-store/.gpg-id
 Contains the default gpg key identification used for encryption and decryption.
-This should be set using the \fBinit\fP command.
+Multiple gpg keys may be specified in this file, one per line. If this file
+exists in any sub directories, passwords inside those sub directories are
+encrypted using those keys. This should be set using the \fBinit\fP command.
 
 .SH ENVIRONMENT VARIABLES
 

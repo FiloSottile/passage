@@ -6,7 +6,6 @@
 umask 077
 
 PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
-ID="$PREFIX/.gpg-id"
 GIT_DIR="${PASSWORD_STORE_GIT:-$PREFIX}/.git"
 GPG_OPTS="--quiet --yes --batch --compress-algo=none"
 
@@ -74,9 +73,39 @@ git_add_file() {
 	git commit -m "$2"
 }
 yesno() {
-	read -p "$1 [y/N] " response
+	read -r -p "$1 [y/N] " response
 	[[ $response == [yY] ]] || exit 1
 }
+set_gpg_recipients() {
+	gpg_recipient_args=( )
+
+	if [[ -n $PASSWORD_STORE_KEY ]]; then
+		for gpg_id in $PASSWORD_STORE_KEY; do
+			gpg_recipient_args+=( "-r" "$gpg_id" )
+		done
+		return
+	fi
+
+	local current="$PREFIX/$1"
+	while [[ $current != "$PREFIX" && ! -f $current/.gpg-id ]]; do
+		current="${current%/*}"
+	done
+	current="$current/.gpg-id"
+
+	if [[ ! -f $current ]]; then
+		echo "You must run:"
+		echo "    $program init your-gpg-id"
+		echo "before you may use the password store."
+		echo
+		usage
+		exit 1
+	fi
+
+	while read -r gpg_id; do
+		gpg_recipient_args+=( "-r" "$gpg_id" )
+	done < "$current"
+}
+
 #
 # BEGIN Platform definable
 #
@@ -138,32 +167,45 @@ fi
 case "$command" in
 	init)
 		reencrypt=0
+		id_path=""
 
-		opts="$($GETOPT -o e -l reencrypt -n "$program" -- "$@")"
+		opts="$($GETOPT -o ep: -l reencrypt,path: -n "$program" -- "$@")"
 		err=$?
 		eval set -- "$opts"
 		while true; do case $1 in
 			-e|--reencrypt) reencrypt=1; shift ;;
+			-p|--path) id_path="$2"; shift 2 ;;
 			--) shift; break ;;
 		esac done
 
-		if [[ $# -ne 1 ]]; then
-			echo "Usage: $program $command [--reencrypt,-e] gpg-id"
+		if [[ $err -ne 0 || $# -lt 1 ]]; then
+			echo "Usage: $program $command [--reencrypt,-e] [--path=subfolder,-p subfolder] gpg-id..."
 			exit 1
 		fi
+		if [[ -n $id_path && ! -d $PREFIX/$id_path ]]; then
+			if [[ -e $PREFIX/$id_path ]]; then
+				echo "Error: $PREFIX/$id_path exists but is not a directory."
+				exit 1;
+			fi
+		fi
 
-		gpg_id="$1"
-		mkdir -v -p "$PREFIX"
-		echo "$gpg_id" > "$ID"
-		echo "Password store initialized for $gpg_id."
-		git_add_file "$ID" "Set GPG id to $gpg_id."
+		mkdir -v -p "$PREFIX/$id_path"
+		gpg_id="$PREFIX/$id_path/.gpg-id"
+		printf "%s\n" "$@" > "$gpg_id"
+		id_print="$(printf "%s, " "$@")"
+		echo "Password store initialized for ${id_print%, }"
+		git_add_file "$gpg_id" "Set GPG id to ${id_print%, }."
 
 		if [[ $reencrypt -eq 1 ]]; then
-			find "$PREFIX/" -iname '*.gpg' | while read passfile; do
-				gpg2 -d $GPG_OPTS "$passfile" | gpg2 -e -r "$gpg_id" -o "$passfile.new" $GPG_OPTS &&
+			find "$PREFIX/$id_path" -iname '*.gpg' | while read -r passfile; do
+				passfile_dir=${passfile%/*}
+				passfile_dir=${passfile_dir#$PREFIX}
+				passfile_dir=${passfile_dir#/}
+				set_gpg_recipients "$passfile_dir"
+				gpg2 -d $GPG_OPTS "$passfile" | gpg2 -e "${gpg_recipient_args[@]}" -o "$passfile.new" $GPG_OPTS &&
 				mv -v "$passfile.new" "$passfile"
 			done
-			git_add_file "$PREFIX" "Reencrypted entire store using new GPG id $gpg_id."
+			git_add_file "$PREFIX/$id_path" "Reencrypted password store using new GPG id ${id_print}."
 		fi
 		exit 0
 		;;
@@ -175,22 +217,6 @@ case "$command" in
 		version
 		exit 0
 		;;
-esac
-
-if [[ -n $PASSWORD_STORE_KEY ]]; then
-	ID="$PASSWORD_STORE_KEY"
-elif [[ ! -f $ID ]]; then
-	echo "You must run:"
-	echo "    $program init your-gpg-id"
-	echo "before you may use the password store."
-	echo
-	usage
-	exit 1
-else
-	ID="$(head -n 1 "$ID")"
-fi
-
-case "$command" in
 	show|ls|list)
 		clip=0
 
@@ -254,11 +280,12 @@ case "$command" in
 		[[ $force -eq 0 && -e $passfile ]] && yesno "An entry already exists for $path. Overwrite it?"
 
 		mkdir -p -v "$PREFIX/$(dirname "$path")"
+		set_gpg_recipients "$(dirname "$path")"
 
 		if [[ $multiline -eq 1 ]]; then
 			echo "Enter contents of $path and press Ctrl+D when finished:"
 			echo
-			gpg2 -e -r "$ID" -o "$passfile" $GPG_OPTS
+			gpg2 -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS
 		elif [[ $noecho -eq 1 ]]; then
 			while true; do
 				read -r -p "Enter password for $path: " -s password
@@ -266,7 +293,7 @@ case "$command" in
 				read -r -p "Retype password for $path: " -s password_again
 				echo
 				if [[ $password == "$password_again" ]]; then
-					gpg2 -e -r "$ID" -o "$passfile" $GPG_OPTS <<<"$password"
+					gpg2 -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS <<<"$password"
 					break
 				else
 					echo "Error: the entered passwords do not match."
@@ -274,7 +301,7 @@ case "$command" in
 			done
 		else
 			read -r -p "Enter password for $path: " -e password
-			gpg2 -e -r "$ID" -o "$passfile" $GPG_OPTS <<<"$password"
+			gpg2 -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS <<<"$password"
 		fi
 		git_add_file "$passfile" "Added given password for $path to store."
 		;;
@@ -286,6 +313,7 @@ case "$command" in
 
 		path="$1"
 		mkdir -p -v "$PREFIX/$(dirname "$path")"
+		set_gpg_recipients "$(dirname "$path")"
 		passfile="$PREFIX/$path.gpg"
 		template="$program.XXXXXXXXXXXXX"
 
@@ -300,7 +328,7 @@ case "$command" in
 			action="Edited"
 		fi
 		${EDITOR:-vi} "$tmp_file"
-		while ! gpg2 -e -r "$ID" -o "$passfile" $GPG_OPTS "$tmp_file"; do
+		while ! gpg2 -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS "$tmp_file"; do
 			echo "GPG encryption failed. Retrying."
 			sleep 1
 		done
@@ -332,13 +360,14 @@ case "$command" in
 			exit 1
 		fi
 		mkdir -p -v "$PREFIX/$(dirname "$path")"
+		set_gpg_recipients "$(dirname "$path")"
 		passfile="$PREFIX/$path.gpg"
 
 		[[ $force -eq 0 && -e $passfile ]] && yesno "An entry already exists for $path. Overwrite it?"
 
 		pass="$(pwgen -s $symbols $length 1)"
 		[[ -n $pass ]] || exit 1
-		gpg2 -e -r "$ID" -o "$passfile" $GPG_OPTS <<<"$pass"
+		gpg2 -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS <<<"$pass"
 		git_add_file "$passfile" "Added generated password for $path to store."
 		
 		if [[ $clip -eq 0 ]]; then
