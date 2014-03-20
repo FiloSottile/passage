@@ -90,6 +90,7 @@ def import_passwords(xml_file, root_path=None):
         xml_tree = ElementTree.XML(text)
         root = xml_tree.find('Root')
         root_group = root.find('Group')
+        import_group(entries,root_group,'')
         if root_path is None: root_path = root_group.find('Name').text
         groups = root_group.findall('Group')
         for group in groups:
