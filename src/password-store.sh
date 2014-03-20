@@ -118,9 +118,7 @@ clip() {
 	(
 		sleep 45
 		now="$(xclip -o -selection clipboard | base64)"
-		if [[ $now != $(echo -n "$1" | base64) ]]; then
-			before="$now"
-		fi
+		[[ $now != $(echo -n "$1" | base64) ]] && before="$now"
 
 		# It might be nice to programatically check to see if klipper exists,
 		# as well as checking for other common clipboard managers. But for now,
