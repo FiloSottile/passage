@@ -8,6 +8,7 @@ umask 077
 GPG_OPTS="--quiet --yes --batch --compress-algo=none"
 PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 SELECTION="${PASSWORD_STORE_SELECTION:-clipboard}"
+CLIP_TIME="${PASSWORD_STORE_CLIP_TIME:-45}"
 export GIT_DIR="${PASSWORD_STORE_GIT:-$PREFIX}/.git"
 export GIT_WORK_TREE="${PASSWORD_STORE_GIT:-$PREFIX}"
 
@@ -29,14 +30,14 @@ usage() {
 	cat <<_EOF
 
 Usage:
-    $program init [--reencrypt,-e] gpg-id
+    $program init [--reencrypt,-e] [--path=subfolder,-p subfolder] gpg-id...
         Initialize new password storage and use gpg-id for encryption.
         Optionally reencrypt existing passwords using new gpg-id.
     $program [ls] [subfolder]
         List passwords.
     $program [show] [--clip,-c] pass-name
         Show existing password and optionally put it on the clipboard.
-        If put on the clipboard, it will be cleared in 45 seconds.
+        If put on the clipboard, it will be cleared in $CLIP_TIME seconds.
     $program insert [--echo,-e | --multiline,-m] [--force,-f] pass-name
         Insert new password. Optionally, echo the password back to the console
         during entry. Or, optionally, the entry may be multiline. Prompt before
@@ -120,7 +121,7 @@ clip() {
 	before="$(xclip -o -selection "$SELECTION" | base64)"
 	echo -n "$1" | xclip -selection "$SELECTION"
 	(
-		( exec -a "$sleep_argv0" sleep 45 )
+		( exec -a "$sleep_argv0" sleep "$CLIP_TIME" )
 		now="$(xclip -o -selection "$SELECTION" | base64)"
 		[[ $now != $(echo -n "$1" | base64) ]] && before="$now"
 
@@ -135,7 +136,7 @@ clip() {
 
 		echo "$before" | base64 -d | xclip -selection "$SELECTION"
 	) 2>/dev/null & disown
-	echo "Copied $2 to clipboard. Will clear in 45 seconds."
+	echo "Copied $2 to clipboard. Will clear in $CLIP_TIME seconds."
 }
 tmpdir() {
 	if [[ -d /dev/shm && -w /dev/shm && -x /dev/shm ]]; then
