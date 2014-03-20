@@ -69,7 +69,8 @@ git_add_file() {
 	[[ -d $GIT_DIR ]] || return
 	git add "$1" || return
 	[[ -n $(git status --porcelain "$1") ]] || return
-	git commit -m "$2"
+	[[ $(git config --bool --get pass.signcommits) == "true" ]] && sign="-S" || sign=""
+	git commit $sign -m "$2"
 }
 yesno() {
 	read -r -p "$1 [y/N] " response
