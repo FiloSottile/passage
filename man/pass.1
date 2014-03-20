@@ -337,7 +337,9 @@ encrypted using those keys. This should be set using the \fBinit\fP command.
 Overrides the default password storage directory.
 .TP
 .I PASSWORD_STORE_KEY
-Overrides the default gpg key identification set by \fBinit\fP.
+Overrides the default gpg key identification set by \fBinit\fP. Keys must not
+contain spaces and thus use of the hexidecimal key signature is recommended.
+Multiple keys may be specified separated by spaces. 
 .TP
 .I PASSWORD_STORE_GIT
 Overrides the default root of the git repository, which is helpful if
