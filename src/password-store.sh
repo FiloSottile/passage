@@ -113,10 +113,12 @@ clip() {
 	# in shell. There must be a better way to deal with this, but because I'm a dolt,
 	# we're going with this for now.
 
+	sleep_argv0="password store sleep on display $DISPLAY"
+	kill -9 $(grep -l -r --include="cmdline" "^$sleep_argv0" /proc/ 2>/dev/null | sed -n 's:/proc/\([0-9]\+\)/.*:\1:p' | sort | uniq) 2>/dev/null && sleep 0.1
 	before="$(xclip -o -selection clipboard | base64)"
 	echo -n "$1" | xclip -selection clipboard
 	(
-		sleep 45
+		( exec -a "$sleep_argv0" sleep 45 )
 		now="$(xclip -o -selection clipboard | base64)"
 		[[ $now != $(echo -n "$1" | base64) ]] && before="$now"
 
@@ -130,7 +132,7 @@ clip() {
 		qdbus org.kde.klipper /klipper org.kde.klipper.klipper.clearClipboardHistory &>/dev/null
 
 		echo "$before" | base64 -d | xclip -selection clipboard
-	) & disown
+	) 2>/dev/null & disown
 	echo "Copied $2 to clipboard. Will clear in 45 seconds."
 }
 tmpdir() {
