@@ -5,13 +5,36 @@
 # This file is licensed under the GPLv2+. Please see COPYING for more information.
 
 import sys
+import re
 
 from subprocess import Popen, PIPE
 from xml.etree import ElementTree
 
+def space_to_camelcase(value):
+    output = ""
+    first_word_passed = False
+    for word in value.split(" "):
+        if not word:
+            output += "_"
+            continue
+        if first_word_passed:
+            output += word.capitalize()
+        else:
+            output += word.lower()
+        first_word_passed = True
+    return output
+
+def cleanTitle(title):
+    # make the title more command line friendly
+    title = re.sub("(\\|\||\(|\))", "-", title)
+    title = re.sub("-$", "", title)
+    title = re.sub("\@", "At", title)
+    title = re.sub("'", "", title)
+    return title
+
 def path_for(element, path=''):
     """ Generate path name from elements title and current path """
-    title = element.find('title').text.replace("/", "|")
+    title = cleanTitle(space_to_camelcase(element.find('title').text))
     return '/'.join([path, title])
 
 def password_data(element):
