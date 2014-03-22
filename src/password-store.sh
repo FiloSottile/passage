@@ -7,7 +7,7 @@ umask 077
 
 GPG_OPTS="--quiet --yes --batch --compress-algo=none"
 PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
-SELECTION="${PASSWORD_STORE_SELECTION:-clipboard}"
+X_SELECTION="${PASSWORD_STORE_X_SELECTION:-clipboard}"
 CLIP_TIME="${PASSWORD_STORE_CLIP_TIME:-45}"
 export GIT_DIR="${PASSWORD_STORE_GIT:-$PREFIX}/.git"
 export GIT_WORK_TREE="${PASSWORD_STORE_GIT:-$PREFIX}"
@@ -118,11 +118,11 @@ clip() {
 
 	sleep_argv0="password store sleep on display $DISPLAY"
 	pkill -f "^$sleep_argv0" 2>/dev/null && sleep 0.1
-	before="$(xclip -o -selection "$SELECTION" | base64)"
-	echo -n "$1" | xclip -selection "$SELECTION"
+	before="$(xclip -o -selection "$X_SELECTION" | base64)"
+	echo -n "$1" | xclip -selection "$X_SELECTION"
 	(
 		( exec -a "$sleep_argv0" sleep "$CLIP_TIME" )
-		now="$(xclip -o -selection "$SELECTION" | base64)"
+		now="$(xclip -o -selection "$X_SELECTION" | base64)"
 		[[ $now != $(echo -n "$1" | base64) ]] && before="$now"
 
 		# It might be nice to programatically check to see if klipper exists,
@@ -134,7 +134,7 @@ clip() {
 		# so we axe it here:
 		qdbus org.kde.klipper /klipper org.kde.klipper.klipper.clearClipboardHistory &>/dev/null
 
-		echo "$before" | base64 -d | xclip -selection "$SELECTION"
+		echo "$before" | base64 -d | xclip -selection "$X_SELECTION"
 	) 2>/dev/null & disown
 	echo "Copied $2 to clipboard. Will clear in $CLIP_TIME seconds."
 }
