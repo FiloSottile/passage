@@ -3,7 +3,7 @@
 
 clip() {
 	sleep_argv0="password store sleep for user $(id -u)"
-	pkill -f "^$sleep_argv0" && sleep 0.1
+	pkill -f "^$sleep_argv0" 2>/dev/null && sleep 0.1
 	before="$(pbpaste | openssl base64)"
 	echo -n "$1" | pbcopy
 	(
@@ -11,7 +11,7 @@ clip() {
 		now="$(pbpaste | openssl base64)"
 		[[ $now != $(echo -n "$1" | openssl base64) ]] && before="$now"
 		echo "$before" | openssl base64 -d | pbcopy
-	) & disown
+	) 2>dev/null & disown
 	echo "Copied $2 to clipboard. Will clear in 45 seconds."
 }
 
