@@ -117,7 +117,7 @@ clip() {
 	# we're going with this for now.
 
 	sleep_argv0="password store sleep on display $DISPLAY"
-	kill -9 $(grep -l -r --include="cmdline" "^$sleep_argv0" /proc/ 2>/dev/null | sed -n 's:/proc/\([0-9]\+\)/.*:\1:p' | sort | uniq) 2>/dev/null && sleep 0.1
+	pkill -f "^$sleep_argv0" && sleep 0.1
 	before="$(xclip -o -selection "$SELECTION" | base64)"
 	echo -n "$1" | xclip -selection "$SELECTION"
 	(
