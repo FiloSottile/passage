@@ -5,10 +5,15 @@
 
 umask 077
 
-GPG_OPTS="--quiet --yes --batch --compress-algo=none"
+GPG_OPTS="--quiet --yes --compress-algo=none"
+GPG="gpg"
+which gpg2 &>/dev/null && GPG="gpg2"
+[[ -n $GPG_AGENT_INFO || $GPG == "gpg2" ]] && GPG_OPTS="$GPT_OPTS --batch --use-agent"
+
 PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 X_SELECTION="${PASSWORD_STORE_X_SELECTION:-clipboard}"
 CLIP_TIME="${PASSWORD_STORE_CLIP_TIME:-45}"
+
 export GIT_DIR="${PASSWORD_STORE_GIT:-$PREFIX}/.git"
 export GIT_WORK_TREE="${PASSWORD_STORE_GIT:-$PREFIX}"
 
@@ -204,7 +209,7 @@ case "$command" in
 				passfile_dir=${passfile_dir#$PREFIX}
 				passfile_dir=${passfile_dir#/}
 				set_gpg_recipients "$passfile_dir"
-				gpg2 -d $GPG_OPTS "$passfile" | gpg2 -e "${gpg_recipient_args[@]}" -o "$passfile.new" $GPG_OPTS &&
+				$GPG -d $GPG_OPTS "$passfile" | $GPG -e "${gpg_recipient_args[@]}" -o "$passfile.new" $GPG_OPTS &&
 				mv -v "$passfile.new" "$passfile"
 			done
 			git_add_file "$PREFIX/$id_path" "Reencrypted password store using new GPG id ${id_print}."
@@ -239,9 +244,9 @@ case "$command" in
 		passfile="$PREFIX/$path.gpg"
 		if [[ -f $passfile ]]; then
 			if [[ $clip -eq 0 ]]; then
-				exec gpg2 -d $GPG_OPTS "$passfile"
+				exec $GPG -d $GPG_OPTS "$passfile"
 			else
-				pass="$(gpg2 -d $GPG_OPTS "$passfile" | head -n 1)"
+				pass="$($GPG -d $GPG_OPTS "$passfile" | head -n 1)"
 				[[ -n $pass ]] || exit 1
 				clip "$pass" "$path"
 			fi
@@ -287,7 +292,7 @@ case "$command" in
 		if [[ $multiline -eq 1 ]]; then
 			echo "Enter contents of $path and press Ctrl+D when finished:"
 			echo
-			gpg2 -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS
+			$GPG -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS
 		elif [[ $noecho -eq 1 ]]; then
 			while true; do
 				read -r -p "Enter password for $path: " -s password
@@ -295,7 +300,7 @@ case "$command" in
 				read -r -p "Retype password for $path: " -s password_again
 				echo
 				if [[ $password == "$password_again" ]]; then
-					gpg2 -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS <<<"$password"
+					$GPG -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS <<<"$password"
 					break
 				else
 					echo "Error: the entered passwords do not match."
@@ -303,7 +308,7 @@ case "$command" in
 			done
 		else
 			read -r -p "Enter password for $path: " -e password
-			gpg2 -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS <<<"$password"
+			$GPG -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS <<<"$password"
 		fi
 		git_add_file "$passfile" "Added given password for $path to store."
 		;;
@@ -326,11 +331,11 @@ case "$command" in
 
 		action="Added"
 		if [[ -f $passfile ]]; then
-			gpg2 -d -o "$tmp_file" $GPG_OPTS "$passfile" || exit 1
+			$GPG -d -o "$tmp_file" $GPG_OPTS "$passfile" || exit 1
 			action="Edited"
 		fi
 		${EDITOR:-vi} "$tmp_file"
-		while ! gpg2 -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS "$tmp_file"; do
+		while ! $GPG -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS "$tmp_file"; do
 			echo "GPG encryption failed. Retrying."
 			sleep 1
 		done
@@ -369,7 +374,7 @@ case "$command" in
 
 		pass="$(pwgen -s $symbols $length 1)"
 		[[ -n $pass ]] || exit 1
-		gpg2 -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS <<<"$pass"
+		$GPG -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS <<<"$pass"
 		git_add_file "$passfile" "Added generated password for $path to store."
 		
 		if [[ $clip -eq 0 ]]; then
