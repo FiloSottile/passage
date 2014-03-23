@@ -19,52 +19,54 @@ export GIT_WORK_TREE="${PASSWORD_STORE_GIT:-$PREFIX}"
 
 
 version() {
-	cat <<_EOF
-|-----------------------|
-|   Password Store      |
-|         v.1.5         |
-|       by zx2c4        |
-|                       |
-|    Jason@zx2c4.com    |
-|  Jason A. Donenfeld   |
-|-----------------------|
-_EOF
+	cat <<-_EOF
+	============================================
+	= pass: the standard unix password manager =
+	=                                          =
+	=                   v1.5                   =
+	=                                          =
+	=             Jason A. Donenfeld           =
+	=               Jason@zx2c4.com            =
+	=                                          =
+	= http://zx2c4.com/projects/password-store =
+	============================================
+	_EOF
 }
 usage() {
 	version
-	cat <<_EOF
+	echo
+	cat <<-_EOF
+	Usage:
+	    $program init [--reencrypt,-e] [--path=subfolder,-p subfolder] gpg-id...
+		Initialize new password storage and use gpg-id for encryption.
+		Optionally reencrypt existing passwords using new gpg-id.
+	    $program [ls] [subfolder]
+		List passwords.
+	    $program [show] [--clip,-c] pass-name
+		Show existing password and optionally put it on the clipboard.
+		If put on the clipboard, it will be cleared in $CLIP_TIME seconds.
+	    $program insert [--echo,-e | --multiline,-m] [--force,-f] pass-name
+		Insert new password. Optionally, echo the password back to the console
+		during entry. Or, optionally, the entry may be multiline. Prompt before
+		overwriting existing password unless forced.
+	    $program edit pass-name
+		Insert a new password or edit an existing password using ${EDITOR:-vi}.
+	    $program generate [--no-symbols,-n] [--clip,-c] [--force,-f] pass-name pass-length
+		Generate a new password of pass-length with optionally no symbols.
+		Optionally put it on the clipboard and clear board after 45 seconds.
+		Prompt before overwriting existing password unless forced.
+	    $program rm [--recursive,-r] [--force,-f] pass-name
+		Remove existing password or directory, optionally forcefully.
+	    $program git git-command-args...
+		If the password store is a git repository, execute a git command
+		specified by git-command-args.
+	    $program help
+		Show this text.
+	    $program version
+		Show version information.
 
-Usage:
-    $program init [--reencrypt,-e] [--path=subfolder,-p subfolder] gpg-id...
-        Initialize new password storage and use gpg-id for encryption.
-        Optionally reencrypt existing passwords using new gpg-id.
-    $program [ls] [subfolder]
-        List passwords.
-    $program [show] [--clip,-c] pass-name
-        Show existing password and optionally put it on the clipboard.
-        If put on the clipboard, it will be cleared in $CLIP_TIME seconds.
-    $program insert [--echo,-e | --multiline,-m] [--force,-f] pass-name
-        Insert new password. Optionally, echo the password back to the console
-        during entry. Or, optionally, the entry may be multiline. Prompt before
-        overwriting existing password unless forced.
-    $program edit pass-name
-        Insert a new password or edit an existing password using ${EDITOR:-vi}.
-    $program generate [--no-symbols,-n] [--clip,-c] [--force,-f] pass-name pass-length
-        Generate a new password of pass-length with optionally no symbols.
-        Optionally put it on the clipboard and clear board after 45 seconds.
-        Prompt before overwriting existing password unless forced.
-    $program rm [--recursive,-r] [--force,-f] pass-name
-        Remove existing password or directory, optionally forcefully.
-    $program git git-command-args...
-        If the password store is a git repository, execute a git command
-        specified by git-command-args.
-    $program help
-        Show this text.
-    $program version
-        Show version information.
-
-More information may be found in the pass(1) man page.
-_EOF
+	More information may be found in the pass(1) man page.
+	_EOF
 }
 is_command() {
 	case "$1" in
