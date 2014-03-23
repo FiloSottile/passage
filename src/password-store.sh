@@ -122,7 +122,7 @@ clip() {
 	# we're going with this for now.
 
 	sleep_argv0="password store sleep on display $DISPLAY"
-	pkill -f "^$sleep_argv0" 2>/dev/null && sleep 0.1
+	pkill -f "^$sleep_argv0" 2>/dev/null && sleep 0.5
 	before="$(xclip -o -selection "$X_SELECTION" | base64)"
 	echo -n "$1" | xclip -selection "$X_SELECTION"
 	(
