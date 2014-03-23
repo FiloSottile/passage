@@ -102,10 +102,12 @@ set_gpg_recipients() {
 	current="$current/.gpg-id"
 
 	if [[ ! -f $current ]]; then
-		echo "You must run:"
-		echo "    $program init your-gpg-id"
-		echo "before you may use the password store."
-		echo
+		cat <<-_EOF
+		ERROR: You must run:
+		    $program init your-gpg-id
+		before you may use the password store.
+
+		_EOF
 		usage
 		exit 1
 	fi
