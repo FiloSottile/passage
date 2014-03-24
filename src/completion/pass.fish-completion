@@ -63,6 +63,7 @@ complete -c $PROG -f -A -n '__fish_pass_needs_command' -a version -d 'Command: s
 
 complete -c $PROG -f -A -n '__fish_pass_needs_command' -a init -d 'Command: initialize new password storage'
 complete -c $PROG -f -A -n '__fish_pass_uses_command init' -s e -l reencrypt -d 'Reencrypt existing passwords using new gpg-id'
+complete -c $PROG -f -A -n '__fish_pass_uses_command init' -s p -l path -d 'Assign gpg-id for specified sub folder of password store'
 complete -c $PROG -f -A -n '__fish_contains_opt -s e reencrypt' -a '(__fish_pass_print_gpg_keys)'
 
 complete -c $PROG -f -A -n '__fish_pass_needs_command' -a ls -d 'Command: list passwords'
