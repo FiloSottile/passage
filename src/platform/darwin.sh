@@ -11,7 +11,7 @@ clip() {
 		now="$(pbpaste | openssl base64)"
 		[[ $now != $(echo -n "$1" | openssl base64) ]] && before="$now"
 		echo "$before" | openssl base64 -d | pbcopy
-	) 2>dev/null & disown
+	) 2>/dev/null & disown
 	echo "Copied $2 to clipboard. Will clear in 45 seconds."
 }
 
