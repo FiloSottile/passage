@@ -8,7 +8,7 @@ umask "${PASSWORD_STORE_UMASK:-077}"
 GPG_OPTS="--quiet --yes --compress-algo=none"
 GPG="gpg"
 which gpg2 &>/dev/null && GPG="gpg2"
-[[ -n $GPG_AGENT_INFO || $GPG == "gpg2" ]] && GPG_OPTS="$GPT_OPTS --batch --use-agent"
+[[ -n $GPG_AGENT_INFO || $GPG == "gpg2" ]] && GPG_OPTS="$GPG_OPTS --batch --use-agent"
 
 PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 X_SELECTION="${PASSWORD_STORE_X_SELECTION:-clipboard}"
