@@ -1,6 +1,6 @@
 # completion file for bash
 
-# Copyright (C) 2012 Jason A. Donenfeld <Jason@zx2c4.com> and
+# Copyright (C) 2012 - 2014 Jason A. Donenfeld <Jason@zx2c4.com> and
 # Brian Mattern <rephorm@rephorm.com>. All Rights Reserved.
 # This file is licensed under the GPLv2+. Please see COPYING for more information.
 
@@ -12,9 +12,7 @@ _pass_complete_entries () {
 	local IFS=$'\n'
 	local items=($(compgen -f $prefix$cur))
 	for item in ${items[@]}; do
-		if [[ $item == $prefix.* ]]; then
-			continue
-		fi
+		[[ $item == $prefix.* ]] && continue
 
 		# if there is a unique match, and it is a directory with one entry
 		# autocomplete the subentry as well (recursively)
@@ -37,6 +35,17 @@ _pass_complete_entries () {
 	done
 }
 
+_pass_complete_folders () {
+	prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store/}"
+
+	local IFS=$'\n'
+	local items=($(compgen -d $prefix$cur))
+	for item in ${items[@]}; do
+		[[ $item == $prefix.* ]] && continue
+		COMPREPLY+=("${item#$prefix}/")
+	done
+}
+
 _pass_complete_keys () {
 	local IFS=$'\n'
 	# Extract names and email addresses from gpg --list-keys
@@ -52,8 +61,12 @@ _pass()
 	if [[ $COMP_CWORD -gt 1 ]]; then
 		case "${COMP_WORDS[1]}" in
 			init)
-				COMPREPLY+=($(compgen -W "-e --reencrypt" -- ${cur}))
-				_pass_complete_keys
+				COMPREPLY+=($(compgen -W "-e --reencrypt -p --path" -- ${cur}))
+				if [[ ${COMP_WORDS[$COMP_CWORD-1]} == "-p" || ${COMP_WORDS[$COMP_CWORD-1]} == "--path" ]]; then
+					_pass_complete_folders
+				else
+					_pass_complete_keys
+				fi
 				;;
 			ls|list|edit)
 				_pass_complete_entries
