@@ -59,12 +59,13 @@ _pass()
 	local cur="${COMP_WORDS[COMP_CWORD]}"
 	local commands="init ls show insert generate edit rm git help version"
 	if [[ $COMP_CWORD -gt 1 ]]; then
+		local lastarg="${COMP_WORDS[$COMP_CWORD-1]}"
 		case "${COMP_WORDS[1]}" in
 			init)
-				COMPREPLY+=($(compgen -W "-e --reencrypt -p --path" -- ${cur}))
-				if [[ ${COMP_WORDS[$COMP_CWORD-1]} == "-p" || ${COMP_WORDS[$COMP_CWORD-1]} == "--path" ]]; then
+				if [[ $lastarg == "-p" || $lastarg == "--path" ]]; then
 					_pass_complete_folders
 				else
+					COMPREPLY+=($(compgen -W "-e --reencrypt -p --path" -- ${cur}))
 					_pass_complete_keys
 				fi
 				;;
@@ -88,7 +89,7 @@ _pass()
 				_pass_complete_entries
 				;;
 			git)
-				COMPREPLY+=($(compgen -W "init push pull config log reflog" -- ${cur}))
+				COMPREPLY+=($(compgen -W "init push pull config log reflog rebase" -- ${cur}))
 				;;
 		esac
 	else
