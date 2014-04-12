@@ -4,6 +4,7 @@
 # This file is licensed under the GPLv2+. Please see COPYING for more information.
 
 umask "${PASSWORD_STORE_UMASK:-077}"
+set -o pipefail
 
 GPG_OPTS="--quiet --yes --compress-algo=none"
 GPG="gpg"
@@ -209,12 +210,13 @@ case "$command" in
 
 		if [[ $reencrypt -eq 1 ]]; then
 			find "$PREFIX/$id_path" -iname '*.gpg' | while read -r passfile; do
+				fake_uniqueness_safety="$RANDOM"
 				passfile_dir=${passfile%/*}
 				passfile_dir=${passfile_dir#$PREFIX}
 				passfile_dir=${passfile_dir#/}
 				set_gpg_recipients "$passfile_dir"
-				$GPG -d $GPG_OPTS "$passfile" | $GPG -e "${gpg_recipient_args[@]}" -o "$passfile.new" $GPG_OPTS &&
-				mv -v "$passfile.new" "$passfile"
+				$GPG -d $GPG_OPTS "$passfile" | $GPG -e "${gpg_recipient_args[@]}" -o "$passfile.new.$fake_uniqueness_safety" $GPG_OPTS &&
+				mv -v "$passfile.new.$fake_uniqueness_safety" "$passfile"
 			done
 			git_add_file "$PREFIX/$id_path" "Reencrypted password store using new GPG id ${id_print}."
 		fi
