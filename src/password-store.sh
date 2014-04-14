@@ -43,6 +43,8 @@ usage() {
 		Optionally reencrypt existing passwords using new gpg-id.
 	    $program [ls] [subfolder]
 		List passwords.
+	    $program find pass-names...
+	    	List passwords that match pass-names.
 	    $program [show] [--clip,-c] pass-name
 		Show existing password and optionally put it on the clipboard.
 		If put on the clipboard, it will be cleared in $CLIP_TIME seconds.
@@ -71,7 +73,7 @@ usage() {
 }
 is_command() {
 	case "$1" in
-		init|ls|list|show|insert|edit|generate|remove|rm|delete|git|help|--help|version|--version) return 0 ;;
+		init|ls|list|find|search|show|insert|edit|generate|remove|rm|delete|git|help|--help|version|--version) return 0 ;;
 		*) return 1 ;;
 	esac
 }
@@ -267,6 +269,25 @@ case "$command" in
 			echo "$path is not in the password store."
 			exit 1
 		fi
+		;;
+	find|search)
+		if [[ -z "$@" ]]; then
+			echo "Usage: $program $command pass-names..."
+			exit 1
+		fi
+		if ! tree --help |& grep -q "^  --matchdirs"; then
+			echo "ERROR: $program: incompatible tree command"
+			echo
+			echo "Your version of the tree command is missing the relevent patch to add the"
+			echo "--matchdirs switch. Please ask your distribution to patch your version of"
+			echo "tree with:"
+			echo "   http://git.zx2c4.com/password-store/plain/contrib/tree-1.6.0-matchdirs.patch"
+			echo "Sorry for the inconvenience."
+			exit 1
+		fi
+		terms="$@"
+		echo "Search Terms: $terms"
+		tree -l --noreport -P "*${terms// /*|*}*" --prune --matchdirs "$PREFIX" | tail -n +2 | sed 's/\.gpg$//'
 		;;
 	insert)
 		multiline=0

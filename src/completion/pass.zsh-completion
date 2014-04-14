@@ -77,6 +77,7 @@ _pass () {
 		subcommands=(
 			"init:Initialize new password storage"
 			"ls:List passwords"
+			"find:Find password files or directories based on pattern"
 			"show:Decrypt and print a password"
 			"insert:Insert a new password"
 			"generate:Generate a new password using pwgen"

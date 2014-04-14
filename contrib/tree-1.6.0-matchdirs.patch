@@ -1,0 +1,162 @@
+From 57f931a7a8564379e7b2e5c31301dcd6c0e84b50 Mon Sep 17 00:00:00 2001
+From: "Jason A. Donenfeld" <Jason@zx2c4.com>
+Date: Thu, 4 Apr 2013 08:43:05 -0700
+Subject: [PATCH] Add --matchdirs to check patterns against directories
+
+This causes pattern matching to include the full contents of any
+directories that match the pattern, including sub-directories.
+---
+ doc/tree.1 | 10 +++++++++-
+ tree.c     | 46 ++++++++++++++++++++++++++++++++++++++++------
+ 2 files changed, 49 insertions(+), 7 deletions(-)
+
+diff --git a/doc/tree.1 b/doc/tree.1
+index 4b80852..7765f34 100644
+--- a/doc/tree.1
++++ b/doc/tree.1
+@@ -21,7 +21,7 @@
+ .SH NAME
+ tree \- list contents of directories in a tree-like format.
+ .SH SYNOPSIS
+-\fBtree\fP [\fB-acdfghilnpqrstuvxACDFQNSUX\fP] [\fB-L\fP \fIlevel\fP [\fB-R\fP]] [\fB-H\fP \fIbaseHREF\fP] [\fB-T\fP \fItitle\fP] [\fB-o\fP \fIfilename\fP] [\fB--nolinks\fP] [\fB-P\fP \fIpattern\fP] [\fB-I\fP \fIpattern\fP] [\fB--inodes\fP] [\fB--device\fP] [\fB--noreport\fP] [\fB--dirsfirst\fP] [\fB--version\fP] [\fB--help\fP] [\fB--filelimit\fP \fI#\fP] [\fB--si\fP] [\fB--prune\fP] [\fB--du\fP] [\fB--timefmt\fP \fIformat\fP] [\fIdirectory\fP ...]
++\fBtree\fP [\fB-acdfghilnpqrstuvxACDFQNSUX\fP] [\fB-L\fP \fIlevel\fP [\fB-R\fP]] [\fB-H\fP \fIbaseHREF\fP] [\fB-T\fP \fItitle\fP] [\fB-o\fP \fIfilename\fP] [\fB--nolinks\fP] [\fB-P\fP \fIpattern\fP] [\fB-I\fP \fIpattern\fP] [\fB--inodes\fP] [\fB--device\fP] [\fB--noreport\fP] [\fB--dirsfirst\fP] [\fB--version\fP] [\fB--help\fP] [\fB--filelimit\fP \fI#\fP] [\fB--si\fP] [\fB--prune\fP] [\fB--du\fP] [\fB--timefmt\fP \fIformat\fP] [\fB--matchdirs\fP] [\fIdirectory\fP ...]
+ .br
+ .SH DESCRIPTION
+ \fITree\fP is a recursive directory listing program that produces a depth
+@@ -123,6 +123,14 @@ Prints (implies -D) and formats the date according to the format string
+ which uses the \fBstrftime\fP(3) syntax.
+ .PP
+ .TP
++.B --matchdirs
++If a match pattern is specified by the -P option, this will cause the pattern
++to be applied to directory names (in addition to filenames).  In the event of a
++match on the directory name, matching is disabled for the directory's
++contents.If the --prune option is used, empty folders that match the pattern
++will not be pruned.
++.PP
++.TP
+ .B -o \fIfilename\fP
+ Send output to \fIfilename\fP.
+ .PP
+diff --git a/tree.c b/tree.c
+index 19cf368..187613d 100644
+--- a/tree.c
++++ b/tree.c
+@@ -28,7 +28,7 @@ static char *hversion="\t\t tree v1.6.0 %s 1996 - 2011 by Steve Baker and Thomas
+ bool dflag, lflag, pflag, sflag, Fflag, aflag, fflag, uflag, gflag;
+ bool qflag, Nflag, Qflag, Dflag, inodeflag, devflag, hflag, Rflag;
+ bool Hflag, siflag, cflag, Xflag, duflag, pruneflag;
+-bool noindent, force_color, nocolor, xdev, noreport, nolinks, flimit, dirsfirst, nosort;
++bool noindent, force_color, nocolor, xdev, noreport, nolinks, flimit, dirsfirst, nosort, matchdirs;
+ char *pattern = NULL, *ipattern = NULL, *host = NULL, *title = "Directory Tree", *sp = " ";
+ char *timefmt = NULL;
+ const char *charset = NULL;
+@@ -75,12 +75,13 @@ int main(int argc, char **argv)
+   char sizebuf[64];
+   off_t size = 0;
+   mode_t mt;
++  bool needfulltree;
+ 
+   q = p = dtotal = ftotal = 0;
+   aflag = dflag = fflag = lflag = pflag = sflag = Fflag = uflag = gflag = FALSE;
+   Dflag = qflag = Nflag = Qflag = Rflag = hflag = Hflag = siflag = cflag = FALSE;
+   noindent = force_color = nocolor = xdev = noreport = nolinks = FALSE;
+-  dirsfirst = nosort = inodeflag = devflag = Xflag = FALSE;
++  matchdirs = dirsfirst = nosort = inodeflag = devflag = Xflag = FALSE;
+   duflag = pruneflag = FALSE;
+   flimit = 0;
+   dirs = xmalloc(sizeof(int) * (maxdirs=4096));
+@@ -350,6 +351,11 @@ int main(int argc, char **argv)
+ 	      Dflag = TRUE;
+ 	      break;
+ 	    }
++	    if (!strncmp("--matchdirs",argv[i],11)) {
++	      j = strlen(argv[i])-1;
++	      matchdirs = TRUE;
++	      break;
++	    }
+ 	  }
+ 	default:
+ 	  fprintf(stderr,"tree: Invalid argument -`%c'.\n",argv[i][j]);
+@@ -387,16 +393,17 @@ int main(int argc, char **argv)
+   parse_dir_colors();
+   initlinedraw(0);
+ 
++  needfulltree = duflag || pruneflag || matchdirs;
+   /* Set our listdir function and sanity check options. */
+   if (Hflag) {
+-    listdir = (duflag || pruneflag)? html_rlistdir : html_listdir;
++    listdir = needfulltree ? html_rlistdir : html_listdir;
+     Xflag = FALSE;
+   } else if (Xflag) {
+-    listdir = (duflag || pruneflag)? xml_rlistdir : xml_listdir;
++    listdir = needfulltree ? xml_rlistdir : xml_listdir;
+     colorize = FALSE;
+     colored = FALSE; /* Do people want colored XML output? */
+   } else {
+-    listdir = (duflag || pruneflag)? unix_rlistdir : unix_listdir;
++    listdir = needfulltree ? unix_rlistdir : unix_listdir;
+   }
+   if (dflag) pruneflag = FALSE;	/* You'll just get nothing otherwise. */
+ 
+@@ -534,6 +541,7 @@ void usage(int n)
+ 	"  --charset X   Use charset X for terminal/HTML and indentation line output.\n"
+ 	"  --filelimit # Do not descend dirs with more than # files in them.\n"
+ 	"  --timefmt <f> Print and format time according to the format <f>.\n"
++	"  --matchdirs   Include directory names in -P pattern matching.\n"
+ 	"  -o filename   Output to file instead of stdout.\n"
+ 	"  -------- File options ---------\n"
+ 	"  -q            Print non-printable characters as '?'.\n"
+@@ -689,6 +697,8 @@ struct _info **getfulltree(char *d, u_long lev, dev_t dev, off_t *size, char **e
+   struct _info **dir, **sav, **p, *sp;
+   struct stat sb;
+   int n;
++  u_long lev_tmp;
++  char *tmp_pattern = NULL, *start_rel_path;
+   
+   *err = NULL;
+   if (Level >= 0 && lev > Level) return NULL;
+@@ -696,7 +706,29 @@ struct _info **getfulltree(char *d, u_long lev, dev_t dev, off_t *size, char **e
+     stat(d,&sb);
+     dev = sb.st_dev;
+   }
++
++  // if the directory name matches, turn off pattern matching for contents
++  if (matchdirs && pattern) {
++    lev_tmp = lev;
++    for (start_rel_path = d + strlen(d); start_rel_path != d; --start_rel_path) {
++      if (*start_rel_path == '/')
++        --lev_tmp;
++      if (lev_tmp <= 0) {
++        if (*start_rel_path)
++          ++start_rel_path;
++        break;
++      }
++    }
++    if (patmatch(start_rel_path,pattern) == 1) {
++      tmp_pattern = pattern;
++      pattern = NULL;
++    }
++  }
+   sav = dir = read_dir(d,&n);
++  if (tmp_pattern) {
++    pattern = tmp_pattern;
++    tmp_pattern = NULL;
++  }
+   if (dir == NULL) {
+     *err = scopy("error opening dir");
+     return NULL;
+@@ -745,7 +777,9 @@ struct _info **getfulltree(char *d, u_long lev, dev_t dev, off_t *size, char **e
+ 	saveino((*dir)->inode, (*dir)->dev);
+ 	(*dir)->child = getfulltree(path,lev+1,dev,&((*dir)->size),&((*dir)->err));
+       }
+-      if (pruneflag && (*dir)->child == NULL) {
++      // prune empty folders, unless they match the requested pattern
++      if (pruneflag && (*dir)->child == NULL &&
++	  !(matchdirs && pattern && patmatch((*dir)->name,pattern) == 1)) {
+ 	sp = *dir;
+ 	for(p=dir;*p;p++) *p = *(p+1);
+ 	n--;
+-- 
+1.9.2
+

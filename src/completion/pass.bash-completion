@@ -57,7 +57,7 @@ _pass()
 {
 	COMPREPLY=()
 	local cur="${COMP_WORDS[COMP_CWORD]}"
-	local commands="init ls show insert generate edit rm git help version"
+	local commands="init ls find show insert generate edit rm git help version"
 	if [[ $COMP_CWORD -gt 1 ]]; then
 		local lastarg="${COMP_WORDS[$COMP_CWORD-1]}"
 		case "${COMP_WORDS[1]}" in

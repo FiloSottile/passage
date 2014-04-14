@@ -106,3 +106,5 @@ complete -c $PROG -f -A -n '__fish_pass_uses_command git' -a 'commit' -d 'Commit
 complete -c $PROG -f -A -n '__fish_pass_uses_command git' -a 'push' -d 'Push changes to remote repo'
 complete -c $PROG -f -A -n '__fish_pass_uses_command git' -a 'pull' -d 'Pull changes from remote repo'
 complete -c $PROG -f -A -n '__fish_pass_uses_command git' -a 'log' -d 'View changelog'
+
+complete -c $PROG -f -A -n '__fish_pass_needs_command' -a find -d 'Command: find a password file or directory matching pattern'
