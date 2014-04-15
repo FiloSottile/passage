@@ -171,6 +171,8 @@ cmd_usage() {
 	    $PROGRAM [show] [--clip,-c] pass-name
 	        Show existing password and optionally put it on the clipboard.
 	        If put on the clipboard, it will be cleared in $CLIP_TIME seconds.
+	    $PROGRAM grep search-string
+	        Search for password files containing search-string when decrypted.
 	    $PROGRAM insert [--echo,-e | --multiline,-m] [--force,-f] pass-name
 	        Insert new password. Optionally, echo the password back to the console
 	        during entry. Or, optionally, the entry may be multiline. Prompt before
@@ -232,9 +234,9 @@ cmd_init() {
 		local passfile
 		find "$PREFIX/$id_path" -iname '*.gpg' | while read -r passfile; do
 			fake_uniqueness_safety="$RANDOM"
-			passfile_dir=${passfile%/*}
-			passfile_dir=${passfile_dir#$PREFIX}
-			passfile_dir=${passfile_dir#/}
+			passfile_dir="${passfile%/*}"
+			passfile_dir="${passfile_dir#$PREFIX}"
+			passfile_dir="${passfile_dir#/}"
 			set_gpg_recipients "$passfile_dir"
 			$GPG -d $GPG_OPTS "$passfile" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile.new.$fake_uniqueness_safety" $GPG_OPTS &&
 			mv -v "$passfile.new.$fake_uniqueness_safety" "$passfile"
@@ -302,6 +304,28 @@ cmd_find() {
 	local terms="$@"
 	echo "Search Terms: $terms"
 	tree -l --noreport -P "*${terms// /*|*}*" --prune --matchdirs --caseinsensitive "$PREFIX" | tail -n +2 | sed 's/\.gpg$//'
+}
+
+cmd_grep() {
+	if [[ $# -ne 1 ]]; then
+		echo "Usage: $PROGRAM $COMMAND search-string"
+		exit 1
+	fi
+	agent_check
+	local passfile
+	local passfile_dir
+	local grepresults
+	local search="$1"
+	find "$PREFIX" -iname '*.gpg' | while read -r passfile; do
+		grepresults="$($GPG -d $GPG_OPTS "$passfile" | grep --color=always "$search")"
+		[ $? -ne 0 ] && continue
+		passfile="${passfile%.gpg}"
+		passfile="${passfile#$PREFIX/}"
+		passfile_dir="${passfile%/*}"
+		passfile="${passfile##*/}"
+		printf "\e[94m$passfile_dir/\e[1m$passfile\e[0m:\n"
+		echo "$grepresults"
+	done
 }
 
 cmd_insert() {
@@ -496,6 +520,7 @@ case "$1" in
 	version|--version) shift;	cmd_version "$@"; ;;
 	show|ls|list) shift;		cmd_show "$@"; ;;
 	find|search) shift;		cmd_find "$@"; ;;
+	grep) shift;			cmd_grep "$@"; ;;
 	insert) shift;			cmd_insert "$@"; ;;
 	edit) shift;			cmd_edit "$@"; ;;
 	generate) shift;		cmd_generate "$@"; ;;
