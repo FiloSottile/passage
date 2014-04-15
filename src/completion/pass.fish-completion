@@ -108,3 +108,4 @@ complete -c $PROG -f -A -n '__fish_pass_uses_command git' -a 'pull' -d 'Pull cha
 complete -c $PROG -f -A -n '__fish_pass_uses_command git' -a 'log' -d 'View changelog'
 
 complete -c $PROG -f -A -n '__fish_pass_needs_command' -a find -d 'Command: find a password file or directory matching pattern'
+complete -c $PROG -f -A -n '__fish_pass_needs_command' -a grep -d 'Command: search inside of decrypted password files for matching pattern'
