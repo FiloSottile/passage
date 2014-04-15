@@ -35,11 +35,11 @@ yesno() {
 	[[ $response == [yY] ]] || exit 1
 }
 set_gpg_recipients() {
-	gpg_recipient_args=( )
+	GPG_RECIPIENT_ARGS=( )
 
 	if [[ -n $PASSWORD_STORE_KEY ]]; then
 		for gpg_id in $PASSWORD_STORE_KEY; do
-			gpg_recipient_args+=( "-r" "$gpg_id" )
+			GPG_RECIPIENT_ARGS+=( "-r" "$gpg_id" )
 		done
 		return
 	fi
@@ -53,7 +53,7 @@ set_gpg_recipients() {
 	if [[ ! -f $current ]]; then
 		cat <<-_EOF
 		ERROR: You must run:
-		    $program init your-gpg-id
+		    $PROGRAM init your-gpg-id
 		before you may use the password store.
 
 		_EOF
@@ -62,7 +62,7 @@ set_gpg_recipients() {
 	fi
 
 	while read -r gpg_id; do
-		gpg_recipient_args+=( "-r" "$gpg_id" )
+		GPG_RECIPIENT_ARGS+=( "-r" "$gpg_id" )
 	done < "$current"
 }
 
@@ -103,13 +103,13 @@ clip() {
 }
 tmpdir() {
 	if [[ -d /dev/shm && -w /dev/shm && -x /dev/shm ]]; then
-		tmp_dir="$(TMPDIR=/dev/shm mktemp -d -t "$template")"
+		SECURE_TMPDIR="$(TMPDIR=/dev/shm mktemp -d -t "$template")"
 	else
 		yesno "$(echo    "Your system does not have /dev/shm, which means that it may"
 		         echo    "be difficult to entirely erase the temporary non-encrypted"
 		         echo    "password file after editing. Are you sure you would like to"
 		         echo -n "continue?")"
-		tmp_dir="$(mktemp -d -t "$template")"
+		SECURE_TMPDIR="$(mktemp -d -t "$template")"
 	fi
 
 }
@@ -147,34 +147,34 @@ cmd_usage() {
 	echo
 	cat <<-_EOF
 	Usage:
-	    $program init [--reencrypt,-e] [--path=subfolder,-p subfolder] gpg-id...
+	    $PROGRAM init [--reencrypt,-e] [--path=subfolder,-p subfolder] gpg-id...
 	        Initialize new password storage and use gpg-id for encryption.
 	        Optionally reencrypt existing passwords using new gpg-id.
-	    $program [ls] [subfolder]
+	    $PROGRAM [ls] [subfolder]
 	        List passwords.
-	    $program find pass-names...
+	    $PROGRAM find pass-names...
 	    	List passwords that match pass-names.
-	    $program [show] [--clip,-c] pass-name
+	    $PROGRAM [show] [--clip,-c] pass-name
 	        Show existing password and optionally put it on the clipboard.
 	        If put on the clipboard, it will be cleared in $CLIP_TIME seconds.
-	    $program insert [--echo,-e | --multiline,-m] [--force,-f] pass-name
+	    $PROGRAM insert [--echo,-e | --multiline,-m] [--force,-f] pass-name
 	        Insert new password. Optionally, echo the password back to the console
 	        during entry. Or, optionally, the entry may be multiline. Prompt before
 	        overwriting existing password unless forced.
-	    $program edit pass-name
+	    $PROGRAM edit pass-name
 	        Insert a new password or edit an existing password using ${EDITOR:-vi}.
-	    $program generate [--no-symbols,-n] [--clip,-c] [--force,-f] pass-name pass-length
+	    $PROGRAM generate [--no-symbols,-n] [--clip,-c] [--force,-f] pass-name pass-length
 	        Generate a new password of pass-length with optionally no symbols.
 	        Optionally put it on the clipboard and clear board after 45 seconds.
 	        Prompt before overwriting existing password unless forced.
-	    $program rm [--recursive,-r] [--force,-f] pass-name
+	    $PROGRAM rm [--recursive,-r] [--force,-f] pass-name
 	        Remove existing password or directory, optionally forcefully.
-	    $program git git-command-args...
+	    $PROGRAM git git-command-args...
 	        If the password store is a git repository, execute a git command
 	        specified by git-command-args.
-	    $program help
+	    $PROGRAM help
 	        Show this text.
-	    $program version
+	    $PROGRAM version
 	        Show version information.
 
 	More information may be found in the pass(1) man page.
@@ -186,7 +186,7 @@ cmd_init() {
 	local id_path=""
 
 	local opts
-	opts="$($GETOPT -o ep: -l reencrypt,path: -n "$program" -- "$@")"
+	opts="$($GETOPT -o ep: -l reencrypt,path: -n "$PROGRAM" -- "$@")"
 	local err=$?
 	eval set -- "$opts"
 	while true; do case $1 in
@@ -196,7 +196,7 @@ cmd_init() {
 	esac done
 
 	if [[ $err -ne 0 || $# -lt 1 ]]; then
-		echo "Usage: $program $command [--reencrypt,-e] [--path=subfolder,-p subfolder] gpg-id..."
+		echo "Usage: $PROGRAM $COMMAND [--reencrypt,-e] [--path=subfolder,-p subfolder] gpg-id..."
 		exit 1
 	fi
 	if [[ -n $id_path && ! -d $PREFIX/$id_path ]]; then
@@ -221,7 +221,7 @@ cmd_init() {
 			passfile_dir=${passfile_dir#$PREFIX}
 			passfile_dir=${passfile_dir#/}
 			set_gpg_recipients "$passfile_dir"
-			$GPG -d $GPG_OPTS "$passfile" | $GPG -e "${gpg_recipient_args[@]}" -o "$passfile.new.$fake_uniqueness_safety" $GPG_OPTS &&
+			$GPG -d $GPG_OPTS "$passfile" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile.new.$fake_uniqueness_safety" $GPG_OPTS &&
 			mv -v "$passfile.new.$fake_uniqueness_safety" "$passfile"
 		done
 		git_add_file "$PREFIX/$id_path" "Reencrypted password store using new GPG id ${id_print}."
@@ -232,7 +232,7 @@ cmd_show() {
 	local clip=0
 
 	local opts
-	opts="$($GETOPT -o c -l clip -n "$program" -- "$@")"
+	opts="$($GETOPT -o c -l clip -n "$PROGRAM" -- "$@")"
 	local err=$?
 	eval set -- "$opts"
 	while true; do case $1 in
@@ -241,7 +241,7 @@ cmd_show() {
 	esac done
 
 	if [[ $err -ne 0 ]]; then
-		echo "Usage: $program $command [--clip,-c] [pass-name]"
+		echo "Usage: $PROGRAM $COMMAND [--clip,-c] [pass-name]"
 		exit 1
 	fi
 
@@ -270,11 +270,11 @@ cmd_show() {
 
 cmd_find() {
 	if [[ -z "$@" ]]; then
-		echo "Usage: $program $command pass-names..."
+		echo "Usage: $PROGRAM $COMMAND pass-names..."
 		exit 1
 	fi
 	if ! tree --version | grep -q "Jason A. Donenfeld"; then
-		echo "ERROR: $program: incompatible tree command"
+		echo "ERROR: $PROGRAM: incompatible tree command"
 		echo
 		echo "Your version of the tree command is missing the relevent patch to add the"
 		echo "--matchdirs and --caseinsensitive switches. Please ask your distribution"
@@ -295,7 +295,7 @@ cmd_insert() {
 	local force=0
 
 	local opts
-	opts="$($GETOPT -o mef -l multiline,echo,force -n "$program" -- "$@")"
+	opts="$($GETOPT -o mef -l multiline,echo,force -n "$PROGRAM" -- "$@")"
 	local err=$?
 	eval set -- "$opts"
 	while true; do case $1 in
@@ -306,7 +306,7 @@ cmd_insert() {
 	esac done
 
 	if [[ $err -ne 0 || ( $multiline -eq 1 && $noecho -eq 0 ) || $# -ne 1 ]]; then
-		echo "Usage: $program $command [--echo,-e | --multiline,-m] [--force,-f] pass-name"
+		echo "Usage: $PROGRAM $COMMAND [--echo,-e | --multiline,-m] [--force,-f] pass-name"
 		exit 1
 	fi
 	local path="$1"
@@ -320,7 +320,7 @@ cmd_insert() {
 	if [[ $multiline -eq 1 ]]; then
 		echo "Enter contents of $path and press Ctrl+D when finished:"
 		echo
-		$GPG -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS
+		$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" $GPG_OPTS
 	elif [[ $noecho -eq 1 ]]; then
 		local password
 		local password_again
@@ -330,7 +330,7 @@ cmd_insert() {
 			read -r -p "Retype password for $path: " -s password_again
 			echo
 			if [[ $password == "$password_again" ]]; then
-				$GPG -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS <<<"$password"
+				$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" $GPG_OPTS <<<"$password"
 				break
 			else
 				echo "Error: the entered passwords do not match."
@@ -339,14 +339,14 @@ cmd_insert() {
 	else
 		local password
 		read -r -p "Enter password for $path: " -e password
-		$GPG -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS <<<"$password"
+		$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" $GPG_OPTS <<<"$password"
 	fi
 	git_add_file "$passfile" "Added given password for $path to store."
 }
 
 cmd_edit() {
 	if [[ $# -ne 1 ]]; then
-		echo "Usage: $program $command pass-name"
+		echo "Usage: $PROGRAM $COMMAND pass-name"
 		exit 1
 	fi
 
@@ -354,12 +354,12 @@ cmd_edit() {
 	mkdir -p -v "$PREFIX/$(dirname "$path")"
 	set_gpg_recipients "$(dirname "$path")"
 	local passfile="$PREFIX/$path.gpg"
-	local template="$program.XXXXXXXXXXXXX"
+	local template="$PROGRAM.XXXXXXXXXXXXX"
 
-	trap '$SHRED "$tmp_file"; rm -rf "$tmp_dir" "$tmp_file"' INT TERM EXIT
+	trap '$SHRED "$tmp_file"; rm -rf "$SECURE_TMPDIR" "$tmp_file"' INT TERM EXIT
 
-	tmpdir #Defines $tmp_dir
-	local tmp_file="$(TMPDIR="$tmp_dir" mktemp -t "$template")"
+	tmpdir #Defines $SECURE_TMPDIR
+	local tmp_file="$(TMPDIR="$SECURE_TMPDIR" mktemp -t "$template")"
 
 	local action="Added"
 	if [[ -f $passfile ]]; then
@@ -367,7 +367,7 @@ cmd_edit() {
 		action="Edited"
 	fi
 	${EDITOR:-vi} "$tmp_file"
-	while ! $GPG -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS "$tmp_file"; do
+	while ! $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" $GPG_OPTS "$tmp_file"; do
 		echo "GPG encryption failed. Retrying."
 		sleep 1
 	done
@@ -380,7 +380,7 @@ cmd_generate() {
 	local symbols="-y"
 
 	local opts
-	opts="$($GETOPT -o ncf -l no-symbols,clip,force -n "$program" -- "$@")"
+	opts="$($GETOPT -o ncf -l no-symbols,clip,force -n "$PROGRAM" -- "$@")"
 	local err=$?
 	eval set -- "$opts"
 	while true; do case $1 in
@@ -391,7 +391,7 @@ cmd_generate() {
 	esac done
 
 	if [[ $err -ne 0 || $# -ne 2 ]]; then
-		echo "Usage: $program $command [--no-symbols,-n] [--clip,-c] [--force,-f] pass-name pass-length"
+		echo "Usage: $PROGRAM $COMMAND [--no-symbols,-n] [--clip,-c] [--force,-f] pass-name pass-length"
 		exit 1
 	fi
 	local path="$1"
@@ -408,7 +408,7 @@ cmd_generate() {
 
 	local pass="$(pwgen -s $symbols $length 1)"
 	[[ -n $pass ]] || exit 1
-	$GPG -e "${gpg_recipient_args[@]}" -o "$passfile" $GPG_OPTS <<<"$pass"
+	$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" $GPG_OPTS <<<"$pass"
 	git_add_file "$passfile" "Added generated password for $path to store."
 
 	if [[ $clip -eq 0 ]]; then
@@ -424,7 +424,7 @@ cmd_delete() {
 	local force=0
 
 	local opts
-	opts="$($GETOPT -o rf -l recursive,force -n "$program" -- "$@")"
+	opts="$($GETOPT -o rf -l recursive,force -n "$PROGRAM" -- "$@")"
 	local err=$?
 	eval set -- "$opts"
 	while true; do case $1 in
@@ -433,7 +433,7 @@ cmd_delete() {
 		--) shift; break ;;
 	esac done
 	if [[ $# -ne 1 ]]; then
-		echo "Usage: $program $command [--recursive,-r] [--force,-f] pass-name"
+		echo "Usage: $PROGRAM $COMMAND [--recursive,-r] [--force,-f] pass-name"
 		exit 1
 	fi
 	local path="$1"
@@ -472,8 +472,8 @@ cmd_git() {
 # END subcommand functions
 #
 
-program="${0##*/}"
-command="$1"
+PROGRAM="${0##*/}"
+COMMAND="$1"
 
 case "$1" in
 	init) shift;			cmd_init "$@"; ;;
@@ -487,6 +487,6 @@ case "$1" in
 	delete|rm|remove) shift;	cmd_delete "$@"; ;;
 	git) shift;			cmd_git "$@"; ;;
 	-*) shift;			cmd_usage "$@"; exit 1; ;;
-	*) command="show";		cmd_show "$@"; ;;
+	*) COMMAND="show";		cmd_show "$@"; ;;
 esac
 exit 0

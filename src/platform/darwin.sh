@@ -17,18 +17,18 @@ clip() {
 
 tmpdir() {
 	cleanup_tmp() {
-		[[ -d $tmp_dir ]] || return
-		rm -rf "$tmp_file" "$tmp_dir" 2>/dev/null
-		umount "$tmp_dir"
+		[[ -d $SECURE_TMPDIR ]] || return
+		rm -rf "$tmp_file" "$SECURE_TMPDIR" 2>/dev/null
+		umount "$SECURE_TMPDIR"
 		diskutil quiet eject "$ramdisk_dev"
-		rmdir "$tmp_dir"
+		rmdir "$SECURE_TMPDIR"
 	}
 	trap cleanup_tmp INT TERM EXIT
-	tmp_dir="$(mktemp -t "$template" -d)"
+	SECURE_TMPDIR="$(mktemp -t "$template" -d)"
 	local ramdisk_dev="$(hdid -drivekey system-image=yes -nomount 'ram://32768' | cut -d ' ' -f 1)" # 32768 sectors = 16 mb
 	[[ -z $ramdisk_dev ]] && exit 1
 	newfs_hfs -M 700 "$ramdisk_dev" &>/dev/null || exit 1
-	mount -t hfs -o noatime -o nobrowse "$ramdisk_dev" "$tmp_dir" || exit 1
+	mount -t hfs -o noatime -o nobrowse "$ramdisk_dev" "$SECURE_TMPDIR" || exit 1
 }
 
 GETOPT="$(brew --prefix gnu-getopt 2>/dev/null || echo /usr/local)/bin/getopt"
