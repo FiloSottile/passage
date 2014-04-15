@@ -526,7 +526,6 @@ case "$1" in
 	generate) shift;		cmd_generate "$@"; ;;
 	delete|rm|remove) shift;	cmd_delete "$@"; ;;
 	git) shift;			cmd_git "$@"; ;;
-	-*) shift;			cmd_usage "$@"; exit 1; ;;
 	*) COMMAND="show";		cmd_show "$@"; ;;
 esac
 exit 0
