@@ -44,13 +44,18 @@ def password_data(element):
     ret = passwd + "\n" if passwd else "\n"
     for field in ['username', 'url', 'comment']:
         fel = element.find(field)
-        if fel.text is not None:
-            ret = "%s%s: %s\n" % (ret, fel.tag, fel.text)
+        children = [str(e.text or '') + str(e.tail or '') for e in list(fel)]
+        if len(children) > 0:
+            children.insert(0, '')
+        text = (fel.text or '') + "\n".join(children)
+        if len(text) > 0:
+            ret = "%s%s: %s\n" % (ret, fel.tag, text)
     return ret
 
 def import_entry(element, path=''):
     """ Import new password entry to password-store using pass insert
     command """
+    print "Importing " + path_for(element, path)
     proc = Popen(['pass', 'insert', '--multiline', '--force',
                   path_for(element, path)],
               stdin=PIPE, stdout=PIPE)
@@ -68,9 +73,8 @@ def import_group(element, path=''):
 
 def main(xml_file):
     """ Parse given KeepassX XML file and import password groups from it """
-    with open(xml_file) as xml:
-        for group in ElementTree.XML(xml.read()).findall('group'):
-            import_group(group)
+    for group in ElementTree.parse(xml_file).findall('group'):
+        import_group(group)
 
 if __name__ == '__main__':
     main(sys.argv[1])
