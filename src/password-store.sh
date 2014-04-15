@@ -275,11 +275,12 @@ case "$command" in
 			echo "Usage: $program $command pass-names..."
 			exit 1
 		fi
-		if ! tree --help |& grep -q "^  --matchdirs"; then
+		if ! tree --version | grep -q "Jason A. Donenfeld"; then
 			echo "ERROR: $program: incompatible tree command"
 			echo
 			echo "Your version of the tree command is missing the relevent patch to add the"
-			echo "--matchdirs switch. Please ask your distribution to patch your version of"
+			echo "--matchdirs and --caseinsensitive switches. Please ask your distribution"
+			echo "to patch your version of"
 			echo "tree with:"
 			echo "   http://git.zx2c4.com/password-store/plain/contrib/tree-1.6.0-matchdirs.patch"
 			echo "Sorry for the inconvenience."
@@ -287,7 +288,7 @@ case "$command" in
 		fi
 		terms="$@"
 		echo "Search Terms: $terms"
-		tree -l --noreport -P "*${terms// /*|*}*" --prune --matchdirs "$PREFIX" | tail -n +2 | sed 's/\.gpg$//'
+		tree -l --noreport -P "*${terms// /*|*}*" --prune --matchdirs --caseinsensitive "$PREFIX" | tail -n +2 | sed 's/\.gpg$//'
 		;;
 	insert)
 		multiline=0
