@@ -2,13 +2,13 @@
 # This file is licensed under the GPLv2+. Please see COPYING for more information.
 
 clip() {
-	sleep_argv0="password store sleep for user $(id -u)"
+	local sleep_argv0="password store sleep for user $(id -u)"
 	pkill -f "^$sleep_argv0" 2>/dev/null && sleep 0.5
-	before="$(pbpaste | openssl base64)"
+	local before="$(pbpaste | openssl base64)"
 	echo -n "$1" | pbcopy
 	(
 		( exec -a "$sleep_argv0" sleep "$CLIP_TIME" )
-		now="$(pbpaste | openssl base64)"
+		local now="$(pbpaste | openssl base64)"
 		[[ $now != $(echo -n "$1" | openssl base64) ]] && before="$now"
 		echo "$before" | openssl base64 -d | pbcopy
 	) 2>/dev/null & disown
@@ -25,7 +25,7 @@ tmpdir() {
 	}
 	trap cleanup_tmp INT TERM EXIT
 	tmp_dir="$(mktemp -t "$template" -d)"
-	ramdisk_dev="$(hdid -drivekey system-image=yes -nomount 'ram://32768' | cut -d ' ' -f 1)" # 32768 sectors = 16 mb
+	local ramdisk_dev="$(hdid -drivekey system-image=yes -nomount 'ram://32768' | cut -d ' ' -f 1)" # 32768 sectors = 16 mb
 	[[ -z $ramdisk_dev ]] && exit 1
 	newfs_hfs -M 700 "$ramdisk_dev" &>/dev/null || exit 1
 	mount -t hfs -o noatime -o nobrowse "$ramdisk_dev" "$tmp_dir" || exit 1

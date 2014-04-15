@@ -2,7 +2,7 @@
 # This file is licensed under the GPLv2+. Please see COPYING for more information.
 
 tmpdir() {
-	ramdisk="/var/tmp/password-store.ramdisk"
+	local ramdisk="/var/tmp/password-store.ramdisk"
 	if [[ -d $ramdisk && -d $ramdisk && -d $ramdisk ]]; then
 		tmp_dir="$(TMPDIR=$ramdisk mktemp -t "$template" -d)"
 	else
