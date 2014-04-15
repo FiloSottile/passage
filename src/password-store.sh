@@ -65,6 +65,16 @@ set_gpg_recipients() {
 		GPG_RECIPIENT_ARGS+=( "-r" "$gpg_id" )
 	done < "$current"
 }
+agent_check() {
+	[[ -n $GPG_AGENT_INFO ]] || yesno "$(cat <<-_EOF
+	You are not running gpg-agent. This means that you will
+	need to enter your password for each and every gpg file
+	that pass processes. This could be quite tedious.
+
+	Are you sure you would like to continue without gpg-agent?
+	_EOF
+	)"
+}
 
 #
 # END helper functions
@@ -105,10 +115,14 @@ tmpdir() {
 	if [[ -d /dev/shm && -w /dev/shm && -x /dev/shm ]]; then
 		SECURE_TMPDIR="$(TMPDIR=/dev/shm mktemp -d -t "$template")"
 	else
-		yesno "$(echo    "Your system does not have /dev/shm, which means that it may"
-		         echo    "be difficult to entirely erase the temporary non-encrypted"
-		         echo    "password file after editing. Are you sure you would like to"
-		         echo -n "continue?")"
+		yesno "$(cat <<-_EOF
+		Your system does not have /dev/shm, which means that it may
+		be difficult to entirely erase the temporary non-encrypted
+		password file after editing.
+
+		Are you sure you would like to continue?
+		_EOF
+		)"
 		SECURE_TMPDIR="$(mktemp -d -t "$template")"
 	fi
 
@@ -214,6 +228,7 @@ cmd_init() {
 	git_add_file "$gpg_id" "Set GPG id to ${id_print%, }."
 
 	if [[ $reencrypt -eq 1 ]]; then
+		agent_check
 		local passfile
 		find "$PREFIX/$id_path" -iname '*.gpg' | while read -r passfile; do
 			fake_uniqueness_safety="$RANDOM"
