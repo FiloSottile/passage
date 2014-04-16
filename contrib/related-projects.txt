@@ -1,0 +1,11 @@
+The following projects make use of pass:
+
+* pass-ios: A password manager app for iOS.
+  <https://github.com/rephorm/pass-ios>
+
+* passff: A firefox plugin.
+  <https://github.com/jvenant/passff>
+
+* passmenu: A demnu script.
+  <https://github.com/cdown/passmenu>
+
