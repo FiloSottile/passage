@@ -291,14 +291,15 @@ cmd_find() {
 		exit 1
 	fi
 	if ! tree --version | grep -q "Jason A. Donenfeld"; then
-		echo "ERROR: $PROGRAM: incompatible tree command"
-		echo
-		echo "Your version of the tree command is missing the relevent patch to add the"
-		echo "--matchdirs and --caseinsensitive switches. Please ask your distribution"
-		echo "to patch your version of"
-		echo "tree with:"
-		echo "   http://git.zx2c4.com/password-store/plain/contrib/tree-1.6.0-matchdirs.patch"
-		echo "Sorry for the inconvenience."
+		cat <<-_EOF
+		ERROR: $PROGRAM: incompatible tree command
+
+		Your version of the tree command is missing the relevent patch to add the
+		--matchdirs and --caseinsensitive switches. Please ask your distribution
+		to patch your version of tree with:
+		    http://git.zx2c4.com/password-store/plain/contrib/tree-1.6.0-matchdirs.patch
+		Sorry for the inconvenience.
+		_EOF
 		exit 1
 	fi
 	local terms="$@"
