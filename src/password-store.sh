@@ -52,7 +52,7 @@ set_gpg_recipients() {
 
 	if [[ ! -f $current ]]; then
 		cat <<-_EOF
-		ERROR: You must run:
+		Error: You must run:
 		    $PROGRAM init your-gpg-id
 		before you may use the password store.
 
@@ -292,7 +292,7 @@ cmd_find() {
 	fi
 	if ! tree --version | grep -q "Jason A. Donenfeld"; then
 		cat <<-_EOF
-		ERROR: $PROGRAM: incompatible tree command
+		Error: incompatible tree command.
 
 		Your version of the tree command is missing the relevent patch to add the
 		--matchdirs and --caseinsensitive switches. Please ask your distribution
@@ -503,7 +503,7 @@ cmd_git() {
 	elif [[ -d $GIT_DIR ]]; then
 		exec git "$@"
 	else
-		echo "Error: the password store is not a git repository."
+		echo "Error: the password store is not a git repository. Try \"$PROGRAM git init\"."
 		exit 1
 	fi
 }
