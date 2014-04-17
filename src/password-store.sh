@@ -207,7 +207,7 @@ cmd_usage() {
 	        Remove existing password or directory, optionally forcefully.
 	    $PROGRAM mv [--force,-f] old-path new-path
 	        Renames or moves old-path to new-path, optionally forcefully.
-	    $PROGRAM cv [--force,-f] old-path new-path
+	    $PROGRAM cp [--force,-f] old-path new-path
 	        Copies old-path to new-path, optionally forcefully.
 	    $PROGRAM git git-command-args...
 	        If the password store is a git repository, execute a git command
