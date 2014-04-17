@@ -108,7 +108,7 @@ reencrypt_path() {
 		if [[ $gpg_keys != "$current_keys" ]]; then
 			echo "$passfile_display: reencrypting to ${gpg_keys//$'\n'/ }"
 			$GPG -d $GPG_OPTS "$passfile" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile.new.$fake_uniqueness_safety" $GPG_OPTS &&
-			mv "$passfile.new.$fake_uniqueness_safety" "$passfile"
+			mv "$passfile.new.$fake_uniqueness_safety" "$passfile" || rm -f "$passfile.new.$fake_uniqueness_safety"
 		fi
 
 		prev_gpg_recipients="${GPG_RECIPIENTS[@]}"
