@@ -85,7 +85,7 @@ _pass()
 				_pass_complete_entries
 				;;
 			cp|copy|mv|rename)
-				COMPREPLY+=($(compgen -W "-f --force" -- ${cur}))
+				COMPREPLY+=($(compgen -W "-e --reencrypt -f --force" -- ${cur}))
 				_pass_complete_entries
 				;;
 			rm|remove|delete)

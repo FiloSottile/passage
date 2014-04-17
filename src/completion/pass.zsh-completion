@@ -52,6 +52,8 @@ _pass () {
 				_arguments : \
 					"-f[force rename]" \
 					"--force[force rename]" \
+					"-e[reencrypt to new gpg-id]" \
+					"--reencrypt[reencrypt to new gpg-id]"
 					_pass_complete_entries_with_subdirs
 				;;
 			rm)

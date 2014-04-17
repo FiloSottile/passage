@@ -83,10 +83,12 @@ complete -c $PROG -f -A -n '__fish_pass_uses_command generate' -a "(__fish_pass_
 
 complete -c $PROG -f -A -n '__fish_pass_needs_command' -a mv -d 'Command: rename existing password'
 complete -c $PROG -f -A -n '__fish_pass_uses_command mv' -s f -l force -d 'Force rename'
+complete -c $PROG -f -A -n '__fish_pass_uses_command mv' -s e -l reencrypt -d 'Reencrypt files if new location has different gpg-id'
 complete -c $PROG -f -A -n '__fish_pass_uses_command mv' -a "(__fish_pass_print_entries_and_dirs)"
 
 complete -c $PROG -f -A -n '__fish_pass_needs_command' -a cp -d 'Command: copy existing password'
 complete -c $PROG -f -A -n '__fish_pass_uses_command cp' -s f -l force -d 'Force copy'
+complete -c $PROG -f -A -n '__fish_pass_uses_command cp' -s e -l reencrypt -d 'Reencrypt files if new location has different gpg-id'
 complete -c $PROG -f -A -n '__fish_pass_uses_command cp' -a "(__fish_pass_print_entries_and_dirs)"
 
 complete -c $PROG -f -A -n '__fish_pass_needs_command' -a rm -d 'Command: remove existing password'
