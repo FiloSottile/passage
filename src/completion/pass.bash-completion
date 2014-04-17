@@ -84,6 +84,10 @@ _pass()
 				COMPREPLY+=($(compgen -W "-n --no-symbols -c --clip -f --force" -- ${cur}))
 				_pass_complete_entries
 				;;
+			mv|rename)
+				COMPREPLY+=($(compgen -W "-f --force" -- ${cur}))
+				_pass_complete_entries
+				;;
 			rm|remove|delete)
 				COMPREPLY+=($(compgen -W "-r --recursive -f --force" -- ${cur}))
 				_pass_complete_entries

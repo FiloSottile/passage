@@ -26,8 +26,13 @@ git_add_file() {
 	[[ -d $GIT_DIR ]] || return
 	git add "$1" || return
 	[[ -n $(git status --porcelain "$1") ]] || return
+	git_commit "$2"
+}
+git_commit() {
+	local sign
+	[[ -d $GIT_DIR ]] || return
 	[[ $(git config --bool --get pass.signcommits) == "true" ]] && sign="-S" || sign=""
-	git commit $sign -m "$2"
+	git commit $sign -m "$1"
 }
 yesno() {
 	local response
@@ -185,6 +190,8 @@ cmd_usage() {
 	        Prompt before overwriting existing password unless forced.
 	    $PROGRAM rm [--recursive,-r] [--force,-f] pass-name
 	        Remove existing password or directory, optionally forcefully.
+	    $PROGRAM mv [--force,-f] old-path new-path
+	        Renames or moves old-path to new-path, optionally forcefully.
 	    $PROGRAM git git-command-args...
 	        If the password store is a git repository, execute a git command
 	        specified by git-command-args.
@@ -482,7 +489,7 @@ cmd_delete() {
 	if [[ ! -d $passfile ]]; then
 		passfile="$PREFIX/$path.gpg"
 		if [[ ! -f $passfile ]]; then
-			echo "$path is not in the password store."
+			echo "Error: $path is not in the password store."
 			exit 1
 		fi
 	fi
@@ -492,8 +499,54 @@ cmd_delete() {
 	rm $recursive -f -v "$passfile"
 	if [[ -d $GIT_DIR && ! -e $passfile ]]; then
 		git rm -qr "$passfile"
-		git commit -m "Removed $path from store."
+		git_commit "Removed $path from store."
 	fi
+}
+
+cmd_rename() {
+	local force=0
+
+	local opts
+	opts="$($GETOPT -o f -l force -n "$PROGRAM" -- "$@")"
+	local err=$?
+	eval set -- "$opts"
+	while true; do case $1 in
+		-f|--force) force=1; shift ;;
+		--) shift; break ;;
+	esac done
+	if [[ $# -ne 2 ]]; then
+		echo "Usage: $PROGRAM $COMMAND [--force,-f] old-path new-path"
+		exit 1
+	fi
+	local old_path="$PREFIX/${1%/}"
+	local new_path="$PREFIX/$2"
+	local old_dir="$old_path"
+
+	if [[ ! -d $old_path ]]; then
+		old_dir="${old_path%/*}"
+		old_path="${old_path}.gpg"
+		if [[ ! -f $old_path ]]; then
+			echo "Error: $1 is not in the password store."
+			exit 1
+		fi
+	fi
+
+	mkdir -p -v "${new_path%/*}"
+	[[ -d $old_path || -d $new_path || $new_path =~ /$ ]] || new_path="${new_path}.gpg"
+
+	local interactive="-i"
+	[[ $force -eq 1 ]] && interactive="-f"
+
+	mv $interactive -v "$old_path" "$new_path" || exit 1
+
+	if [[ -d $GIT_DIR && ! -e $old_path ]]; then
+		git rm -qr "$old_path"
+		git_add_file "$new_path" "Renamed ${1} to ${2}."
+	fi
+
+	while rmdir "$old_dir" &>/dev/null; do
+		old_dir="${old_dir%/*}"
+	done
 }
 
 cmd_git() {
@@ -526,6 +579,7 @@ case "$1" in
 	edit) shift;			cmd_edit "$@"; ;;
 	generate) shift;		cmd_generate "$@"; ;;
 	delete|rm|remove) shift;	cmd_delete "$@"; ;;
+	rename|mv) shift;		cmd_rename "$@"; ;;
 	git) shift;			cmd_git "$@"; ;;
 	*) COMMAND="show";		cmd_show "$@"; ;;
 esac
