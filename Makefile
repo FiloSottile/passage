@@ -4,7 +4,7 @@ BINDIR ?= $(PREFIX)/bin
 LIBDIR ?= $(PREFIX)/lib
 MANDIR ?= $(PREFIX)/share/man
 
-PLATFORMFILE := src/platform/$(shell uname | tr '[:upper:]' '[:lower:]').sh
+PLATFORMFILE := src/platform/$(shell uname | cut -d _ -f 1 | tr '[:upper:]' '[:lower:]').sh
 
 .PHONY: install uninstall install-pass
 
