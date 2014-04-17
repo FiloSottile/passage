@@ -41,6 +41,7 @@ yesno() {
 }
 set_gpg_recipients() {
 	GPG_RECIPIENT_ARGS=( )
+	local gpg_id
 
 	if [[ -n $PASSWORD_STORE_KEY ]]; then
 		for gpg_id in $PASSWORD_STORE_KEY; do
