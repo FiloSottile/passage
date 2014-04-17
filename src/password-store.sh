@@ -41,11 +41,13 @@ yesno() {
 }
 set_gpg_recipients() {
 	GPG_RECIPIENT_ARGS=( )
+	GPG_RECIPIENTS=( )
 	local gpg_id
 
 	if [[ -n $PASSWORD_STORE_KEY ]]; then
 		for gpg_id in $PASSWORD_STORE_KEY; do
 			GPG_RECIPIENT_ARGS+=( "-r" "$gpg_id" )
+			GPG_RECIPIENTS+=( "$gpg_id" )
 		done
 		return
 	fi
@@ -69,6 +71,7 @@ set_gpg_recipients() {
 
 	while read -r gpg_id; do
 		GPG_RECIPIENT_ARGS+=( "-r" "$gpg_id" )
+		GPG_RECIPIENTS+=( "$gpg_id" )
 	done < "$current"
 }
 agent_check() {
@@ -84,15 +87,31 @@ agent_check() {
 reencrypt_path() {
 	local passfile
 	local passfile_dir
+	local passfile_display
 	local fake_uniqueness_safety
+	local prev_gpg_recipients
+	local gpg_keys
+	local current_keys
 	find "$1" -iname '*.gpg' | while read -r passfile; do
 		fake_uniqueness_safety="$RANDOM"
 		passfile_dir="${passfile%/*}"
 		passfile_dir="${passfile_dir#$PREFIX}"
 		passfile_dir="${passfile_dir#/}"
+		passfile_display="${passfile#$PREFIX/}"
+		passfile_display="${passfile_display%.gpg}"
+
 		set_gpg_recipients "$passfile_dir"
-		$GPG -d $GPG_OPTS "$passfile" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile.new.$fake_uniqueness_safety" $GPG_OPTS &&
-		mv -v "$passfile.new.$fake_uniqueness_safety" "$passfile"
+		[[ $prev_gpg_recipients != "${GPG_RECIPIENTS[@]}" ]] && \
+			gpg_keys="$(gpg --list-keys --keyid-format long "${GPG_RECIPIENTS[@]}" | sed -n 's/sub *.*\/\([A-F0-9]\{16\}\) .*/\1/p' | sort | uniq)"
+		current_keys="$($GPG -v --list-only --keyid-format long "$passfile" 2>&1 | cut -d ' ' -f 5 | sort | uniq)"
+
+		if [[ $gpg_keys != "$current_keys" ]]; then
+			echo "$passfile_display: reencrypting to ${gpg_keys//$'\n'/ }"
+			$GPG -d $GPG_OPTS "$passfile" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile.new.$fake_uniqueness_safety" $GPG_OPTS &&
+			mv "$passfile.new.$fake_uniqueness_safety" "$passfile"
+		fi
+
+		prev_gpg_recipients="${GPG_RECIPIENTS[@]}"
 	done
 }
 
@@ -205,10 +224,10 @@ cmd_usage() {
 	        Prompt before overwriting existing password unless forced.
 	    $PROGRAM rm [--recursive,-r] [--force,-f] pass-name
 	        Remove existing password or directory, optionally forcefully.
-	    $PROGRAM mv [--force,-f] old-path new-path
-	        Renames or moves old-path to new-path, optionally forcefully.
-	    $PROGRAM cp [--force,-f] old-path new-path
-	        Copies old-path to new-path, optionally forcefully.
+	    $PROGRAM mv [--reencrypt,-e] [--force,-f] old-path new-path
+	        Renames or moves old-path to new-path, optionally forcefully, optionally reencrypting.
+	    $PROGRAM cp [--reencrypt,-e] [--force,-f] old-path new-path
+	        Copies old-path to new-path, optionally forcefully, optionally reencrypting.
 	    $PROGRAM git git-command-args...
 	        If the password store is a git repository, execute a git command
 	        specified by git-command-args.
@@ -256,7 +275,7 @@ cmd_init() {
 	if [[ $reencrypt -eq 1 ]]; then
 		agent_check
 		reencrypt_path "$PREFIX/$id_path"
-		git_add_file "$PREFIX/$id_path" "Reencrypted password store using new GPG id ${id_print}."
+		git_add_file "$PREFIX/$id_path" "Reencrypted password store using new GPG id ${id_print%, }."
 	fi
 }
 
@@ -517,16 +536,18 @@ cmd_copy_move() {
 	shift
 
 	local force=0
+	local reencrypt=0
 	local opts
 	opts="$($GETOPT -o f -l force -n "$PROGRAM" -- "$@")"
 	local err=$?
 	eval set -- "$opts"
 	while true; do case $1 in
 		-f|--force) force=1; shift ;;
+		-e|--reencrypt) reencrypt=1; shift ;;
 		--) shift; break ;;
 	esac done
 	if [[ $# -ne 2 ]]; then
-		echo "Usage: $PROGRAM $COMMAND [--force,-f] old-path new-path"
+		echo "Usage: $PROGRAM $COMMAND [--reencrypt,-e] [--force,-f] old-path new-path"
 		exit 1
 	fi
 	local old_path="$PREFIX/${1%/}"
@@ -550,7 +571,7 @@ cmd_copy_move() {
 
 	if [[ $move -eq 1 ]]; then
 		mv $interactive -v "$old_path" "$new_path" || exit 1
-		[[ -e "$new_path" ]] && reencrypt_path "$new_path"
+		[[ $reencrypt -eq 1 && -e "$new_path" ]] && reencrypt_path "$new_path"
 
 		if [[ -d $GIT_DIR && ! -e $old_path ]]; then
 			git rm -qr "$old_path"
@@ -562,7 +583,7 @@ cmd_copy_move() {
 		done
 	else
 		cp $interactive -r -v "$old_path" "$new_path" || exit 1
-		[[ -e "$new_path" ]] && reencrypt_path "$new_path"
+		[[ $reencrypt -eq 1 && -e "$new_path" ]] && reencrypt_path "$new_path"
 		git_add_file "$new_path" "Copied ${1} to ${2}."
 	fi
 }

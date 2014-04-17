@@ -126,19 +126,19 @@ alternatively named \fBremove\fP or \fBdelete\fP. If \fI--recursive\fP or \fI-r\
 is specified, delete pass-name recursively if it is a directory. If \fI--force\fP
 or \fI-f\fP is specified, do not interactively prompt before removal.
 .TP
-\fBmv\fP [ \fI--force\fP, \fI-f\fP ] \fIold-path\fP \fInew-path\fP
+\fBmv\fP [ \fI--reencrypt\fP, \fI-e\fP ] [ \fI--force\fP, \fI-f\fP ] \fIold-path\fP \fInew-path\fP
 Renames the password or directory named \fIold-path\fP to \fInew-path\fP. This
 command is alternatively named \fBrename\fP. If \fI--force\fP is specified,
 silently overwrite \fInew-path\fP if it exists. If \fInew-path\fP ends in a
-trailing \fI/\fP, it is always treated as a directory. Passwords will be reencrypted
-to the corresponding keys of their new destination.
+trailing \fI/\fP, it is always treated as a directory. Passwords may be optionally
+reencrypted to the corresponding keys of their new destination.
 .TP
-\fBcp\fP [ \fI--force\fP, \fI-f\fP ] \fIold-path\fP \fInew-path\fP
+\fBcp\fP [ \fI--reencrypt\fP, \fI-e\fP ] [ \fI--force\fP, \fI-f\fP ] \fIold-path\fP \fInew-path\fP
 Copies the password or directory named \fIold-path\fP to \fInew-path\fP. This
 command is alternatively named \fBcopy\fP. If \fI--force\fP is specified,
 silently overwrite \fInew-path\fP if it exists. If \fInew-path\fP ends in a
-trailing \fI/\fP, it is always treated as a directory. Passwords will be reencrypted
-to the corresponding keys of their new destination.
+trailing \fI/\fP, it is always treated as a directory. Passwords may be optionally
+reencrypted to the corresponding keys of their new destination.
 .TP
 \fBgit\fP \fIgit-command-args\fP...
 If the password store is a git repository, pass \fIgit-command-args\fP as arguments to
