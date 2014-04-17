@@ -130,7 +130,15 @@ or \fI-f\fP is specified, do not interactively prompt before removal.
 Renames the password or directory named \fIold-path\fP to \fInew-path\fP. This
 command is alternatively named \fBrename\fP. If \fI--force\fP is specified,
 silently overwrite \fInew-path\fP if it exists. If \fInew-path\fP ends in a
-trailing \fI/\fP, it is always treated as a directory.
+trailing \fI/\fP, it is always treated as a directory. Passwords will be reencrypted
+to the corresponding keys of their new destination.
+.TP
+\fBcp\fP [ \fI--force\fP, \fI-f\fP ] \fIold-path\fP \fInew-path\fP
+Copies the password or directory named \fIold-path\fP to \fInew-path\fP. This
+command is alternatively named \fBcopy\fP. If \fI--force\fP is specified,
+silently overwrite \fInew-path\fP if it exists. If \fInew-path\fP ends in a
+trailing \fI/\fP, it is always treated as a directory. Passwords will be reencrypted
+to the corresponding keys of their new destination.
 .TP
 \fBgit\fP \fIgit-command-args\fP...
 If the password store is a git repository, pass \fIgit-command-args\fP as arguments to

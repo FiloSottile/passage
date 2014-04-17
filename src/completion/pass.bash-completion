@@ -57,7 +57,7 @@ _pass()
 {
 	COMPREPLY=()
 	local cur="${COMP_WORDS[COMP_CWORD]}"
-	local commands="init ls find grep show insert generate edit rm git help version"
+	local commands="init ls find grep show insert generate edit rm mv cp git help version"
 	if [[ $COMP_CWORD -gt 1 ]]; then
 		local lastarg="${COMP_WORDS[$COMP_CWORD-1]}"
 		case "${COMP_WORDS[1]}" in
@@ -84,7 +84,7 @@ _pass()
 				COMPREPLY+=($(compgen -W "-n --no-symbols -c --clip -f --force" -- ${cur}))
 				_pass_complete_entries
 				;;
-			mv|rename)
+			cp|copy|mv|rename)
 				COMPREPLY+=($(compgen -W "-f --force" -- ${cur}))
 				_pass_complete_entries
 				;;

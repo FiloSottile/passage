@@ -48,7 +48,7 @@ _pass () {
 					"--clip[copy password to the clipboard]"
 				_pass_complete_entries_with_subdirs
 				;;
-			mv|rename)
+			cp|copy|mv|rename)
 				_arguments : \
 					"-f[force rename]" \
 					"--force[force rename]" \
@@ -90,6 +90,7 @@ _pass () {
 			"generate:Generate a new password using pwgen"
 			"edit:Edit a password with \$EDITOR"
 			"mv:Rename the password"
+			"cp:Copy the password"
 			"rm:Remove the password"
 			"git:Call git on the password store"
 			"version:Output version information"

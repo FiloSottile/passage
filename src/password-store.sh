@@ -80,6 +80,20 @@ agent_check() {
 	_EOF
 	)"
 }
+reencrypt_path() {
+	local passfile
+	local passfile_dir
+	local fake_uniqueness_safety
+	find "$1" -iname '*.gpg' | while read -r passfile; do
+		fake_uniqueness_safety="$RANDOM"
+		passfile_dir="${passfile%/*}"
+		passfile_dir="${passfile_dir#$PREFIX}"
+		passfile_dir="${passfile_dir#/}"
+		set_gpg_recipients "$passfile_dir"
+		$GPG -d $GPG_OPTS "$passfile" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile.new.$fake_uniqueness_safety" $GPG_OPTS &&
+		mv -v "$passfile.new.$fake_uniqueness_safety" "$passfile"
+	done
+}
 
 #
 # END helper functions
@@ -192,6 +206,8 @@ cmd_usage() {
 	        Remove existing password or directory, optionally forcefully.
 	    $PROGRAM mv [--force,-f] old-path new-path
 	        Renames or moves old-path to new-path, optionally forcefully.
+	    $PROGRAM cv [--force,-f] old-path new-path
+	        Copies old-path to new-path, optionally forcefully.
 	    $PROGRAM git git-command-args...
 	        If the password store is a git repository, execute a git command
 	        specified by git-command-args.
@@ -238,16 +254,7 @@ cmd_init() {
 
 	if [[ $reencrypt -eq 1 ]]; then
 		agent_check
-		local passfile
-		find "$PREFIX/$id_path" -iname '*.gpg' | while read -r passfile; do
-			fake_uniqueness_safety="$RANDOM"
-			passfile_dir="${passfile%/*}"
-			passfile_dir="${passfile_dir#$PREFIX}"
-			passfile_dir="${passfile_dir#/}"
-			set_gpg_recipients "$passfile_dir"
-			$GPG -d $GPG_OPTS "$passfile" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile.new.$fake_uniqueness_safety" $GPG_OPTS &&
-			mv -v "$passfile.new.$fake_uniqueness_safety" "$passfile"
-		done
+		reencrypt_path "$PREFIX/$id_path"
 		git_add_file "$PREFIX/$id_path" "Reencrypted password store using new GPG id ${id_print}."
 	fi
 }
@@ -503,9 +510,12 @@ cmd_delete() {
 	fi
 }
 
-cmd_rename() {
-	local force=0
+cmd_copy_move() {
+	local move=1
+	[[ $1 == "copy" ]] && move=0
+	shift
 
+	local force=0
 	local opts
 	opts="$($GETOPT -o f -l force -n "$PROGRAM" -- "$@")"
 	local err=$?
@@ -537,16 +547,23 @@ cmd_rename() {
 	local interactive="-i"
 	[[ $force -eq 1 ]] && interactive="-f"
 
-	mv $interactive -v "$old_path" "$new_path" || exit 1
+	if [[ $move -eq 1 ]]; then
+		mv $interactive -v "$old_path" "$new_path" || exit 1
+		[[ -e "$new_path" ]] && reencrypt_path "$new_path"
 
-	if [[ -d $GIT_DIR && ! -e $old_path ]]; then
-		git rm -qr "$old_path"
-		git_add_file "$new_path" "Renamed ${1} to ${2}."
+		if [[ -d $GIT_DIR && ! -e $old_path ]]; then
+			git rm -qr "$old_path"
+			git_add_file "$new_path" "Renamed ${1} to ${2}."
+		fi
+
+		while rmdir "$old_dir" &>/dev/null; do
+			old_dir="${old_dir%/*}"
+		done
+	else
+		cp $interactive -r -v "$old_path" "$new_path" || exit 1
+		[[ -e "$new_path" ]] && reencrypt_path "$new_path"
+		git_add_file "$new_path" "Copied ${1} to ${2}."
 	fi
-
-	while rmdir "$old_dir" &>/dev/null; do
-		old_dir="${old_dir%/*}"
-	done
 }
 
 cmd_git() {
@@ -579,7 +596,8 @@ case "$1" in
 	edit) shift;			cmd_edit "$@"; ;;
 	generate) shift;		cmd_generate "$@"; ;;
 	delete|rm|remove) shift;	cmd_delete "$@"; ;;
-	rename|mv) shift;		cmd_rename "$@"; ;;
+	rename|mv) shift;		cmd_copy_move "move" "$@"; ;;
+	copy|cp) shift;			cmd_copy_move "copy" "$@"; ;;
 	git) shift;			cmd_git "$@"; ;;
 	*) COMMAND="show";		cmd_show "$@"; ;;
 esac
