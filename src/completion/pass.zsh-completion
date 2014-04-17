@@ -23,8 +23,6 @@ _pass () {
 		case "${cmd}" in
 			init)
 				_arguments : \
-					"-e[re-encrypt existing passwords]" \
-					"--reencrypt[re-encrypt existing passwords]" \
 					"-p[gpg-id will only be applied to this subfolder]" \
 					"--path[gpg-id will only be applied to this subfolder]"
 				_pass_complete_keys
@@ -51,9 +49,7 @@ _pass () {
 			cp|copy|mv|rename)
 				_arguments : \
 					"-f[force rename]" \
-					"--force[force rename]" \
-					"-e[reencrypt to new gpg-id]" \
-					"--reencrypt[reencrypt to new gpg-id]"
+					"--force[force rename]"
 					_pass_complete_entries_with_subdirs
 				;;
 			rm)

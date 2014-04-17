@@ -200,9 +200,9 @@ cmd_usage() {
 	echo
 	cat <<-_EOF
 	Usage:
-	    $PROGRAM init [--reencrypt,-e] [--path=subfolder,-p subfolder] gpg-id...
+	    $PROGRAM init [--path=subfolder,-p subfolder] gpg-id...
 	        Initialize new password storage and use gpg-id for encryption.
-	        Optionally reencrypt existing passwords using new gpg-id.
+	        Selectively reencrypt existing passwords using new gpg-id.
 	    $PROGRAM [ls] [subfolder]
 	        List passwords.
 	    $PROGRAM find pass-names...
@@ -224,10 +224,10 @@ cmd_usage() {
 	        Prompt before overwriting existing password unless forced.
 	    $PROGRAM rm [--recursive,-r] [--force,-f] pass-name
 	        Remove existing password or directory, optionally forcefully.
-	    $PROGRAM mv [--reencrypt,-e] [--force,-f] old-path new-path
-	        Renames or moves old-path to new-path, optionally forcefully, optionally reencrypting.
-	    $PROGRAM cp [--reencrypt,-e] [--force,-f] old-path new-path
-	        Copies old-path to new-path, optionally forcefully, optionally reencrypting.
+	    $PROGRAM mv [--force,-f] old-path new-path
+	        Renames or moves old-path to new-path, optionally forcefully, selectively reencrypting.
+	    $PROGRAM cp [--force,-f] old-path new-path
+	        Copies old-path to new-path, optionally forcefully, selectively reencrypting.
 	    $PROGRAM git git-command-args...
 	        If the password store is a git repository, execute a git command
 	        specified by git-command-args.
@@ -241,21 +241,19 @@ cmd_usage() {
 }
 
 cmd_init() {
-	local reencrypt=0
 	local id_path=""
 
 	local opts
-	opts="$($GETOPT -o ep: -l reencrypt,path: -n "$PROGRAM" -- "$@")"
+	opts="$($GETOPT -o p: -l path: -n "$PROGRAM" -- "$@")"
 	local err=$?
 	eval set -- "$opts"
 	while true; do case $1 in
-		-e|--reencrypt) reencrypt=1; shift ;;
 		-p|--path) id_path="$2"; shift 2 ;;
 		--) shift; break ;;
 	esac done
 
 	if [[ $err -ne 0 || $# -lt 1 ]]; then
-		echo "Usage: $PROGRAM $COMMAND [--reencrypt,-e] [--path=subfolder,-p subfolder] gpg-id..."
+		echo "Usage: $PROGRAM $COMMAND [--path=subfolder,-p subfolder] gpg-id..."
 		exit 1
 	fi
 	if [[ -n $id_path && ! -d $PREFIX/$id_path ]]; then
@@ -272,11 +270,9 @@ cmd_init() {
 	echo "Password store initialized for ${id_print%, }"
 	git_add_file "$gpg_id" "Set GPG id to ${id_print%, }."
 
-	if [[ $reencrypt -eq 1 ]]; then
-		agent_check
-		reencrypt_path "$PREFIX/$id_path"
-		git_add_file "$PREFIX/$id_path" "Reencrypted password store using new GPG id ${id_print%, }."
-	fi
+	agent_check
+	reencrypt_path "$PREFIX/$id_path"
+	git_add_file "$PREFIX/$id_path" "Reencrypted password store using new GPG id ${id_print%, }."
 }
 
 cmd_show() {
@@ -536,18 +532,16 @@ cmd_copy_move() {
 	shift
 
 	local force=0
-	local reencrypt=0
 	local opts
 	opts="$($GETOPT -o f -l force -n "$PROGRAM" -- "$@")"
 	local err=$?
 	eval set -- "$opts"
 	while true; do case $1 in
 		-f|--force) force=1; shift ;;
-		-e|--reencrypt) reencrypt=1; shift ;;
 		--) shift; break ;;
 	esac done
 	if [[ $# -ne 2 ]]; then
-		echo "Usage: $PROGRAM $COMMAND [--reencrypt,-e] [--force,-f] old-path new-path"
+		echo "Usage: $PROGRAM $COMMAND [--force,-f] old-path new-path"
 		exit 1
 	fi
 	local old_path="$PREFIX/${1%/}"
@@ -571,7 +565,7 @@ cmd_copy_move() {
 
 	if [[ $move -eq 1 ]]; then
 		mv $interactive -v "$old_path" "$new_path" || exit 1
-		[[ $reencrypt -eq 1 && -e "$new_path" ]] && reencrypt_path "$new_path"
+		[[ -e "$new_path" ]] && reencrypt_path "$new_path"
 
 		if [[ -d $GIT_DIR && ! -e $old_path ]]; then
 			git rm -qr "$old_path"
@@ -583,7 +577,7 @@ cmd_copy_move() {
 		done
 	else
 		cp $interactive -r -v "$old_path" "$new_path" || exit 1
-		[[ $reencrypt -eq 1 && -e "$new_path" ]] && reencrypt_path "$new_path"
+		[[ -e "$new_path" ]] && reencrypt_path "$new_path"
 		git_add_file "$new_path" "Copied ${1} to ${2}."
 	fi
 }

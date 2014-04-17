@@ -65,7 +65,7 @@ _pass()
 				if [[ $lastarg == "-p" || $lastarg == "--path" ]]; then
 					_pass_complete_folders
 				else
-					COMPREPLY+=($(compgen -W "-e --reencrypt -p --path" -- ${cur}))
+					COMPREPLY+=($(compgen -W "-p --path" -- ${cur}))
 					_pass_complete_keys
 				fi
 				;;
@@ -85,7 +85,7 @@ _pass()
 				_pass_complete_entries
 				;;
 			cp|copy|mv|rename)
-				COMPREPLY+=($(compgen -W "-e --reencrypt -f --force" -- ${cur}))
+				COMPREPLY+=($(compgen -W "-f --force" -- ${cur}))
 				_pass_complete_entries
 				;;
 			rm|remove|delete)

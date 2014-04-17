@@ -51,14 +51,14 @@ password names in
 .SH COMMANDS
 
 .TP
-\fBinit\fP [ \fI--reencrypt\fP, \fI-e\fP ] [ \fI--path=sub-folder\fP, \fI-p sub-folder\fP ] \fIgpg-id...\fP
+\fBinit\fP [ \fI--path=sub-folder\fP, \fI-p sub-folder\fP ] \fIgpg-id...\fP
 Initialize new password storage and use
 .I gpg-id
 for encryption. Multiple gpg-ids may be specified, in order to encrypt each
 password with multiple ids. This command must be run first before a password
-store can be used. If \fI--reencrypt\fP or \fI-e\fP is specified, reencrypt
-all existing passwords in the password store using \fIgpg-id\fP. Note that
-use of
+store can be used. If the specified \fIgpg-id\fP is different from the key
+used in any existing files, these files will be reencrypted to use the new id.
+Note that use of
 .BR gpg-agent (1)
 is recommended so that the batch decryption does not require as much user
 intervention. If \fI--path\fP or \fI-p\fP is specified, along with an argument,
@@ -126,18 +126,18 @@ alternatively named \fBremove\fP or \fBdelete\fP. If \fI--recursive\fP or \fI-r\
 is specified, delete pass-name recursively if it is a directory. If \fI--force\fP
 or \fI-f\fP is specified, do not interactively prompt before removal.
 .TP
-\fBmv\fP [ \fI--reencrypt\fP, \fI-e\fP ] [ \fI--force\fP, \fI-f\fP ] \fIold-path\fP \fInew-path\fP
+\fBmv\fP [ \fI--force\fP, \fI-f\fP ] \fIold-path\fP \fInew-path\fP
 Renames the password or directory named \fIold-path\fP to \fInew-path\fP. This
 command is alternatively named \fBrename\fP. If \fI--force\fP is specified,
 silently overwrite \fInew-path\fP if it exists. If \fInew-path\fP ends in a
-trailing \fI/\fP, it is always treated as a directory. Passwords may be optionally
+trailing \fI/\fP, it is always treated as a directory. Passwords are selectively
 reencrypted to the corresponding keys of their new destination.
 .TP
-\fBcp\fP [ \fI--reencrypt\fP, \fI-e\fP ] [ \fI--force\fP, \fI-f\fP ] \fIold-path\fP \fInew-path\fP
+\fBcp\fP [ \fI--force\fP, \fI-f\fP ] \fIold-path\fP \fInew-path\fP
 Copies the password or directory named \fIold-path\fP to \fInew-path\fP. This
 command is alternatively named \fBcopy\fP. If \fI--force\fP is specified,
 silently overwrite \fInew-path\fP if it exists. If \fInew-path\fP ends in a
-trailing \fI/\fP, it is always treated as a directory. Passwords may be optionally
+trailing \fI/\fP, it is always treated as a directory. Passwords are selectively
 reencrypted to the corresponding keys of their new destination.
 .TP
 \fBgit\fP \fIgit-command-args\fP...
