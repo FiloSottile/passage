@@ -122,25 +122,29 @@ def decrypt_gz(key, cipher_text):
         ct = c.decrypt(cipher_text[28:], iv=iv)
     return ct
 
-def main(datafile, verbose=False):
+def main(datafile, verbose=False, xml=False):
     f = None
     with open(datafile, "rb") as f:
         # Encrypted data
         data = f.read()
-    password = getpass.getpass()
-    # Pad password
-    password += (chr(0) * (32 - len(password)))
-    # Decrypt. Decrypted data is compressed
-    cleardata_gz = decrypt_gz(password, data)
-    # Length of data padding
-    padlen = ord(cleardata_gz[-1])
-    # Decompress actual data (15 is wbits [ref3] DON'T CHANGE, 2**15 is the (initial) buf size)
-    xmldata = zlib.decompress(cleardata_gz[:-padlen], 15, 2**15)
+    if xml:
+        xmldata = data
+    else:
+        password = getpass.getpass()
+        # Pad password
+        password += (chr(0) * (32 - len(password)))
+        # Decrypt. Decrypted data is compressed
+        cleardata_gz = decrypt_gz(password, data)
+        # Length of data padding
+        padlen = ord(cleardata_gz[-1])
+        # Decompress actual data (15 is wbits [ref3] DON'T CHANGE, 2**15 is the (initial) buf size)
+        xmldata = zlib.decompress(cleardata_gz[:-padlen], 15, 2**15)
     root = etree.fromstring(xmldata)
     import_subentries(root, verbose=verbose)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('-x', '--xml', help='read plain XML file', action='store_true')
     parser.add_argument('--verbose', '-v', action='count')
     parser.add_argument('FILE', help="the file storing the Revelation passwords")
     args = parser.parse_args()
@@ -149,7 +153,7 @@ if __name__ == '__main__':
         sys.stderr.write(s+'\n')
 
     try:
-        main(args.FILE, verbose=args.verbose)
+        main(args.FILE, verbose=args.verbose, xml=args.xml)
     except KeyboardInterrupt:
         if args.verbose:
             traceback.print_exc()
