@@ -114,6 +114,14 @@ reencrypt_path() {
 		prev_gpg_recipients="${GPG_RECIPIENTS[@]}"
 	done
 }
+check_sneaky_paths() {
+	for path in "$@"; do
+		if [[ $path =~ /\.\.$ || $path =~ ^\.\./ || $path =~ /\.\./ || $path =~ ^\.\.$ ]]; then
+			echo "Error: You've attempted to pass a sneaky path to pass. Go home."
+			exit 1
+		fi
+	done
+}
 
 #
 # END helper functions
@@ -256,6 +264,7 @@ cmd_init() {
 		echo "Usage: $PROGRAM $COMMAND [--path=subfolder,-p subfolder] gpg-id..."
 		exit 1
 	fi
+	[[ -n $id_path ]] && check_sneaky_paths "$id_path"
 	if [[ -n $id_path && ! -d $PREFIX/$id_path ]]; then
 		if [[ -e $PREFIX/$id_path ]]; then
 			echo "Error: $PREFIX/$id_path exists but is not a directory."
@@ -309,6 +318,7 @@ cmd_show() {
 
 	local path="$1"
 	local passfile="$PREFIX/$path.gpg"
+	check_sneaky_paths "$path"
 	if [[ -f $passfile ]]; then
 		if [[ $clip -eq 0 ]]; then
 			exec $GPG -d $GPG_OPTS "$passfile"
@@ -396,6 +406,7 @@ cmd_insert() {
 	fi
 	local path="$1"
 	local passfile="$PREFIX/$path.gpg"
+	check_sneaky_paths "$path"
 
 	[[ $force -eq 0 && -e $passfile ]] && yesno "An entry already exists for $path. Overwrite it?"
 
@@ -436,6 +447,7 @@ cmd_edit() {
 	fi
 
 	local path="$1"
+	check_sneaky_paths "$path"
 	mkdir -p -v "$PREFIX/$(dirname "$path")"
 	set_gpg_recipients "$(dirname "$path")"
 	local passfile="$PREFIX/$path.gpg"
@@ -481,6 +493,7 @@ cmd_generate() {
 	fi
 	local path="$1"
 	local length="$2"
+	check_sneaky_paths "$path"
 	if [[ ! $length =~ ^[0-9]+$ ]]; then
 		echo "pass-length \"$length\" must be a number."
 		exit 1
@@ -522,6 +535,7 @@ cmd_delete() {
 		exit 1
 	fi
 	local path="$1"
+	check_sneaky_paths "$path"
 
 	local passfile="$PREFIX/${path%/}"
 	if [[ ! -d $passfile ]]; then
@@ -560,6 +574,7 @@ cmd_copy_move() {
 		echo "Usage: $PROGRAM $COMMAND [--force,-f] old-path new-path"
 		exit 1
 	fi
+	check_sneaky_paths "$@"
 	local old_path="$PREFIX/${1%/}"
 	local new_path="$PREFIX/$2"
 	local old_dir="$old_path"
