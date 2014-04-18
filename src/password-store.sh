@@ -275,6 +275,10 @@ cmd_init() {
 			git rm -qr "$gpg_id"
 			git_commit "Deinitialized ${gpg_id}."
 		fi
+		gpg_id="${gpg_id%/*}"
+		while rmdir "$gpg_id" &>/dev/null; do
+			gpg_id="${gpg_id%/*}"
+		done
 		exit 0
 	fi
 
@@ -538,6 +542,10 @@ cmd_delete() {
 		git rm -qr "$passfile"
 		git_commit "Removed $path from store."
 	fi
+	passfile="${passfile%/*}"
+	while rmdir "$passfile" &>/dev/null; do
+		passfile="${passfile%/*}"
+	done
 }
 
 cmd_copy_move() {
