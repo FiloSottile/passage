@@ -29,9 +29,9 @@ git_add_file() {
 	git_commit "$2"
 }
 git_commit() {
-	local sign
+	local sign=""
 	[[ -d $GIT_DIR ]] || return
-	[[ $(git config --bool --get pass.signcommits) == "true" ]] && sign="-S" || sign=""
+	[[ $(git config --bool --get pass.signcommits) == "true" ]] && sign="-S"
 	git commit $sign -m "$1"
 }
 yesno() {
@@ -112,6 +112,12 @@ reencrypt_path() {
 		fi
 
 		prev_gpg_recipients="${GPG_RECIPIENTS[@]}"
+	done
+}
+remove_empty_directories() {
+	local old_dir="$1"
+	while rmdir "$old_dir" &>/dev/null; do
+		old_dir="${old_dir%/*}"
 	done
 }
 
@@ -275,10 +281,7 @@ cmd_init() {
 			git rm -qr "$gpg_id"
 			git_commit "Deinitialized ${gpg_id}."
 		fi
-		gpg_id="${gpg_id%/*}"
-		while rmdir "$gpg_id" &>/dev/null; do
-			gpg_id="${gpg_id%/*}"
-		done
+		remove_empty_directories "${gpg_id%/*}"
 		exit 0
 	fi
 
@@ -542,10 +545,7 @@ cmd_delete() {
 		git rm -qr "$passfile"
 		git_commit "Removed $path from store."
 	fi
-	passfile="${passfile%/*}"
-	while rmdir "$passfile" &>/dev/null; do
-		passfile="${passfile%/*}"
-	done
+	remove_empty_directories "${passfile%/*}"
 }
 
 cmd_copy_move() {
@@ -593,10 +593,7 @@ cmd_copy_move() {
 			git rm -qr "$old_path"
 			git_add_file "$new_path" "Renamed ${1} to ${2}."
 		fi
-
-		while rmdir "$old_dir" &>/dev/null; do
-			old_dir="${old_dir%/*}"
-		done
+		remove_empty_directories "$old_dir"
 	else
 		cp $interactive -r -v "$old_path" "$new_path" || exit 1
 		[[ -e "$new_path" ]] && reencrypt_path "$new_path"
