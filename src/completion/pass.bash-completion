@@ -12,15 +12,20 @@ _pass_complete_entries () {
 	local IFS=$'\n'
 	local items=($(compgen -f $prefix$cur))
 	for item in ${items[@]}; do
-		[[ $item == $prefix.* ]] && continue
+		[[ $item =~ /\.[^/]*$ ]] && continue
 
 		# if there is a unique match, and it is a directory with one entry
 		# autocomplete the subentry as well (recursively)
 		if [[ ${#items[@]} -eq 1 && $autoexpand -eq 1 ]]; then
 			while [[ -d $item ]]; do
 				local subitems=($(compgen -f "$item/"))
-				if [[ ${#subitems[@]} -eq 1 ]]; then
-					item="${subitems[0]}"
+				local filtereditems=( )
+				for item2 in "${subitems[@]}"; do
+					[[ $item2 =~ /\.[^/]*$ ]] && continue
+					filtereditems+=( "$item2" )
+				done
+				if [[ ${#filtereditems[@]} -eq 1 ]]; then
+					item="${filtereditems[0]}"
 				else
 					break
 				fi
