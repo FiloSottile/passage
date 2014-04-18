@@ -263,8 +263,22 @@ cmd_init() {
 		fi
 	fi
 
-	mkdir -v -p "$PREFIX/$id_path"
 	local gpg_id="$PREFIX/$id_path/.gpg-id"
+
+	if [[ $# -eq 1 && -z $1 ]]; then
+		if [[ ! -f "$gpg_id" ]]; then
+			echo "Error: $gpg_id does not exist and so cannot be removed."
+			exit 1
+		fi
+		rm -v -f "$gpg_id" || exit 1
+		if [[ -d $GIT_DIR ]]; then
+			git rm -qr "$gpg_id"
+			git_commit "Deinitialized ${gpg_id}."
+		fi
+		exit 0
+	fi
+
+	mkdir -v -p "$PREFIX/$id_path"
 	printf "%s\n" "$@" > "$gpg_id"
 	local id_print="$(printf "%s, " "$@")"
 	echo "Password store initialized for ${id_print%, }"

@@ -63,7 +63,9 @@ Note that use of
 is recommended so that the batch decryption does not require as much user
 intervention. If \fI--path\fP or \fI-p\fP is specified, along with an argument,
 a specific gpg-id or set of gpg-ids is assigned for that specific sub folder of
-the password store.
+the password store. If only one \fIgpg-id\fP is given, and it is an empty string,
+then the current \fI.gpg-id\fP file for the specified \fIsub-folder\fP (or root if
+unspecified) is removed.
 .TP
 \fBls\fP \fIsubfolder\fP
 List names of passwords inside the tree at
