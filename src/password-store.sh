@@ -114,12 +114,6 @@ reencrypt_path() {
 		prev_gpg_recipients="${GPG_RECIPIENTS[@]}"
 	done
 }
-remove_empty_directories() {
-	local old_dir="$1"
-	while rmdir "$old_dir" &>/dev/null; do
-		old_dir="${old_dir%/*}"
-	done
-}
 
 #
 # END helper functions
@@ -281,7 +275,7 @@ cmd_init() {
 			git rm -qr "$gpg_id"
 			git_commit "Deinitialized ${gpg_id}."
 		fi
-		remove_empty_directories "${gpg_id%/*}"
+		rmdir -p "${gpg_id%/*}" 2>/dev/null
 		exit 0
 	fi
 
@@ -545,7 +539,7 @@ cmd_delete() {
 		git rm -qr "$passfile"
 		git_commit "Removed $path from store."
 	fi
-	remove_empty_directories "${passfile%/*}"
+	rmdir -p "${passfile%/*}" 2>/dev/null
 }
 
 cmd_copy_move() {
@@ -593,7 +587,7 @@ cmd_copy_move() {
 			git rm -qr "$old_path"
 			git_add_file "$new_path" "Renamed ${1} to ${2}."
 		fi
-		remove_empty_directories "$old_dir"
+		rmdir -p "$old_dir" 2>/dev/null
 	else
 		cp $interactive -r -v "$old_path" "$new_path" || exit 1
 		[[ -e "$new_path" ]] && reencrypt_path "$new_path"
