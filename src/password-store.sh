@@ -630,19 +630,19 @@ PROGRAM="${0##*/}"
 COMMAND="$1"
 
 case "$1" in
-	init) shift;			cmd_init "$@"; ;;
-	help|--help) shift;		cmd_usage "$@"; ;;
-	version|--version) shift;	cmd_version "$@"; ;;
-	show|ls|list) shift;		cmd_show "$@"; ;;
-	find|search) shift;		cmd_find "$@"; ;;
-	grep) shift;			cmd_grep "$@"; ;;
-	insert) shift;			cmd_insert "$@"; ;;
-	edit) shift;			cmd_edit "$@"; ;;
-	generate) shift;		cmd_generate "$@"; ;;
-	delete|rm|remove) shift;	cmd_delete "$@"; ;;
-	rename|mv) shift;		cmd_copy_move "move" "$@"; ;;
-	copy|cp) shift;			cmd_copy_move "copy" "$@"; ;;
-	git) shift;			cmd_git "$@"; ;;
-	*) COMMAND="show";		cmd_show "$@"; ;;
+	init) shift;			cmd_init "$@" ;;
+	help|--help) shift;		cmd_usage "$@" ;;
+	version|--version) shift;	cmd_version "$@" ;;
+	show|ls|list) shift;		cmd_show "$@" ;;
+	find|search) shift;		cmd_find "$@" ;;
+	grep) shift;			cmd_grep "$@" ;;
+	insert) shift;			cmd_insert "$@" ;;
+	edit) shift;			cmd_edit "$@" ;;
+	generate) shift;		cmd_generate "$@" ;;
+	delete|rm|remove) shift;	cmd_delete "$@" ;;
+	rename|mv) shift;		cmd_copy_move "move" "$@" ;;
+	copy|cp) shift;			cmd_copy_move "copy" "$@" ;;
+	git) shift;			cmd_git "$@" ;;
+	*) COMMAND="show";		cmd_show "$@" ;;
 esac
 exit 0
