@@ -88,17 +88,17 @@ reencrypt_path() {
 	local passfile
 	local passfile_dir
 	local passfile_display
-	local fake_uniqueness_safety
+	local passfile_temp
 	local prev_gpg_recipients
 	local gpg_keys
 	local current_keys
 	find "$1" -iname '*.gpg' | while read -r passfile; do
-		fake_uniqueness_safety="$RANDOM"
 		passfile_dir="${passfile%/*}"
 		passfile_dir="${passfile_dir#$PREFIX}"
 		passfile_dir="${passfile_dir#/}"
 		passfile_display="${passfile#$PREFIX/}"
 		passfile_display="${passfile_display%.gpg}"
+		passfile_temp="${passfile}.tmp.${RANDOM}.${RANDOM}.${RANDOM}.${RANDOM}.--"
 
 		set_gpg_recipients "$passfile_dir"
 		[[ $prev_gpg_recipients != "${GPG_RECIPIENTS[@]}" ]] &&
@@ -107,8 +107,8 @@ reencrypt_path() {
 
 		if [[ $gpg_keys != "$current_keys" ]]; then
 			echo "$passfile_display: reencrypting to ${gpg_keys//$'\n'/ }"
-			$GPG -d $GPG_OPTS "$passfile" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile.new.$fake_uniqueness_safety" $GPG_OPTS &&
-			mv "$passfile.new.$fake_uniqueness_safety" "$passfile" || rm -f "$passfile.new.$fake_uniqueness_safety"
+			$GPG -d $GPG_OPTS "$passfile" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile_temp" $GPG_OPTS &&
+			mv "$passfile_temp" "$passfile" || rm -f "$passfile_temp"
 		fi
 
 		prev_gpg_recipients="${GPG_RECIPIENTS[@]}"
