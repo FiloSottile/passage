@@ -177,7 +177,7 @@ tmpdir() {
 GETOPT="getopt"
 SHRED="shred -f -z"
 
-source "$PASSWORD_STORE_PLATFORM_FILE" 2>/dev/null
+source "$(dirname "$0")/platform/$(uname | cut -d _ -f 1 | tr '[:upper:]' '[:lower:]').sh" 2>/dev/null # PLATFORM_FUNCTION_FILE
 
 #
 # END platform definable
