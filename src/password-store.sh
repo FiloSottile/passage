@@ -177,7 +177,7 @@ tmpdir() {
 GETOPT="getopt"
 SHRED="shred -f -z"
 
-# source /path/to/platform-defined-functions
+source "$PASSWORD_STORE_PLATFORM_FILE" 2>/dev/null
 
 #
 # END platform definable
