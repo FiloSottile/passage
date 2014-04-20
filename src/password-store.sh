@@ -102,8 +102,8 @@ reencrypt_path() {
 
 		set_gpg_recipients "$passfile_dir"
 		[[ $prev_gpg_recipients != "${GPG_RECIPIENTS[@]}" ]] &&
-		gpg_keys="$($GPG --list-keys --keyid-format long "${GPG_RECIPIENTS[@]}" | sed -n 's/sub *.*\/\([A-F0-9]\{16\}\) .*/\1/p' | sort | uniq)"
-		current_keys="$($GPG -v --list-only --keyid-format long "$passfile" 2>&1 | cut -d ' ' -f 5 | sort | uniq)"
+		gpg_keys="$($GPG --list-keys --keyid-format long "${GPG_RECIPIENTS[@]}" | sed -n 's/sub *.*\/\([A-F0-9]\{16\}\) .*/\1/p' | sort -u)"
+		current_keys="$($GPG -v --list-only --keyid-format long "$passfile" 2>&1 | cut -d ' ' -f 5 | sort -u)"
 
 		if [[ $gpg_keys != "$current_keys" ]]; then
 			echo "$passfile_display: reencrypting to ${gpg_keys//$'\n'/ }"
