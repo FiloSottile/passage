@@ -42,7 +42,6 @@ yesno() {
 set_gpg_recipients() {
 	GPG_RECIPIENT_ARGS=( )
 	GPG_RECIPIENTS=( )
-	local gpg_id
 
 	if [[ -n $PASSWORD_STORE_KEY ]]; then
 		for gpg_id in $PASSWORD_STORE_KEY; do
@@ -85,26 +84,26 @@ agent_check() {
 	)"
 }
 reencrypt_path() {
-	local passfile passfile_dir passfile_display passfile_temp prev_gpg_recipients gpg_keys current_keys config
+	local prev_gpg_recipients="" gpg_keys="" current_keys="" index
 	local groups="$($GPG --list-config --with-colons | grep ^cfg:group:.*)"
 	while read -r -d "" passfile; do
-		passfile_dir="${passfile%/*}"
+		local passfile_dir="${passfile%/*}"
 		passfile_dir="${passfile_dir#$PREFIX}"
 		passfile_dir="${passfile_dir#/}"
-		passfile_display="${passfile#$PREFIX/}"
+		local passfile_display="${passfile#$PREFIX/}"
 		passfile_display="${passfile_display%.gpg}"
-		passfile_temp="${passfile}.tmp.${RANDOM}.${RANDOM}.${RANDOM}.${RANDOM}.--"
+		local passfile_temp="${passfile}.tmp.${RANDOM}.${RANDOM}.${RANDOM}.${RANDOM}.--"
 
 		set_gpg_recipients "$passfile_dir"
 		if [[ $prev_gpg_recipients != "${GPG_RECIPIENTS[@]}" ]]; then
-			for config in "${!GPG_RECIPIENTS[@]}"; do
-				local group="$(sed -n "s/^cfg:group:${GPG_RECIPIENTS[$config]}:\\(.*\\)$/\\1/p" <<<"$groups" | head -n 1)"
+			for index in "${!GPG_RECIPIENTS[@]}"; do
+				local group="$(sed -n "s/^cfg:group:${GPG_RECIPIENTS[$index]}:\\(.*\\)$/\\1/p" <<<"$groups" | head -n 1)"
 				[[ -z $group ]] && continue
 				local saved_ifs="$IFS"
 				IFS=";"
 				GPG_RECIPIENTS+=( $group )
 				IFS="$saved_ifs"
-				unset GPG_RECIPIENTS[$config]
+				unset GPG_RECIPIENTS[$index]
 			done
 			gpg_keys="$($GPG --list-keys --keyid-format long "${GPG_RECIPIENTS[@]}" | sed -n 's/sub *.*\/\([A-F0-9]\{16\}\) .*/\1/p' | sort -u)"
 		fi
@@ -119,6 +118,7 @@ reencrypt_path() {
 	done < <(find "$1" -iname '*.gpg' -print0)
 }
 check_sneaky_paths() {
+	local path
 	for path in "$@"; do
 		if [[ $path =~ /\.\.$ || $path =~ ^\.\./ || $path =~ /\.\./ || $path =~ ^\.\.$ ]]; then
 			echo "Error: You've attempted to pass a sneaky path to pass. Go home."
@@ -253,9 +253,7 @@ cmd_usage() {
 }
 
 cmd_init() {
-	local id_path=""
-
-	local opts
+	local opts id_path=""
 	opts="$($GETOPT -o p: -l path: -n "$PROGRAM" -- "$@")"
 	local err=$?
 	eval set -- "$opts"
@@ -303,9 +301,7 @@ cmd_init() {
 }
 
 cmd_show() {
-	local clip=0
-
-	local opts
+	local opts clip=0
 	opts="$($GETOPT -o c -l clip -n "$PROGRAM" -- "$@")"
 	local err=$?
 	eval set -- "$opts"
@@ -371,14 +367,13 @@ cmd_grep() {
 		exit 1
 	fi
 	agent_check
-	local passfile passfile_dir grepresults
 	local search="$1"
 	while read -r -d "" passfile; do
-		grepresults="$($GPG -d $GPG_OPTS "$passfile" | grep --color=always "$search")"
+		local grepresults="$($GPG -d $GPG_OPTS "$passfile" | grep --color=always "$search")"
 		[ $? -ne 0 ] && continue
 		passfile="${passfile%.gpg}"
 		passfile="${passfile#$PREFIX/}"
-		passfile_dir="${passfile%/*}"
+		local passfile_dir="${passfile%/*}"
 		passfile="${passfile##*/}"
 		printf "\e[94m$passfile_dir/\e[1m$passfile\e[0m:\n"
 		echo "$grepresults"
@@ -386,8 +381,7 @@ cmd_grep() {
 }
 
 cmd_insert() {
-	local multiline=0 noecho=1 force=0
-	local opts
+	local opts multiline=0 noecho=1 force=0
 	opts="$($GETOPT -o mef -l multiline,echo,force -n "$PROGRAM" -- "$@")"
 	local err=$?
 	eval set -- "$opts"
@@ -469,8 +463,7 @@ cmd_edit() {
 }
 
 cmd_generate() {
-	local clip=0 force=0 symbols="-y"
-	local opts
+	local opts clip=0 force=0 symbols="-y"
 	opts="$($GETOPT -o ncf -l no-symbols,clip,force -n "$PROGRAM" -- "$@")"
 	local err=$?
 	eval set -- "$opts"
@@ -512,8 +505,7 @@ cmd_generate() {
 }
 
 cmd_delete() {
-	local recursive="" force=0
-	local opts
+	local opts recursive="" force=0
 	opts="$($GETOPT -o rf -l recursive,force -n "$PROGRAM" -- "$@")"
 	local err=$?
 	eval set -- "$opts"
@@ -549,11 +541,9 @@ cmd_delete() {
 }
 
 cmd_copy_move() {
-	local move=1 force=0
+	local opts move=1 force=0
 	[[ $1 == "copy" ]] && move=0
 	shift
-
-	local opts
 	opts="$($GETOPT -o f -l force -n "$PROGRAM" -- "$@")"
 	local err=$?
 	eval set -- "$opts"
