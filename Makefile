@@ -22,8 +22,6 @@ else
 FISHCOMP_SWITCH := 
 endif
 
-.PHONY: install uninstall install-common
-
 all:
 	@echo "Password store is a shell script, so there is nothing to do. Try \"make install\" instead."
 
@@ -55,3 +53,15 @@ uninstall:
 		"$(DESTDIR)$(PREFIX)/share/bash-completion/completions/pass" \
 		"$(DESTDIR)$(PREFIX)/share/zsh/site-functions/_pass" \
 		"$(DESTDIR)$(PREFIX)/share/fish/completions/pass.fish"
+
+TESTS = $(wildcard tests/t[0-9][0-9][0-9][0-9]-*.sh)
+
+test: $(TESTS)
+
+$(TESTS):
+	@cd $$(dirname "$@") && ./$$(basename "$@") $(PASS_TEST_OPTS)
+
+clean:
+	$(RM) -rf tests/test-results/ tests/trash\ directory.*/
+
+.PHONY: install uninstall install-common test clean $(TESTS)

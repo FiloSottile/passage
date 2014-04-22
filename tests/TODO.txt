@@ -1,0 +1,30 @@
+Harness:
+
+ * Generate new gpg key programatically
+
+
+Tests to add:
+
+ * pass mv [directory to file]
+ * pass mv [file to directory]
+ * pass mv [file to file]
+ * pass mv [directory to directory]
+ * pass mv [X to new directory (by having the argument end in "/")]
+ * pass mv [X to existing directory]
+ * pass cp [all the above]
+ * pass [all the above, but reencrypting when source and destination have different .gpg-id settings]
+ * pass init [reencryption with different key]
+ * pass grep
+ * pass find
+ * pass rm
+ * pass init -p [plus reencryption with different key]
+ * pass insert, pass ls
+ * pass insert, pass show
+ * pass insert [with -e, with -m, without either]
+ * pass insert, cp, mv, rm, generate [with -f, without -f, on existing]
+ * pass generate [with -n vs without -n]
+ * pass edit [using shm vs not using shm]
+ * pass git init
+ * git operations on all commands
+ * Are empty folders pruned for rm, cp, mv, init (when "" is the argument) [with git, and without git]
+ * Are git commits happening as planned? Are they being signed when signing is enabled?
