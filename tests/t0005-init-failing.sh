@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 test_description='Show "pass init" returning non-zero bug(?) (XXX: remove this test?)'
 . ./setup.sh

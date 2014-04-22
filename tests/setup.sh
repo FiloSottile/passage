@@ -16,9 +16,7 @@ PASSWORD_STORE_TEST_HOME="$(cd "$(dirname "$BASH_SOURCE")"; pwd)"
 
 PASS="${PASSWORD_STORE_TEST_HOME}/../src/password-store.sh"
 
-if test -e ${PASS} ; then
-	echo "pass is ${PASS}"
-else
+if ! test -e ${PASS} ; then
 	echo "Could not find password-store.sh"
 	exit 1
 fi

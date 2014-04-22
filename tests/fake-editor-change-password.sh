@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Fake editor program for testing 'pass edit'.
 # Changes password to 'Hello World', leaving rest of file intact.
 #
