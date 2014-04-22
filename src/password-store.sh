@@ -85,15 +85,7 @@ agent_check() {
 	)"
 }
 reencrypt_path() {
-	local passfile
-	local passfile_dir
-	local passfile_display
-	local passfile_temp
-	local prev_gpg_recipients
-	local gpg_keys
-	local current_keys
-	local config
-	local saved_ifs
+	local passfile passfile_dir passfile_display passfile_temp prev_gpg_recipients gpg_keys current_keys config
 	local -A groups
 	while read -r config; do
 		[[ $config =~ cfg:group:* ]] || continue
@@ -112,14 +104,13 @@ reencrypt_path() {
 		if [[ $prev_gpg_recipients != "${GPG_RECIPIENTS[@]}" ]]; then
 			for config in "${!GPG_RECIPIENTS[@]}"; do
 				[[ ${groups[${GPG_RECIPIENTS[$config]}]} ]] || continue
-				saved_ifs="$IFS"
+				local saved_ifs="$IFS"
 				IFS=";"
 				GPG_RECIPIENTS+=( ${groups[${GPG_RECIPIENTS[$config]}]} )
 				IFS="$saved_ifs"
 				unset GPG_RECIPIENTS[$config]
 			done
 			gpg_keys="$($GPG --list-keys --keyid-format long "${GPG_RECIPIENTS[@]}" | sed -n 's/sub *.*\/\([A-F0-9]\{16\}\) .*/\1/p' | sort -u)"
-			
 		fi
 		current_keys="$($GPG -v --list-only --keyid-format long "$passfile" 2>&1 | cut -d ' ' -f 5 | sort -u)"
 
@@ -384,9 +375,7 @@ cmd_grep() {
 		exit 1
 	fi
 	agent_check
-	local passfile
-	local passfile_dir
-	local grepresults
+	local passfile passfile_dir grepresults
 	local search="$1"
 	while read -r -d "" passfile; do
 		grepresults="$($GPG -d $GPG_OPTS "$passfile" | grep --color=always "$search")"
@@ -401,10 +390,7 @@ cmd_grep() {
 }
 
 cmd_insert() {
-	local multiline=0
-	local noecho=1
-	local force=0
-
+	local multiline=0 noecho=1 force=0
 	local opts
 	opts="$($GETOPT -o mef -l multiline,echo,force -n "$PROGRAM" -- "$@")"
 	local err=$?
@@ -434,8 +420,7 @@ cmd_insert() {
 		echo
 		$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" $GPG_OPTS
 	elif [[ $noecho -eq 1 ]]; then
-		local password
-		local password_again
+		local password password_again
 		while true; do
 			read -r -p "Enter password for $path: " -s password || exit 1
 			echo
@@ -488,10 +473,7 @@ cmd_edit() {
 }
 
 cmd_generate() {
-	local clip=0
-	local force=0
-	local symbols="-y"
-
+	local clip=0 force=0 symbols="-y"
 	local opts
 	opts="$($GETOPT -o ncf -l no-symbols,clip,force -n "$PROGRAM" -- "$@")"
 	local err=$?
@@ -534,9 +516,7 @@ cmd_generate() {
 }
 
 cmd_delete() {
-	local recursive=""
-	local force=0
-
+	local recursive="" force=0
 	local opts
 	opts="$($GETOPT -o rf -l recursive,force -n "$PROGRAM" -- "$@")"
 	local err=$?
@@ -573,11 +553,10 @@ cmd_delete() {
 }
 
 cmd_copy_move() {
-	local move=1
+	local move=1 force=0
 	[[ $1 == "copy" ]] && move=0
 	shift
 
-	local force=0
 	local opts
 	opts="$($GETOPT -o f -l force -n "$PROGRAM" -- "$@")"
 	local err=$?
