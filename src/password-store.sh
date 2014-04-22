@@ -421,9 +421,9 @@ cmd_insert() {
 		local password
 		local password_again
 		while true; do
-			read -r -p "Enter password for $path: " -s password || continue
+			read -r -p "Enter password for $path: " -s password || exit 1
 			echo
-			read -r -p "Retype password for $path: " -s password_again || continue
+			read -r -p "Retype password for $path: " -s password_again || exit 1
 			echo
 			if [[ $password == "$password_again" ]]; then
 				$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" $GPG_OPTS <<<"$password"
