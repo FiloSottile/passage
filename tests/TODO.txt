@@ -28,3 +28,6 @@ Tests to add:
  * git operations on all commands
  * Are empty folders pruned for rm, cp, mv, init (when "" is the argument) [with git, and without git]
  * Are git commits happening as planned? Are they being signed when signing is enabled?
+ * reencryption on pass init, pass mv, and pass cp
+ * reencryption with team pass
+ * reencryption with gpg groups in gpg.conf
