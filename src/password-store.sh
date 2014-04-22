@@ -86,12 +86,7 @@ agent_check() {
 }
 reencrypt_path() {
 	local passfile passfile_dir passfile_display passfile_temp prev_gpg_recipients gpg_keys current_keys config
-	local -A groups
-	while read -r config; do
-		[[ $config =~ cfg:group:* ]] || continue
-		groups[$(cut -d : -f 3 <<<"$config")]="$(cut -d : -f 4 <<<"$config")"
-	done < <($GPG --list-config --with-colons)
-
+	local groups="$($GPG --list-config --with-colons | grep ^cfg:group:.*)"
 	while read -r -d "" passfile; do
 		passfile_dir="${passfile%/*}"
 		passfile_dir="${passfile_dir#$PREFIX}"
@@ -103,10 +98,11 @@ reencrypt_path() {
 		set_gpg_recipients "$passfile_dir"
 		if [[ $prev_gpg_recipients != "${GPG_RECIPIENTS[@]}" ]]; then
 			for config in "${!GPG_RECIPIENTS[@]}"; do
-				[[ ${groups[${GPG_RECIPIENTS[$config]}]} ]] || continue
+				local group="$(sed -n "s/^cfg:group:${GPG_RECIPIENTS[$config]}:\\(.*\\)$/\\1/p" <<<"$groups" | head -n 1)"
+				[[ -z $group ]] && continue
 				local saved_ifs="$IFS"
 				IFS=";"
-				GPG_RECIPIENTS+=( ${groups[${GPG_RECIPIENTS[$config]}]} )
+				GPG_RECIPIENTS+=( $group )
 				IFS="$saved_ifs"
 				unset GPG_RECIPIENTS[$config]
 			done
@@ -120,7 +116,7 @@ reencrypt_path() {
 			mv "$passfile_temp" "$passfile" || rm -f "$passfile_temp"
 		fi
 		prev_gpg_recipients="${GPG_RECIPIENTS[@]}"
-	done < <(find "$PREFIX" -iname '*.gpg' -print0)
+	done < <(find "$1" -iname '*.gpg' -print0)
 }
 check_sneaky_paths() {
 	for path in "$@"; do
