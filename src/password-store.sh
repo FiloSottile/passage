@@ -92,6 +92,14 @@ reencrypt_path() {
 	local prev_gpg_recipients
 	local gpg_keys
 	local current_keys
+	local config
+	local saved_ifs
+	local -A groups
+	while read -r config; do
+		[[ $config =~ cfg:group:* ]] || continue
+		groups[$(cut -d : -f 3 <<<"$config")]="$(cut -d : -f 4 <<<"$config")"
+	done < <($GPG --list-config --with-colons)
+
 	while read -r -d "" passfile; do
 		passfile_dir="${passfile%/*}"
 		passfile_dir="${passfile_dir#$PREFIX}"
@@ -101,8 +109,18 @@ reencrypt_path() {
 		passfile_temp="${passfile}.tmp.${RANDOM}.${RANDOM}.${RANDOM}.${RANDOM}.--"
 
 		set_gpg_recipients "$passfile_dir"
-		[[ $prev_gpg_recipients != "${GPG_RECIPIENTS[@]}" ]] &&
-		gpg_keys="$($GPG --list-keys --keyid-format long "${GPG_RECIPIENTS[@]}" | sed -n 's/sub *.*\/\([A-F0-9]\{16\}\) .*/\1/p' | sort -u)"
+		if [[ $prev_gpg_recipients != "${GPG_RECIPIENTS[@]}" ]]; then
+			for config in "${!GPG_RECIPIENTS[@]}"; do
+				[[ ${groups[${GPG_RECIPIENTS[$config]}]} ]] || continue
+				saved_ifs="$IFS"
+				IFS=";"
+				GPG_RECIPIENTS+=( ${groups[${GPG_RECIPIENTS[$config]}]} )
+				IFS="$saved_ifs"
+				unset GPG_RECIPIENTS[$config]
+			done
+			gpg_keys="$($GPG --list-keys --keyid-format long "${GPG_RECIPIENTS[@]}" | sed -n 's/sub *.*\/\([A-F0-9]\{16\}\) .*/\1/p' | sort -u)"
+			
+		fi
 		current_keys="$($GPG -v --list-only --keyid-format long "$passfile" 2>&1 | cut -d ' ' -f 5 | sort -u)"
 
 		if [[ $gpg_keys != "$current_keys" ]]; then
@@ -110,7 +128,6 @@ reencrypt_path() {
 			$GPG -d $GPG_OPTS "$passfile" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile_temp" $GPG_OPTS &&
 			mv "$passfile_temp" "$passfile" || rm -f "$passfile_temp"
 		fi
-
 		prev_gpg_recipients="${GPG_RECIPIENTS[@]}"
 	done < <(find "$PREFIX" -iname '*.gpg' -print0)
 }
@@ -285,14 +302,13 @@ cmd_init() {
 			git_commit "Deinitialized ${gpg_id}."
 		fi
 		rmdir -p "${gpg_id%/*}" 2>/dev/null
-		exit 0
+	else
+		mkdir -v -p "$PREFIX/$id_path"
+		printf "%s\n" "$@" > "$gpg_id"
+		local id_print="$(printf "%s, " "$@")"
+		echo "Password store initialized for ${id_print%, }"
+		git_add_file "$gpg_id" "Set GPG id to ${id_print%, }."
 	fi
-
-	mkdir -v -p "$PREFIX/$id_path"
-	printf "%s\n" "$@" > "$gpg_id"
-	local id_print="$(printf "%s, " "$@")"
-	echo "Password store initialized for ${id_print%, }"
-	git_add_file "$gpg_id" "Set GPG id to ${id_print%, }."
 
 	agent_check
 	reencrypt_path "$PREFIX/$id_path"
