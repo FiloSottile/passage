@@ -18,6 +18,12 @@ if [[ ! -d $PASSWORD_STORE_DIR ]]; then
 	exit 1
 fi
 
+export GIT_DIR="$PASSWORD_STORE_DIR/.git"
+export GIT_WORK_TREE="$PASSWORD_STORE_DIR"
+git config --global user.email "Pass-Automated-Testing-Suite@zx2c4.com"
+git config --global user.name "Pass Automated Testing Suite"
+
+
 PASS="$TEST_HOME/../src/password-store.sh"
 if [[ ! -e $PASS ]]; then
 	echo "Could not find password-store.sh"

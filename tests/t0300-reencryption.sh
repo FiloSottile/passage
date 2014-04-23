@@ -20,8 +20,11 @@ gpg_keys_from_group() {
 	canonicalize_gpg_keys "${keys[@]}"
 }
 
+test_expect_success 'Setup initial key and git' '
+	$PASS init $KEY1 && $PASS git init
+'
+
 test_expect_success 'Root key encryption' '
-	$PASS init $KEY1 &&
 	$PASS insert -e folder/cred1 <<<"$INITIAL_PASSWORD" &&
 	[[ $(canonicalize_gpg_keys "$KEY1") == "$(gpg_keys_from_encrypted_file "$PASSWORD_STORE_DIR/folder/cred1.gpg")" ]]
 '
@@ -89,5 +92,8 @@ test_expect_success 'Password lived through all transformations' '
 	[[ $($PASS show anotherfolder2/anotherfolder/cred1) == "$INITIAL_PASSWORD" ]]
 '
 
-test_done
+test_expect_success 'Git picked up all changes throughout' '
+	[[ -z $(git status --porcelain 2>&1) ]]
+'
 
+test_done
