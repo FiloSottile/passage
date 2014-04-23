@@ -62,6 +62,6 @@ $(TESTS):
 	@cd $$(dirname "$@") && ./$$(basename "$@") $(PASS_TEST_OPTS)
 
 clean:
-	$(RM) -rf tests/test-results/ tests/trash\ directory.*/
+	$(RM) -rf tests/test-results/ tests/trash\ directory.*/ tests/gnupg/random_seed
 
 .PHONY: install uninstall install-common test clean $(TESTS)
