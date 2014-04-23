@@ -283,7 +283,7 @@ cmd_init() {
 		rm -v -f "$gpg_id" || exit 1
 		if [[ -d $GIT_DIR ]]; then
 			git rm -qr "$gpg_id"
-			git_commit "Deinitialized ${gpg_id}."
+			git_commit "Deinitialize ${gpg_id}."
 		fi
 		rmdir -p "${gpg_id%/*}" 2>/dev/null
 	else
@@ -296,7 +296,7 @@ cmd_init() {
 
 	agent_check
 	reencrypt_path "$PREFIX/$id_path"
-	git_add_file "$PREFIX/$id_path" "Reencrypted password store using new GPG id ${id_print%, }."
+	git_add_file "$PREFIX/$id_path" "Reencrypt password store using new GPG id ${id_print%, }."
 }
 
 cmd_show() {
@@ -415,7 +415,7 @@ cmd_insert() {
 		read -r -p "Enter password for $path: " -e password
 		gpg -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" $GPG_OPTS <<<"$password"
 	fi
-	git_add_file "$passfile" "Added given password for $path to store."
+	git_add_file "$passfile" "Add given password for $path to store."
 }
 
 cmd_edit() {
@@ -436,10 +436,10 @@ cmd_edit() {
 	tmpdir #Defines $SECURE_TMPDIR
 	local tmp_file="$(TMPDIR="$SECURE_TMPDIR" mktemp -t "$template")"
 
-	local action="Added"
+	local action="Add"
 	if [[ -f $passfile ]]; then
 		gpg -d -o "$tmp_file" $GPG_OPTS "$passfile" || exit 1
-		action="Edited"
+		action="Edit"
 	fi
 	${EDITOR:-vi} "$tmp_file"
 	while ! gpg -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" $GPG_OPTS "$tmp_file"; do
@@ -481,7 +481,7 @@ cmd_generate() {
 	local pass="$(pwgen -s $symbols $length 1)"
 	[[ -n $pass ]] || exit 1
 	gpg -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" $GPG_OPTS <<<"$pass"
-	git_add_file "$passfile" "Added generated password for $path to store."
+	git_add_file "$passfile" "Add generated password for $path to store."
 
 	if [[ $clip -eq 0 ]]; then
 		echo "The generated password to $path is:"
@@ -522,7 +522,7 @@ cmd_delete() {
 	rm $recursive -f -v "$passfile"
 	if [[ -d $GIT_DIR && ! -e $passfile ]]; then
 		git rm -qr "$passfile"
-		git_commit "Removed $path from store."
+		git_commit "Remove $path from store."
 	fi
 	rmdir -p "${passfile%/*}" 2>/dev/null
 }
@@ -568,20 +568,20 @@ cmd_copy_move() {
 
 		if [[ -d $GIT_DIR && ! -e $old_path ]]; then
 			git rm -qr "$old_path"
-			git_add_file "$new_path" "Renamed ${1} to ${2}."
+			git_add_file "$new_path" "Rename ${1} to ${2}."
 		fi
 		rmdir -p "$old_dir" 2>/dev/null
 	else
 		cp $interactive -r -v "$old_path" "$new_path" || exit 1
 		[[ -e "$new_path" ]] && reencrypt_path "$new_path"
-		git_add_file "$new_path" "Copied ${1} to ${2}."
+		git_add_file "$new_path" "Copy ${1} to ${2}."
 	fi
 }
 
 cmd_git() {
 	if [[ $1 == "init" ]]; then
 		git "$@" || exit 1
-		git_add_file "$PREFIX" "Added current contents of password store."
+		git_add_file "$PREFIX" "Add current contents of password store."
 	elif [[ -d $GIT_DIR ]]; then
 		exec git "$@"
 	else
