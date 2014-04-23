@@ -366,9 +366,9 @@ cmd_grep() {
 		exit 1
 	fi
 	agent_check
-	local search="$1" passfile
+	local search="$1" passfile grepresults
 	while read -r -d "" passfile; do
-		local grepresults="$(gpg -d $GPG_OPTS "$passfile" | grep --color=always "$search")"
+		grepresults="$(gpg -d $GPG_OPTS "$passfile" | grep --color=always "$search")"
 		[ $? -ne 0 ] && continue
 		passfile="${passfile%.gpg}"
 		passfile="${passfile#$PREFIX/}"
