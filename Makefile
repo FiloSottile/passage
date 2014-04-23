@@ -6,6 +6,12 @@ MANDIR ?= $(PREFIX)/share/man
 
 PLATFORMFILE := src/platform/$(shell uname | cut -d _ -f 1 | tr '[:upper:]' '[:lower:]').sh
 
+ifeq ($(FORCE_ALL),1)
+FORCE_BASHCOMP := 1
+FORCE_ZSHCOMP := 1
+FORCE_FISHCOMP := 1
+endif
+
 ifeq ($(FORCE_BASHCOMP),1)
 BASHCOMP_SWITCH := "-D"
 else
