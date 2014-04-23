@@ -68,6 +68,7 @@ set_gpg_recipients() {
 		exit 1
 	fi
 
+	local gpg_id
 	while read -r gpg_id; do
 		GPG_RECIPIENT_ARGS+=( "-r" "$gpg_id" )
 		GPG_RECIPIENTS+=( "$gpg_id" )
@@ -84,7 +85,7 @@ agent_check() {
 	)"
 }
 reencrypt_path() {
-	local prev_gpg_recipients="" gpg_keys="" current_keys="" index
+	local prev_gpg_recipients="" gpg_keys="" current_keys="" index passfile
 	local groups="$($GPG --list-config --with-colons | grep ^cfg:group:.*)"
 	while read -r -d "" passfile; do
 		local passfile_dir="${passfile%/*}"
@@ -367,7 +368,7 @@ cmd_grep() {
 		exit 1
 	fi
 	agent_check
-	local search="$1"
+	local search="$1" passfile
 	while read -r -d "" passfile; do
 		local grepresults="$($GPG -d $GPG_OPTS "$passfile" | grep --color=always "$search")"
 		[ $? -ne 0 ] && continue
