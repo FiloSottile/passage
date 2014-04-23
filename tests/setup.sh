@@ -28,7 +28,12 @@ fi
 # Note: the assumption is the test key is unencrypted.
 export GNUPGHOME=$(pwd)"/gnupg/"
 chmod 700 "$GNUPGHOME"
-export PASSWORD_STORE_KEY=3DEEA12D  # "Password-store Test Key"
+export PASSWORD_STORE_KEY="3DEEA12D"  # "Password-store Test Key"
+
+# We don't want to use any running agent.
+# We want an agent to appear to pass to be running.
+# We don't need a real agent. Hence:
+export GPG_AGENT_INFO=" "
 
 # pass_init()
 #
