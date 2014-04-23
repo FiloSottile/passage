@@ -1,10 +1,11 @@
 # This file should be sourced by all test-scripts
 #
 # This scripts sets the following:
-#   ${GNUPGHOME} Full path to test GPG directory
-#   $PASS      Full path to password-store script to test
-#   ${PASSWORD_STORE_KEY}  GPG key id of testing key
-#   ${PASSWORD_STORE_TEST_HOME}  This folder
+#   $GNUPGHOME			Full path to test GPG directory
+#   $PASS			Full path to password-store script to test
+#   $GPG			Name of gpg executable
+#   $PASSWORD_STORE_KEY		GPG key id of testing key
+#   $PASSWORD_STORE_TEST_HOME	This folder
 
 #
 # Constants
