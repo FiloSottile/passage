@@ -3,16 +3,14 @@
 test_description='Test show'
 . ./setup.sh
 
-TEST_CRED="test_cred"
-
 test_expect_success 'Test "show" command' '
-	pass_init &&
-	create_cred "$TEST_CRED" &&
-	$PASS show "$TEST_CRED"
+	pass init $KEY1 &&
+	pass generate cred1 20 &&
+	$PASS show cred1
 '
 
 test_expect_success 'Test "show" of nonexistant password' '
-	pass_init &&
-	test_must_fail $PASS show "$TEST_CRED"
+	test_must_fail $PASS show cred2
 '
+
 test_done

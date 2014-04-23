@@ -54,7 +54,7 @@ uninstall:
 		"$(DESTDIR)$(PREFIX)/share/zsh/site-functions/_pass" \
 		"$(DESTDIR)$(PREFIX)/share/fish/completions/pass.fish"
 
-TESTS = $(wildcard tests/t[0-9][0-9][0-9][0-9]-*.sh)
+TESTS = $(sort $(wildcard tests/t[0-9][0-9][0-9][0-9]-*.sh))
 
 test: $(TESTS)
 

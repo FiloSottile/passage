@@ -8,9 +8,9 @@ test_expect_success 'Make sure we can run pass' '
 '
 
 test_expect_success 'Make sure we can initialize our test store' '
-	pass_init &&
-	ls -ld "$PASSWORD_STORE_DIR" &&
-	[[ -d "$PASSWORD_STORE_DIR" ]]
+	pass init $KEY1 &&
+	[[ -e "$PASSWORD_STORE_DIR/.gpg-id" ]] &&
+	[[ $(cat "$PASSWORD_STORE_DIR/.gpg-id") == "$KEY1" ]]
 '
 
 test_done

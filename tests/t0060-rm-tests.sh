@@ -3,14 +3,11 @@
 test_description='Test rm'
 . ./setup.sh
 
-TEST_CRED="test_cred"
-
 test_expect_success 'Test "rm" command' '
-	pass_init &&
-	create_cred "$TEST_CRED" &&
-	echo "Removing $TEST_CRED" &&
-	echo "y" | $PASS rm "$TEST_CRED" &&
-	check_no_cred "$TEST_CRED"
+	$PASS init $KEY1 &&
+	$PASS generate cred1 43 &&
+	echo "y" | $PASS rm cred1 &&
+	[[ ! -e $PASSWORD_STORE_DIR/cred1.gpg ]]
 '
 
 test_expect_success 'Test "rm" of non-existent password' '

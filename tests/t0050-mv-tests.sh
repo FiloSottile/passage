@@ -7,12 +7,10 @@ TEST_CRED="test_cred"
 TEST_CRED_NEW="test_cred_new"
 
 test_expect_success 'Test "mv" command' '
-	pass_init &&
-	create_cred "$TEST_CRED" &&
-	echo "Moving $TEST_CRED to $TEST_CRED_NEW" &&
-	$PASS mv "$TEST_CRED" "$TEST_CRED_NEW" &&
-	check_cred "$TEST_CRED_NEW" &&
-	check_no_cred "$TEST_CRED"
+	pass init $KEY1 &&
+	$PASS generate cred1 39 &&
+	$PASS mv cred1 cred2 &&
+	[[ -e $PASSWORD_STORE_DIR/cred2.gpg && ! -e $PASSWORD_STORE_DIR/cred1.gpg ]]
 '
 
 test_done

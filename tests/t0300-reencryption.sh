@@ -5,11 +5,23 @@ test_description='Reencryption consistency'
 
 INITIAL_PASSWORD="will this password live? a big question indeed..."
 
-test_expect_success 'Init with key1' '
-	pass_init
-'
+canonicalize_gpg_keys() {
+	$GPG --list-keys --keyid-format long "$@" | sed -n 's/sub *.*\/\([A-F0-9]\{16\}\) .*/\1/p' | sort -u
+}
+gpg_keys_from_encrypted_file() {
+	$GPG -v --list-only --keyid-format long "$1" 2>&1 | cut -d ' ' -f 5 | sort -u
+}
+gpg_keys_from_group() {
+	local output="$($GPG --list-config --with-colons | sed -n "s/^cfg:group:$1:\\(.*\\)/\\1/p" | head -n 1)"
+	local saved_ifs="$IFS"
+	IFS=";"
+	local keys=( $output )
+	IFS="$saved_ifs"
+	canonicalize_gpg_keys "${keys[@]}"
+}
 
 test_expect_success 'Root key encryption' '
+	$PASS init $KEY1 &&
 	$PASS insert -e folder/cred1 <<<"$INITIAL_PASSWORD" &&
 	[[ $(canonicalize_gpg_keys "$KEY1") == "$(gpg_keys_from_encrypted_file "$PASSWORD_STORE_DIR/folder/cred1.gpg")" ]]
 '
