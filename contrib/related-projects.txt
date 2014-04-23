@@ -9,5 +9,5 @@ The following projects make use of pass:
 * passmenu: A demnu script.
   <https://github.com/cdown/passmenu>
 
-* emacs-password-store: Emacs package
+* emacs-password-store: Emacs package.
   <https://github.com/svend/emacs-password-store>
