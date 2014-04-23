@@ -4,8 +4,8 @@ test_description='Test show'
 . ./setup.sh
 
 test_expect_success 'Test "show" command' '
-	pass init $KEY1 &&
-	pass generate cred1 20 &&
+	$PASS init $KEY1 &&
+	$PASS generate cred1 20 &&
 	$PASS show cred1
 '
 
