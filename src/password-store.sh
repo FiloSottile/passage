@@ -331,7 +331,7 @@ cmd_show() {
 		else
 			echo "${path%\/}"
 		fi
-		tree -l --noreport "$PREFIX/$path" | tail -n +2 | sed 's/\.gpg$//'
+		tree -C -l --noreport "$PREFIX/$path" | tail -n +2 | sed 's/\.gpg$//'
 	else
 		echo "$path is not in the password store."
 		exit 1
@@ -343,21 +343,9 @@ cmd_find() {
 		echo "Usage: $PROGRAM $COMMAND pass-names..."
 		exit 1
 	fi
-	if ! tree --version | grep -q "Jason A. Donenfeld"; then
-		cat <<-_EOF
-		Error: incompatible tree command.
-
-		Your version of the tree command is missing the relevent patch to add the
-		--matchdirs and --caseinsensitive switches. Please ask your distribution
-		to patch your version of tree with:
-		    http://git.zx2c4.com/password-store/plain/contrib/tree-1.6.0-matchdirs.patch
-		Sorry for the inconvenience.
-		_EOF
-		exit 1
-	fi
 	local terms="$@"
 	echo "Search Terms: $terms"
-	tree -l --noreport -P "*${terms// /*|*}*" --prune --matchdirs --caseinsensitive "$PREFIX" | tail -n +2 | sed 's/\.gpg$//'
+	tree -C -l --noreport -P "*${terms// /*|*}*" --prune --matchdirs --ignore-case "$PREFIX" | tail -n +2 | sed 's/\.gpg$//'
 }
 
 cmd_grep() {

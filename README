@@ -23,7 +23,7 @@ Depends on:
   http://sourceforge.net/projects/xclip/
 - pwgen
   http://sourceforge.net/projects/pwgen/
-- tree
+- tree >= 1.7.0
   http://mama.indstate.edu/users/ice/tree/
 - GNU getopt
   http://www.kernel.org/pub/linux/utils/util-linux/
