@@ -26,7 +26,7 @@ def space_to_camelcase(value):
 
 def cleanTitle(title):
     # make the title more command line friendly
-    title = re.sub("(\\|\||\(|\))", "-", title)
+    title = re.sub("(\\|\||\(|\)|/)", "-", title)
     title = re.sub("-$", "", title)
     title = re.sub("\@", "At", title)
     title = re.sub("'", "", title)
