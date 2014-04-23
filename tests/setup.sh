@@ -34,13 +34,14 @@ alias pass="command \"$PASS\""
 # Note: the assumption is the test key is unencrypted.
 export GNUPGHOME="$TEST_HOME/gnupg/"
 chmod 700 "$GNUPGHOME"
-alias gpg="command gpg"
-which gpg2 &>/dev/null && alias gpg="command gpg2"
+GPG="gpg"
+which gpg2 &>/dev/null && GPG="gpg2"
+alias gpg="command $GPG"
 
 # We don't want to use any running agent.
 # We want an agent to appear to pass to be running.
 # We don't need a real agent. Hence:
-export GPG_AGENT_INFO=" "
+[[ $GPG == "gpg2" ]] && export GPG_AGENT_INFO=" " || unset GPG_AGENT_INFO
 
 KEY1="CF90C77B"  # pass test key 1
 KEY2="D774A374"  # pass test key 2
