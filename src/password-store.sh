@@ -100,10 +100,7 @@ reencrypt_path() {
 			for index in "${!GPG_RECIPIENTS[@]}"; do
 				local group="$(sed -n "s/^cfg:group:${GPG_RECIPIENTS[$index]}:\\(.*\\)$/\\1/p" <<<"$groups" | head -n 1)"
 				[[ -z $group ]] && continue
-				local saved_ifs="$IFS"
-				IFS=";"
-				GPG_RECIPIENTS+=( $group )
-				IFS="$saved_ifs"
+				IFS=";" command eval 'GPG_RECIPIENTS+=( $group )' # Hack to make IFS change temporary, http://unix.stackexchange.com/a/92190
 				unset GPG_RECIPIENTS[$index]
 			done
 			gpg_keys="$($GPG --list-keys --keyid-format long "${GPG_RECIPIENTS[@]}" | sed -n 's/sub *.*\/\([A-F0-9]\{16\}\) .*/\1/p' | sort -u)"
