@@ -29,6 +29,8 @@ fi
 export GNUPGHOME=$(pwd)"/gnupg/"
 chmod 700 "$GNUPGHOME"
 export PASSWORD_STORE_KEY="3DEEA12D"  # "Password-store Test Key"
+GPG="gpg"
+which gpg2 &>/dev/null && GPG="gpg2"
 
 # We don't want to use any running agent.
 # We want an agent to appear to pass to be running.
@@ -162,6 +164,36 @@ verify_password() {
 	${PASS} show "$TEST_CRED" | sed -n 1p > "$actualfile" &&
 	echo "$expected" > "$expectedfile" &&
 	test_cmp "$expectedfile" "$actualfile"
+}
+
+# canonicalize_gpg_keys()
+#
+# Resolves key names to key ids.
+#
+# Arguments: <key name>...
+# Returns: 0, and echos keys on new lines
+canonicalize_gpg_keys() {
+	$GPG --list-keys --keyid-format long "$@" | sed -n 's/sub *.*\/\([A-F0-9]\{16\}\) .*/\1/p' | sort -u
+}
+
+# gpg_keys_from_encrypted_file()
+#
+# Finds keys used to encrypt a .gpg file.
+#
+# Arguments: <gpg file>
+# Returns 0, and echos keys on new lines
+gpg_keys_from_encrypted_file() {
+	$GPG -v --list-only --keyid-format long "$1" 2>&1 | cut -d ' ' -f 5 | sort -u
+}
+
+# gpg_keys_from_group()
+#
+# Finds keys used in gpg.conf group
+#
+# Arguments: <group>
+# Returns: 0, and echos keys on new lines, which might be non-canonical
+gpg_keys_from_group() {
+	$GPG --list-config --with-colons | sed -n "s/^cfg:group:$1:\\(.*\\)/\\1/p" | tr ';' '\n'
 }
 
 # Initialize the test harness
