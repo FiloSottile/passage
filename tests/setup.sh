@@ -192,9 +192,14 @@ gpg_keys_from_encrypted_file() {
 # Finds keys used in gpg.conf group
 #
 # Arguments: <group>
-# Returns: 0, and echos keys on new lines, which might be non-canonical
+# Returns: 0, and echos keys on new lines
 gpg_keys_from_group() {
-	$GPG --list-config --with-colons | sed -n "s/^cfg:group:$1:\\(.*\\)/\\1/p" | tr ';' '\n'
+	local output="$($GPG --list-config --with-colons | sed -n "s/^cfg:group:$1:\\(.*\\)/\\1/p" | head -n 1)"
+	local saved_ifs="$IFS"
+	IFS=";"
+	local keys=( $output )
+	IFS="$saved_ifs"
+	canonicalize_gpg_keys "${keys[@]}"
 }
 
 # Initialize the test harness
