@@ -4,11 +4,11 @@ test_description='Sanity checks'
 . ./setup.sh
 
 test_expect_success 'Make sure we can run pass' '
-	$PASS --help | grep "pass: the standard unix password manager"
+	pass --help | grep "pass: the standard unix password manager"
 '
 
 test_expect_success 'Make sure we can initialize our test store' '
-	$PASS init $KEY1 &&
+	pass init $KEY1 &&
 	[[ -e "$PASSWORD_STORE_DIR/.gpg-id" ]] &&
 	[[ $(cat "$PASSWORD_STORE_DIR/.gpg-id") == "$KEY1" ]]
 '

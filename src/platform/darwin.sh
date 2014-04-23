@@ -31,5 +31,5 @@ tmpdir() {
 	mount -t hfs -o noatime -o nobrowse "$ramdisk_dev" "$SECURE_TMPDIR" || exit 1
 }
 
-GETOPT="$(brew --prefix gnu-getopt 2>/dev/null || echo /usr/local)/bin/getopt"
-SHRED="srm -f -z"
+alias getopt="command $(brew --prefix gnu-getopt 2>/dev/null || echo /usr/local)/bin/getopt"
+alias shred="command srm -f -z"
