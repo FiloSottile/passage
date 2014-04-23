@@ -86,7 +86,7 @@ check_cred() {
 		return 1
 	fi
 }
-	
+
 # check_no_cred()
 #
 # Check to make sure the given credential does not exist.
@@ -130,9 +130,7 @@ create_cred() {
 		local password="$1"
 		shift
 		echo "Using password \"$password\" for $cred"
-		# TODO: Working around bug with 'pass insert' returning non-zero.
-		#       Fix this code to exit on error when that is fixed.
-		$PASS insert -e "$cred" <<<"$password" || true
+		$PASS insert -e "$cred" <<<"$password" || return 1
 	else
 		echo "Generating random password for $cred"
 		if ! $PASS generate "${cred}" 24 > /dev/null; then
