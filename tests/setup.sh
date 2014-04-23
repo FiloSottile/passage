@@ -4,7 +4,7 @@
 #   $GNUPGHOME			Full path to test GPG directory
 #   $PASS			Full path to password-store script to test
 #   $GPG			Name of gpg executable
-#   $PASSWORD_STORE_KEY		GPG key id of testing key
+#   $PASSWORD_STORE_KEY{1..5}	GPG key ids of testing keys
 #   $PASSWORD_STORE_TEST_HOME	This folder
 
 #
@@ -29,7 +29,6 @@ fi
 # Note: the assumption is the test key is unencrypted.
 export GNUPGHOME="${PASSWORD_STORE_TEST_HOME}/gnupg/"
 chmod 700 "$GNUPGHOME"
-export PASSWORD_STORE_KEY="3DEEA12D"  # "Password-store Test Key"
 GPG="gpg"
 which gpg2 &>/dev/null && GPG="gpg2"
 
@@ -37,6 +36,12 @@ which gpg2 &>/dev/null && GPG="gpg2"
 # We want an agent to appear to pass to be running.
 # We don't need a real agent. Hence:
 export GPG_AGENT_INFO=" "
+
+export PASSWORD_STORE_KEY1="CF90C77B"  # pass test key 1
+export PASSWORD_STORE_KEY2="D774A374"  # pass test key 2
+export PASSWORD_STORE_KEY3="EB7D54A8"  # pass test key 3
+export PASSWORD_STORE_KEY4="E4691410"  # pass test key 4
+export PASSWORD_STORE_KEY5="39E5020C"  # pass test key 5
 
 # pass_init()
 #
@@ -46,7 +51,7 @@ export GPG_AGENT_INFO=" "
 # Returns: Nothing, sets PASSWORD_STORE_DIR
 pass_init() {
 	export PASSWORD_STORE_DIR="${SHARNESS_TRASH_DIRECTORY}/test-store/"
-	echo "Initializing test password store (${PASSWORD_STORE_DIR}) with key ${PASSWORD_STORE_KEY}"
+	echo "Initializing test password store (${PASSWORD_STORE_DIR}) with key ${PASSWORD_STORE_KEY1}"
 
 	if [[ -d "${PASSWORD_STORE_DIR}" ]] ; then
 		echo "Removing old store"
@@ -57,7 +62,7 @@ pass_init() {
 		fi
 	fi
 
-	$PASS init ${PASSWORD_STORE_KEY} || return 1
+	$PASS init ${PASSWORD_STORE_KEY1} || return 1
 
 	echo "Initialization of ${PASSWORD_STORE_DIR} complete."
 }
