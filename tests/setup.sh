@@ -1,21 +1,20 @@
 # This file should be sourced by all test-scripts
 #
 # This scripts sets the following:
-#   $GNUPGHOME			Full path to test GPG directory
-#   $PASS			Full path to password-store script to test
-#   $GPG			Name of gpg executable
-#   $PASSWORD_STORE_KEY{1..5}	GPG key ids of testing keys
-#   $PASSWORD_STORE_TEST_HOME	This folder
+#   $PASS	Full path to password-store script to test
+#   $GPG	Name of gpg executable
+#   $KEY{1..5}	GPG key ids of testing keys
+#   $TEST_HOME	This folder
 
 #
 # Constants
 
-PASSWORD_STORE_TEST_HOME="$(cd "$(dirname "$BASH_SOURCE")"; pwd)"
+TEST_HOME="$(cd "$(dirname "$BASH_SOURCE")"; pwd)"
 
 #
 # Find the pass script
 
-PASS="${PASSWORD_STORE_TEST_HOME}/../src/password-store.sh"
+PASS="$TEST_HOME/../src/password-store.sh"
 
 if [[ ! -e $PASS ]]; then
 	echo "Could not find password-store.sh"
@@ -27,7 +26,7 @@ fi
 
 # Where the test keyring and test key id
 # Note: the assumption is the test key is unencrypted.
-export GNUPGHOME="${PASSWORD_STORE_TEST_HOME}/gnupg/"
+export GNUPGHOME="$TEST_HOME/gnupg/"
 chmod 700 "$GNUPGHOME"
 GPG="gpg"
 which gpg2 &>/dev/null && GPG="gpg2"
@@ -37,11 +36,11 @@ which gpg2 &>/dev/null && GPG="gpg2"
 # We don't need a real agent. Hence:
 export GPG_AGENT_INFO=" "
 
-export PASSWORD_STORE_KEY1="CF90C77B"  # pass test key 1
-export PASSWORD_STORE_KEY2="D774A374"  # pass test key 2
-export PASSWORD_STORE_KEY3="EB7D54A8"  # pass test key 3
-export PASSWORD_STORE_KEY4="E4691410"  # pass test key 4
-export PASSWORD_STORE_KEY5="39E5020C"  # pass test key 5
+KEY1="CF90C77B"  # pass test key 1
+KEY2="D774A374"  # pass test key 2
+KEY3="EB7D54A8"  # pass test key 3
+KEY4="E4691410"  # pass test key 4
+KEY5="39E5020C"  # pass test key 5
 
 # pass_init()
 #
@@ -50,21 +49,18 @@ export PASSWORD_STORE_KEY5="39E5020C"  # pass test key 5
 # Arguments: None
 # Returns: Nothing, sets PASSWORD_STORE_DIR
 pass_init() {
-	export PASSWORD_STORE_DIR="${SHARNESS_TRASH_DIRECTORY}/test-store/"
-	echo "Initializing test password store (${PASSWORD_STORE_DIR}) with key ${PASSWORD_STORE_KEY1}"
+	export PASSWORD_STORE_DIR="$SHARNESS_TRASH_DIRECTORY/test-store/"
+	echo "Initializing test password store ($PASSWORD_STORE_DIR) with key $KEY1"
 
-	if [[ -d "${PASSWORD_STORE_DIR}" ]] ; then
-		echo "Removing old store"
-		rm -rf "${PASSWORD_STORE_DIR}"
-		if [[ -d "${PASSWORD_STORE_DIR}" ]] ; then
-			echo "Removal failed."
+	if [[ -d $PASSWORD_STORE_DIR ]] ; then
+		rm -rf "$PASSWORD_STORE_DIR"
+		if [[ -d $PASSWORD_STORE_DIR ]] ; then
+			echo "Removal of old store failed."
 			return 1
 		fi
 	fi
 
-	$PASS init ${PASSWORD_STORE_KEY1} || return 1
-
-	echo "Initialization of ${PASSWORD_STORE_DIR} complete."
+	$PASS init $KEY1 || return 1
 }
 
 # check_cred()
@@ -80,14 +76,13 @@ check_cred() {
 		return 1
 	fi
 	local cred="$1"
-	shift
-	echo "Checking credential ${cred}"
+	echo "Checking credential $cred"
 	if ! $PASS show "$cred"; then
-		echo "Credential ${cred} does not exist"
+		echo "Credential $cred does not exist"
 		return 1
 	fi
 	if [[ -z "$($PASS show "$cred")" ]]; then
-		echo "Credential ${cred} empty"
+		echo "Credential $cred empty"
 		return 1
 	fi
 }
@@ -105,10 +100,9 @@ check_no_cred() {
 		return 1
 	fi
 	local cred="$1"
-	shift
-	echo "Checking for lack of credential ${cred}"
+	echo "Checking for lack of credential $cred"
 	$PASS show "$cred" || return 0 
-	echo "Credential ${cred} exists."
+	echo "Credential $cred exists."
 	return 1
 }
 
@@ -125,21 +119,19 @@ create_cred() {
 		return 1
 	fi
 	local cred="$1"
-	shift
-	echo "Creating credential ${cred}"
+	echo "Creating credential $cred"
 	if ! check_no_cred "$cred"; then
 		echo "Credential already exists"
 		return 1
 	fi
 	if [[ "$#" -eq 1 ]]; then
 		local password="$1"
-		shift
 		echo "Using password \"$password\" for $cred"
 		$PASS insert -f -e "$cred" <<<"$password" || return 1
 	else
 		echo "Generating random password for $cred"
-		if ! $PASS generate -f "${cred}" 24 > /dev/null; then
-			echo "Failed to create credential ${cred}"
+		if ! $PASS generate -f "$cred" 24 > /dev/null; then
+			echo "Failed to create credential $cred"
 			return 1
 		fi
 	fi
@@ -157,14 +149,11 @@ verify_password() {
 		echo "$0: Bad arguments"
 		return 1
 	fi
-	local cred="$1"
-	shift
-	local expected="$1"
-	shift
-	echo "Verifing credential ${cred} has password \"${expected}\""
+	local cred="$1" expected="$2"
+	echo "Verifing credential $cred has password \"$expected\""
 	check_cred "$cred" || return 1
-	local actualfile="${SHARNESS_TRASH_DIRECTORY}/verify-password-actual.$RANDOM.$RANDOM.$RANDOM.$RANDOM"
-	local expectedfile="${SHARNESS_TRASH_DIRECTORY}/verify-password-expected.$RANDOM.$RANDOM.$RANDOM.$RANDOM"
+	local actualfile="$SHARNESS_TRASH_DIRECTORY/verify-password-actual.$RANDOM.$RANDOM.$RANDOM.$RANDOM"
+	local expectedfile="$SHARNESS_TRASH_DIRECTORY/verify-password-expected.$RANDOM.$RANDOM.$RANDOM.$RANDOM"
 	$PASS show "$TEST_CRED" | sed -n 1p > "$actualfile" &&
 	echo "$expected" > "$expectedfile" &&
 	test_cmp "$expectedfile" "$actualfile"

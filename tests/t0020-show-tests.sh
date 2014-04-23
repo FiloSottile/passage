@@ -3,7 +3,7 @@
 test_description='Test show'
 . ./setup.sh
 
-export TEST_CRED="test_cred"
+TEST_CRED="test_cred"
 
 test_expect_success 'Test "show" command' '
 	pass_init &&

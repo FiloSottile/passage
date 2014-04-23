@@ -3,8 +3,8 @@
 test_description='Test insert'
 . ./setup.sh
 
-export TEST_CRED="test_cred"
-export TEST_PASSWORD="Hello world"
+TEST_CRED="test_cred"
+TEST_PASSWORD="Hello world"
 
 test_expect_success 'Test "insert" command' '
 	pass_init &&

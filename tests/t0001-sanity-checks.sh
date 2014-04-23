@@ -9,8 +9,8 @@ test_expect_success 'Make sure we can run pass' '
 
 test_expect_success 'Make sure we can initialize our test store' '
 	pass_init &&
-	ls -ld "${PASSWORD_STORE_DIR}" &&
-	[[ -d "${PASSWORD_STORE_DIR}" ]]
+	ls -ld "$PASSWORD_STORE_DIR" &&
+	[[ -d "$PASSWORD_STORE_DIR" ]]
 '
 
 test_done
