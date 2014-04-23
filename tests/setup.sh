@@ -130,10 +130,10 @@ create_cred() {
 		local password="$1"
 		shift
 		echo "Using password \"$password\" for $cred"
-		$PASS insert -e "$cred" <<<"$password" || return 1
+		$PASS insert -f -e "$cred" <<<"$password" || return 1
 	else
 		echo "Generating random password for $cred"
-		if ! $PASS generate "${cred}" 24 > /dev/null; then
+		if ! $PASS generate -f "${cred}" 24 > /dev/null; then
 			echo "Failed to create credential ${cred}"
 			return 1
 		fi
