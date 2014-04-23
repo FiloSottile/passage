@@ -54,11 +54,7 @@ pass_init() {
 		fi
 	fi
 
-	# This curently returns non-zero for unknown reasons.
-	# Only happens with stdin set to /dev/null.
-	# I suspect the agent check.
-	# TODO:  Once fixed, catch non-zero here and fail.
-	${PASS} init ${PASSWORD_STORE_KEY} || true
+	${PASS} init ${PASSWORD_STORE_KEY} || return 1
 
 	echo "Initialization of ${PASSWORD_STORE_DIR} complete."
 }
