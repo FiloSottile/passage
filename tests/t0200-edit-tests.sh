@@ -10,7 +10,7 @@ test_expect_success 'Test "edit" command' '
 	create_cred "$TEST_CRED" &&
 	export FAKE_EDITOR_PASSWORD="big fat fake password" &&
 	export EDITOR="$PASSWORD_STORE_TEST_HOME/fake-editor-change-password.sh" &&
-	${PASS} edit "$TEST_CRED" &&
+	$PASS edit "$TEST_CRED" &&
 	verify_password "$TEST_CRED" "$FAKE_EDITOR_PASSWORD" 
 '
 

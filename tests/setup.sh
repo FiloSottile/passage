@@ -2,7 +2,7 @@
 #
 # This scripts sets the following:
 #   ${GNUPGHOME} Full path to test GPG directory
-#   ${PASS}      Full path to password-store script to test
+#   $PASS      Full path to password-store script to test
 #   ${PASSWORD_STORE_KEY}  GPG key id of testing key
 #   ${PASSWORD_STORE_TEST_HOME}  This folder
 
@@ -16,7 +16,7 @@ PASSWORD_STORE_TEST_HOME="$(cd "$(dirname "$BASH_SOURCE")"; pwd)"
 
 PASS="${PASSWORD_STORE_TEST_HOME}/../src/password-store.sh"
 
-if ! test -e ${PASS} ; then
+if [[ ! -e $PASS ]]; then
 	echo "Could not find password-store.sh"
 	exit 1
 fi
@@ -26,7 +26,7 @@ fi
 
 # Where the test keyring and test key id
 # Note: the assumption is the test key is unencrypted.
-export GNUPGHOME=$(pwd)"/gnupg/"
+export GNUPGHOME="${PASSWORD_STORE_TEST_HOME}/gnupg/"
 chmod 700 "$GNUPGHOME"
 export PASSWORD_STORE_KEY="3DEEA12D"  # "Password-store Test Key"
 GPG="gpg"
@@ -56,7 +56,7 @@ pass_init() {
 		fi
 	fi
 
-	${PASS} init ${PASSWORD_STORE_KEY} || return 1
+	$PASS init ${PASSWORD_STORE_KEY} || return 1
 
 	echo "Initialization of ${PASSWORD_STORE_DIR} complete."
 }
@@ -76,11 +76,11 @@ check_cred() {
 	local cred="$1"
 	shift
 	echo "Checking credential ${cred}"
-	if ! ${PASS} show "$cred"; then
+	if ! $PASS show "$cred"; then
 		echo "Credential ${cred} does not exist"
 		return 1
 	fi
-	if [[ -z "$(${PASS} show "$cred")" ]]; then
+	if [[ -z "$($PASS show "$cred")" ]]; then
 		echo "Credential ${cred} empty"
 		return 1
 	fi
@@ -101,7 +101,7 @@ check_no_cred() {
 	local cred="$1"
 	shift
 	echo "Checking for lack of credential ${cred}"
-	${PASS} show "$cred" || return 0 
+	$PASS show "$cred" || return 0 
 	echo "Credential ${cred} exists."
 	return 1
 }
@@ -131,10 +131,10 @@ create_cred() {
 		echo "Using password \"$password\" for $cred"
 		# TODO: Working around bug with 'pass insert' returning non-zero.
 		#       Fix this code to exit on error when that is fixed.
-		${PASS} insert -e "$cred" <<<"$password" || true
+		$PASS insert -e "$cred" <<<"$password" || true
 	else
 		echo "Generating random password for $cred"
-		if ! ${PASS} generate "${cred}" 24 > /dev/null; then
+		if ! $PASS generate "${cred}" 24 > /dev/null; then
 			echo "Failed to create credential ${cred}"
 			return 1
 		fi
@@ -161,7 +161,7 @@ verify_password() {
 	check_cred "$cred" || return 1
 	local actualfile="${SHARNESS_TRASH_DIRECTORY}/verify-password-actual.$RANDOM.$RANDOM.$RANDOM.$RANDOM"
 	local expectedfile="${SHARNESS_TRASH_DIRECTORY}/verify-password-expected.$RANDOM.$RANDOM.$RANDOM.$RANDOM"
-	${PASS} show "$TEST_CRED" | sed -n 1p > "$actualfile" &&
+	$PASS show "$TEST_CRED" | sed -n 1p > "$actualfile" &&
 	echo "$expected" > "$expectedfile" &&
 	test_cmp "$expectedfile" "$actualfile"
 }
