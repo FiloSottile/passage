@@ -9,4 +9,4 @@ password_files=( "${password_files[@]%.gpg}" )
 
 password=$(printf '%s\n' "${password_files[@]}" | dmenu "$@")
 
-[[ -n $password ]] && pass -c "$password"
+[[ -n $password ]] && pass show -c "$password" 2>/dev/null
