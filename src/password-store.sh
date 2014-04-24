@@ -87,7 +87,7 @@ agent_check() {
 }
 reencrypt_path() {
 	local prev_gpg_recipients="" gpg_keys="" current_keys="" index passfile
-	local groups="$(gpg --list-config --with-colons | grep ^cfg:group:.*)"
+	local groups="$(gpg --list-config --with-colons | grep "^cfg:group:.*")"
 	while read -r -d "" passfile; do
 		local passfile_dir="${passfile%/*}"
 		passfile_dir="${passfile_dir#$PREFIX}"
@@ -97,9 +97,9 @@ reencrypt_path() {
 		local passfile_temp="${passfile}.tmp.${RANDOM}.${RANDOM}.${RANDOM}.${RANDOM}.--"
 
 		set_gpg_recipients "$passfile_dir"
-		if [[ $prev_gpg_recipients != "${GPG_RECIPIENTS[@]}" ]]; then
+		if [[ $prev_gpg_recipients != "${GPG_RECIPIENTS[*]}" ]]; then
 			for index in "${!GPG_RECIPIENTS[@]}"; do
-				local group="$(sed -n "s/^cfg:group:${GPG_RECIPIENTS[$index]}:\\(.*\\)$/\\1/p" <<<"$groups" | head -n 1)"
+				local group="$(sed -n "s/^cfg:group:${GPG_RECIPIENTS[$index]}:\\(.*\\)\$/\\1/p" <<<"$groups" | head -n 1)"
 				[[ -z $group ]] && continue
 				IFS=";" eval 'GPG_RECIPIENTS+=( $group )' # http://unix.stackexchange.com/a/92190
 				unset GPG_RECIPIENTS[$index]
@@ -113,7 +113,7 @@ reencrypt_path() {
 			gpg -d $GPG_OPTS "$passfile" | gpg -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile_temp" $GPG_OPTS &&
 			mv "$passfile_temp" "$passfile" || rm -f "$passfile_temp"
 		fi
-		prev_gpg_recipients="${GPG_RECIPIENTS[@]}"
+		prev_gpg_recipients="${GPG_RECIPIENTS[*]}"
 	done < <(find "$1" -iname '*.gpg' -print0)
 }
 check_sneaky_paths() {
@@ -343,7 +343,7 @@ cmd_find() {
 		echo "Usage: $PROGRAM $COMMAND pass-names..."
 		exit 1
 	fi
-	local terms="$@"
+	local terms="$*"
 	echo "Search Terms: $terms"
 	tree -C -l --noreport -P "*${terms// /*|*}*" --prune --matchdirs --ignore-case "$PREFIX" | tail -n +2 | sed 's/\.gpg$//'
 }
@@ -362,7 +362,7 @@ cmd_grep() {
 		passfile="${passfile#$PREFIX/}"
 		local passfile_dir="${passfile%/*}"
 		passfile="${passfile##*/}"
-		printf "\e[94m$passfile_dir/\e[1m$passfile\e[0m:\n"
+		printf "\e[94m%s/\e[1m%s\e[0m:\n" "$passfile_dir" "$passfile"
 		echo "$grepresults"
 	done < <(find "$PREFIX" -iname '*.gpg' -print0)
 }
