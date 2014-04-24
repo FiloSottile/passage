@@ -20,24 +20,24 @@ test_expect_success 'Directory creation' '
 '
 
 test_expect_success 'Directory creation with file rename and empty directory removal' '
-	"$PASS" mv directory/cred2 newdirectory/cred &&
-	[[ -d $PASSWORD_STORE_DIR/newdirectory && -e $PASSWORD_STORE_DIR/newdirectory/cred.gpg && ! -e $PASSWORD_STORE_DIR/directory ]]
+	"$PASS" mv directory/cred2 "new directory with spaces"/cred &&
+	[[ -d $PASSWORD_STORE_DIR/"new directory with spaces" && -e $PASSWORD_STORE_DIR/"new directory with spaces"/cred.gpg && ! -e $PASSWORD_STORE_DIR/directory ]]
 '
 
 test_expect_success 'Directory rename' '
-	"$PASS" mv newdirectory anotherdirectory &&
-	[[ -d $PASSWORD_STORE_DIR/anotherdirectory && -e $PASSWORD_STORE_DIR/anotherdirectory/cred.gpg && ! -e $PASSWORD_STORE_DIR/newdirectory ]]
+	"$PASS" mv "new directory with spaces" anotherdirectory &&
+	[[ -d $PASSWORD_STORE_DIR/anotherdirectory && -e $PASSWORD_STORE_DIR/anotherdirectory/cred.gpg && ! -e $PASSWORD_STORE_DIR/"new directory with spaces" ]]
 '
 
 test_expect_success 'Directory move into new directory' '
-	"$PASS" mv anotherdirectory newdirectory/ &&
-	[[ -d $PASSWORD_STORE_DIR/newdirectory/anotherdirectory && -e $PASSWORD_STORE_DIR/newdirectory/anotherdirectory/cred.gpg && ! -e $PASSWORD_STORE_DIR/anotherdirectory ]]
+	"$PASS" mv anotherdirectory "new directory with spaces"/ &&
+	[[ -d $PASSWORD_STORE_DIR/"new directory with spaces"/anotherdirectory && -e $PASSWORD_STORE_DIR/"new directory with spaces"/anotherdirectory/cred.gpg && ! -e $PASSWORD_STORE_DIR/anotherdirectory ]]
 '
 
 test_expect_success 'Multi-directory creation and multi-directory empty removal' '
-	"$PASS" mv newdirectory/anotherdirectory/cred new1/new2/new3/new4/thecred &&
+	"$PASS" mv "new directory with spaces"/anotherdirectory/cred new1/new2/new3/new4/thecred &&
 	"$PASS" mv new1/new2/new3/new4/thecred cred &&
-	[[ ! -d $PASSWORD_STORE_DIR/newdirectory/anotherdirectory && ! -d $PASSWORD_STORE_DIR/new1/new2/new3/new4 && -e $PASSWORD_STORE_DIR/cred.gpg ]]
+	[[ ! -d $PASSWORD_STORE_DIR/"new directory with spaces"/anotherdirectory && ! -d $PASSWORD_STORE_DIR/new1/new2/new3/new4 && -e $PASSWORD_STORE_DIR/cred.gpg ]]
 '
 
 test_expect_success 'Password made it until the end' '

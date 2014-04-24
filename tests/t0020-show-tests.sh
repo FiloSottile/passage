@@ -10,6 +10,11 @@ test_expect_success 'Test "show" command' '
 	"$PASS" show cred1
 '
 
+test_expect_success 'Test "show" command with spaces' '
+	"$PASS" insert -e "I am a cred with lots of spaces"<<<"BLAH!!" &&
+	[[ $("$PASS" show "I am a cred with lots of spaces") == "BLAH!!" ]]
+'
+
 test_expect_success 'Test "show" of nonexistant password' '
 	test_must_fail "$PASS" show cred2
 '
