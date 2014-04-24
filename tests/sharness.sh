@@ -668,7 +668,7 @@ PATH="$SHARNESS_BUILD_DIRECTORY:$PATH"
 export PATH SHARNESS_BUILD_DIRECTORY
 
 # Public: Path to test script currently executed.
-SHARNESS_TEST_FILE="$0"
+SHARNESS_TEST_FILE="./$(basename "$0")"
 export SHARNESS_TEST_FILE
 
 # Prepare test area.

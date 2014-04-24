@@ -1,6 +1,7 @@
 #!/bin/bash
 
 test_description='Test mv command'
+cd "$(dirname "$0")"
 . ./setup.sh
 
 INITIAL_PASSWORD="bla bla bla will we make it!!"

@@ -6,9 +6,11 @@
 #   $KEY{1..5}	GPG key ids of testing keys
 #   $TEST_HOME	This folder
 
-. ./sharness.sh
 
-TEST_HOME="$(cd "$(dirname "$SHARNESS_TEST_FILE")/.."; pwd)"
+# We must be called from tests/ !!
+TEST_HOME="$(pwd)"
+
+. ./sharness.sh
 
 export PASSWORD_STORE_DIR="$SHARNESS_TRASH_DIRECTORY/test-store/"
 rm -rf "$PASSWORD_STORE_DIR"

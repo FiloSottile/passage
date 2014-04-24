@@ -1,6 +1,7 @@
 #!/bin/bash
 
 test_description='Test show'
+cd "$(dirname "$0")"
 . ./setup.sh
 
 test_expect_success 'Test "show" command' '

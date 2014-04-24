@@ -1,6 +1,7 @@
 #!/bin/bash
 
 test_description='Sanity checks'
+cd "$(dirname "$0")"
 . ./setup.sh
 
 test_expect_success 'Make sure we can run pass' '

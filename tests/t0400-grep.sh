@@ -1,6 +1,7 @@
 #!/bin/bash
 
 test_description='Grep check'
+cd "$(dirname "$0")"
 . ./setup.sh
 
 test_expect_success 'Make sure grep prints normal lines' '

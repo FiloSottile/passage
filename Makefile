@@ -65,7 +65,7 @@ TESTS = $(sort $(wildcard tests/t[0-9][0-9][0-9][0-9]-*.sh))
 test: $(TESTS)
 
 $(TESTS):
-	@cd $$(dirname "$@") && ./$$(basename "$@") $(PASS_TEST_OPTS)
+	@$@ $(PASS_TEST_OPTS)
 
 clean:
 	$(RM) -rf tests/test-results/ tests/trash\ directory.*/ tests/gnupg/random_seed
