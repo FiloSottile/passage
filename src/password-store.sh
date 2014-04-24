@@ -343,9 +343,9 @@ cmd_find() {
 		echo "Usage: $PROGRAM $COMMAND pass-names..."
 		exit 1
 	fi
-	local terms="$*"
-	echo "Search Terms: $terms"
-	tree -C -l --noreport -P "*${terms// /*|*}*" --prune --matchdirs --ignore-case "$PREFIX" | tail -n +2 | sed 's/\.gpg$//'
+	IFS="," eval 'echo "Search Terms: $*"'
+	local terms="*$(printf '%s*|*' "$@")"
+	tree -C -l --noreport -P "${terms%|*}" --prune --matchdirs --ignore-case "$PREFIX" | tail -n +2 | sed 's/\.gpg$//'
 }
 
 cmd_grep() {
