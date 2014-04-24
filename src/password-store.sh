@@ -332,8 +332,11 @@ cmd_show() {
 			echo "${path%\/}"
 		fi
 		tree -C -l --noreport "$PREFIX/$path" | tail -n +2 | sed 's/\.gpg$//'
+	elif [[ -z $path ]]; then
+		echo "Error: password store is empty. Try \"pass init\"."
+		exit 1
 	else
-		echo "$path is not in the password store."
+		echo "Error: $path is not in the password store."
 		exit 1
 	fi
 }
