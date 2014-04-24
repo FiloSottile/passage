@@ -38,10 +38,8 @@ chmod 700 "$GNUPGHOME"
 GPG="gpg"
 which gpg2 &>/dev/null && GPG="gpg2"
 
-# We don't want to use any running agent.
-# We want an agent to appear to pass to be running.
-# We don't need a real agent. Hence:
-[[ $GPG == "gpg2" ]] && export GPG_AGENT_INFO=" " || unset GPG_AGENT_INFO
+# We don't want any currently running agent to conflict.
+unset GPG_AGENT_INFO
 
 KEY1="CF90C77B"  # pass test key 1
 KEY2="D774A374"  # pass test key 2

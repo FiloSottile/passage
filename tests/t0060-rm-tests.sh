@@ -7,7 +7,7 @@ cd "$(dirname "$0")"
 test_expect_success 'Test "rm" command' '
 	"$PASS" init $KEY1 &&
 	"$PASS" generate cred1 43 &&
-	echo "y" | "$PASS" rm cred1 &&
+	"$PASS" rm cred1 &&
 	[[ ! -e $PASSWORD_STORE_DIR/cred1.gpg ]]
 '
 

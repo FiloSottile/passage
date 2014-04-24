@@ -35,6 +35,7 @@ git_commit() {
 	git commit $sign -m "$1"
 }
 yesno() {
+	[[ -t 0 ]] || return 0
 	local response
 	read -r -p "$1 [y/N] " response
 	[[ $response == [yY] ]] || exit 1
@@ -75,7 +76,7 @@ set_gpg_recipients() {
 	done < "$current"
 }
 agent_check() {
-	[[ -n $GPG_AGENT_INFO ]] || yesno "$(cat <<-_EOF
+	[[ ! -t 0 || -n $GPG_AGENT_INFO ]] || yesno "$(cat <<-_EOF
 	You are not running gpg-agent. This means that you will
 	need to enter your password for each and every gpg file
 	that pass processes. This could be quite tedious.
@@ -559,7 +560,7 @@ cmd_copy_move() {
 	[[ -d $old_path || -d $new_path || $new_path =~ /$ ]] || new_path="${new_path}.gpg"
 
 	local interactive="-i"
-	[[ $force -eq 1 ]] && interactive="-f"
+	[[ ! -t 0 || $force -eq 1 ]] && interactive="-f"
 
 	if [[ $move -eq 1 ]]; then
 		mv $interactive -v "$old_path" "$new_path" || exit 1
