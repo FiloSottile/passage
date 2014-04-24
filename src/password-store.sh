@@ -40,6 +40,10 @@ yesno() {
 	read -r -p "$1 [y/N] " response
 	[[ $response == [yY] ]] || exit 1
 }
+die() {
+	echo "$@" >&2
+	exit 1
+}
 set_gpg_recipients() {
 	GPG_RECIPIENT_ARGS=( )
 	GPG_RECIPIENTS=( )
@@ -59,7 +63,7 @@ set_gpg_recipients() {
 	current="$current/.gpg-id"
 
 	if [[ ! -f $current ]]; then
-		cat <<-_EOF
+		cat >&2 <<-_EOF
 		Error: You must run:
 		    $PROGRAM init your-gpg-id
 		before you may use the password store.
@@ -119,10 +123,7 @@ reencrypt_path() {
 check_sneaky_paths() {
 	local path
 	for path in "$@"; do
-		if [[ $path =~ /\.\.$ || $path =~ ^\.\./ || $path =~ /\.\./ || $path =~ ^\.\.$ ]]; then
-			echo "Error: You've attempted to pass a sneaky path to pass. Go home."
-			exit 1
-		fi
+		[[ $path =~ /\.\.$ || $path =~ ^\.\./ || $path =~ /\.\./ || $path =~ ^\.\.$ ]] && die "Error: You've attempted to pass a sneaky path to pass. Go home."
 	done
 }
 
@@ -261,25 +262,14 @@ cmd_init() {
 		--) shift; break ;;
 	esac done
 
-	if [[ $err -ne 0 || $# -lt 1 ]]; then
-		echo "Usage: $PROGRAM $COMMAND [--path=subfolder,-p subfolder] gpg-id..."
-		exit 1
-	fi
+	[[ $err -ne 0 || $# -lt 1 ]] && die "Usage: $PROGRAM $COMMAND [--path=subfolder,-p subfolder] gpg-id..."
 	[[ -n $id_path ]] && check_sneaky_paths "$id_path"
-	if [[ -n $id_path && ! -d $PREFIX/$id_path ]]; then
-		if [[ -e $PREFIX/$id_path ]]; then
-			echo "Error: $PREFIX/$id_path exists but is not a directory."
-			exit 1;
-		fi
-	fi
+	[[ -n $id_path && ! -d $PREFIX/$id_path && -e $PREFIX/$id_path ]] && die "Error: $PREFIX/$id_path exists but is not a directory."
 
 	local gpg_id="$PREFIX/$id_path/.gpg-id"
 
 	if [[ $# -eq 1 && -z $1 ]]; then
-		if [[ ! -f "$gpg_id" ]]; then
-			echo "Error: $gpg_id does not exist and so cannot be removed."
-			exit 1
-		fi
+		[[ ! -f "$gpg_id" ]] && die "Error: $gpg_id does not exist and so cannot be removed."
 		rm -v -f "$gpg_id" || exit 1
 		if [[ -d $GIT_DIR ]]; then
 			git rm -qr "$gpg_id"
@@ -309,10 +299,7 @@ cmd_show() {
 		--) shift; break ;;
 	esac done
 
-	if [[ $err -ne 0 ]]; then
-		echo "Usage: $PROGRAM $COMMAND [--clip,-c] [pass-name]"
-		exit 1
-	fi
+	[[ $err -ne 0 ]] && die "Usage: $PROGRAM $COMMAND [--clip,-c] [pass-name]"
 
 	local path="$1"
 	local passfile="$PREFIX/$path.gpg"
@@ -333,29 +320,21 @@ cmd_show() {
 		fi
 		tree -C -l --noreport "$PREFIX/$path" | tail -n +2 | sed 's/\.gpg$//'
 	elif [[ -z $path ]]; then
-		echo "Error: password store is empty. Try \"pass init\"."
-		exit 1
+		die "Error: password store is empty. Try \"pass init\"."
 	else
-		echo "Error: $path is not in the password store."
-		exit 1
+		die "Error: $path is not in the password store."
 	fi
 }
 
 cmd_find() {
-	if [[ -z "$@" ]]; then
-		echo "Usage: $PROGRAM $COMMAND pass-names..."
-		exit 1
-	fi
+	[[ -z "$@" ]] && die "Usage: $PROGRAM $COMMAND pass-names..."
 	IFS="," eval 'echo "Search Terms: $*"'
 	local terms="*$(printf '%s*|*' "$@")"
 	tree -C -l --noreport -P "${terms%|*}" --prune --matchdirs --ignore-case "$PREFIX" | tail -n +2 | sed 's/\.gpg$//'
 }
 
 cmd_grep() {
-	if [[ $# -ne 1 ]]; then
-		echo "Usage: $PROGRAM $COMMAND search-string"
-		exit 1
-	fi
+	[[ $# -ne 1 ]] && die "Usage: $PROGRAM $COMMAND search-string"
 	agent_check
 	local search="$1" passfile grepresults
 	while read -r -d "" passfile; do
@@ -382,10 +361,7 @@ cmd_insert() {
 		--) shift; break ;;
 	esac done
 
-	if [[ $err -ne 0 || ( $multiline -eq 1 && $noecho -eq 0 ) || $# -ne 1 ]]; then
-		echo "Usage: $PROGRAM $COMMAND [--echo,-e | --multiline,-m] [--force,-f] pass-name"
-		exit 1
-	fi
+	[[ $err -ne 0 || ( $multiline -eq 1 && $noecho -eq 0 ) || $# -ne 1 ]] && die "Usage: $PROGRAM $COMMAND [--echo,-e | --multiline,-m] [--force,-f] pass-name"
 	local path="$1"
 	local passfile="$PREFIX/$path.gpg"
 	check_sneaky_paths "$path"
@@ -422,10 +398,7 @@ cmd_insert() {
 }
 
 cmd_edit() {
-	if [[ $# -ne 1 ]]; then
-		echo "Usage: $PROGRAM $COMMAND pass-name"
-		exit 1
-	fi
+	[[ $# -ne 1 ]] && die "Usage: $PROGRAM $COMMAND pass-name"
 
 	local path="$1"
 	check_sneaky_paths "$path"
@@ -464,17 +437,11 @@ cmd_generate() {
 		--) shift; break ;;
 	esac done
 
-	if [[ $err -ne 0 || $# -ne 2 ]]; then
-		echo "Usage: $PROGRAM $COMMAND [--no-symbols,-n] [--clip,-c] [--force,-f] pass-name pass-length"
-		exit 1
-	fi
+	[[ $err -ne 0 || $# -ne 2 ]] && die "Usage: $PROGRAM $COMMAND [--no-symbols,-n] [--clip,-c] [--force,-f] pass-name pass-length"
 	local path="$1"
 	local length="$2"
 	check_sneaky_paths "$path"
-	if [[ ! $length =~ ^[0-9]+$ ]]; then
-		echo "pass-length \"$length\" must be a number."
-		exit 1
-	fi
+	[[ ! $length =~ ^[0-9]+$ ]] && die "Error: pass-length \"$length\" must be a number."
 	mkdir -p -v "$PREFIX/$(dirname "$path")"
 	set_gpg_recipients "$(dirname "$path")"
 	local passfile="$PREFIX/$path.gpg"
@@ -504,20 +471,14 @@ cmd_delete() {
 		-f|--force) force=1; shift ;;
 		--) shift; break ;;
 	esac done
-	if [[ $# -ne 1 ]]; then
-		echo "Usage: $PROGRAM $COMMAND [--recursive,-r] [--force,-f] pass-name"
-		exit 1
-	fi
+	[[ $# -ne 1 ]] && die "Usage: $PROGRAM $COMMAND [--recursive,-r] [--force,-f] pass-name"
 	local path="$1"
 	check_sneaky_paths "$path"
 
 	local passfile="$PREFIX/${path%/}"
 	if [[ ! -d $passfile ]]; then
 		passfile="$PREFIX/$path.gpg"
-		if [[ ! -f $passfile ]]; then
-			echo "Error: $path is not in the password store."
-			exit 1
-		fi
+		[[ ! -f $passfile ]] && die "Error: $path is not in the password store."
 	fi
 
 	[[ $force -eq 1 ]] || yesno "Are you sure you would like to delete $path?"
@@ -541,10 +502,7 @@ cmd_copy_move() {
 		-f|--force) force=1; shift ;;
 		--) shift; break ;;
 	esac done
-	if [[ $# -ne 2 ]]; then
-		echo "Usage: $PROGRAM $COMMAND [--force,-f] old-path new-path"
-		exit 1
-	fi
+	[[ $# -ne 2 ]] && die "Usage: $PROGRAM $COMMAND [--force,-f] old-path new-path"
 	check_sneaky_paths "$@"
 	local old_path="$PREFIX/${1%/}"
 	local new_path="$PREFIX/$2"
@@ -553,10 +511,7 @@ cmd_copy_move() {
 	if [[ ! -d $old_path ]]; then
 		old_dir="${old_path%/*}"
 		old_path="${old_path}.gpg"
-		if [[ ! -f $old_path ]]; then
-			echo "Error: $1 is not in the password store."
-			exit 1
-		fi
+		[[ ! -f $old_path ]] && die "Error: $1 is not in the password store."
 	fi
 
 	mkdir -p -v "${new_path%/*}"
@@ -588,8 +543,7 @@ cmd_git() {
 	elif [[ -d $GIT_DIR ]]; then
 		exec git "$@"
 	else
-		echo "Error: the password store is not a git repository. Try \"$PROGRAM git init\"."
-		exit 1
+		die "Error: the password store is not a git repository. Try \"$PROGRAM git init\"."
 	fi
 }
 
