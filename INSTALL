@@ -19,7 +19,8 @@ The install target will automatically determine the existance
 of bash, zsh, and fish, and install the completion files as
 needed. If you'd like to force installation, you may set
 FORCE_BASHCOMP, FORCE_ZSHCOMP, or FORCE_FISHCOMP to 1, or set
-FORCE_ALL to 1.
+FORCE_ALL to 1. The exact paths of the completions can be
+controlled with BASHCOMP_PATH, ZSHCOMP_PATH, and FISHCOMP_PATH.
 
 -- Test Suite --
 
