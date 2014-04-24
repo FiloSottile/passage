@@ -29,14 +29,12 @@ if [[ ! -e $PASS ]]; then
 	echo "Could not find password-store.sh"
 	exit 1
 fi
-alias pass="command \"$PASS\""
 
 # Note: the assumption is the test key is unencrypted.
 export GNUPGHOME="$TEST_HOME/gnupg/"
 chmod 700 "$GNUPGHOME"
 GPG="gpg"
 which gpg2 &>/dev/null && GPG="gpg2"
-alias gpg="command $GPG"
 
 # We don't want to use any running agent.
 # We want an agent to appear to pass to be running.
