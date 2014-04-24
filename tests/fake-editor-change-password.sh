@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Fake editor program for testing 'pass edit'.
 # Changes password to 'Hello World', leaving rest of file intact.
 #

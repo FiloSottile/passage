@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 test_description='Test insert'
 cd "$(dirname "$0")"

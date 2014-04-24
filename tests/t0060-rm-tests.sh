@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 test_description='Test rm'
 cd "$(dirname "$0")"

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright (C) 2013 Tom Hendrikx <tom@whyscream.net>. All Rights Reserved.
 # This file is licensed under the GPLv2+. Please see COPYING for more information.
 

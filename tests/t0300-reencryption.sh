@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 test_description='Reencryption consistency'
 cd "$(dirname "$0")"
