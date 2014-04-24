@@ -20,6 +20,6 @@ new_password="${FAKE_EDITOR_PASSWORD:-Hello World}"
 
 # And change only first line of file
 # -i.tmp allows editing file in place. Extension needed on Mac OSX
-sed -i.tmp "1 s/^.*$/$new_password/g" "$filename"
+sed -i.tmp "1 s/^.*\$/$new_password/g" "$filename"
 
 exit 0
