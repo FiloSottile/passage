@@ -6,10 +6,10 @@
 umask "${PASSWORD_STORE_UMASK:-077}"
 set -o pipefail
 
-GPG_OPTS="--quiet --yes --compress-algo=none"
+GPG_OPTS=( "--quiet" "--yes" "--compress-algo=none" )
 GPG="gpg"
 which gpg2 &>/dev/null && GPG="gpg2"
-[[ -n $GPG_AGENT_INFO || $GPG == "gpg2" ]] && GPG_OPTS="$GPG_OPTS --batch --use-agent"
+[[ -n $GPG_AGENT_INFO || $GPG == "gpg2" ]] && GPG_OPTS+=( "--batch" "--use-agent" )
 alias gpg="command $GPG"
 
 PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
@@ -110,7 +110,7 @@ reencrypt_path() {
 
 		if [[ $gpg_keys != "$current_keys" ]]; then
 			echo "$passfile_display: reencrypting to ${gpg_keys//$'\n'/ }"
-			gpg -d $GPG_OPTS "$passfile" | gpg -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile_temp" $GPG_OPTS &&
+			gpg -d "${GPG_OPTS[@]}" "$passfile" | gpg -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile_temp" "${GPG_OPTS[@]}" &&
 			mv "$passfile_temp" "$passfile" || rm -f "$passfile_temp"
 		fi
 		prev_gpg_recipients="${GPG_RECIPIENTS[*]}"
@@ -319,9 +319,9 @@ cmd_show() {
 	check_sneaky_paths "$path"
 	if [[ -f $passfile ]]; then
 		if [[ $clip -eq 0 ]]; then
-			exec gpg -d $GPG_OPTS "$passfile"
+			exec gpg -d "${GPG_OPTS[@]}" "$passfile"
 		else
-			local pass="$(gpg -d $GPG_OPTS "$passfile" | head -n 1)"
+			local pass="$(gpg -d "${GPG_OPTS[@]}" "$passfile" | head -n 1)"
 			[[ -n $pass ]] || exit 1
 			clip "$pass" "$path"
 		fi
@@ -356,7 +356,7 @@ cmd_grep() {
 	agent_check
 	local search="$1" passfile grepresults
 	while read -r -d "" passfile; do
-		grepresults="$(gpg -d $GPG_OPTS "$passfile" | grep --color=always "$search")"
+		grepresults="$(gpg -d "${GPG_OPTS[@]}" "$passfile" | grep --color=always "$search")"
 		[ $? -ne 0 ] && continue
 		passfile="${passfile%.gpg}"
 		passfile="${passfile#$PREFIX/}"
@@ -395,7 +395,7 @@ cmd_insert() {
 	if [[ $multiline -eq 1 ]]; then
 		echo "Enter contents of $path and press Ctrl+D when finished:"
 		echo
-		gpg -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" $GPG_OPTS
+		gpg -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}"
 	elif [[ $noecho -eq 1 ]]; then
 		local password password_again
 		while true; do
@@ -404,7 +404,7 @@ cmd_insert() {
 			read -r -p "Retype password for $path: " -s password_again || exit 1
 			echo
 			if [[ $password == "$password_again" ]]; then
-				gpg -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" $GPG_OPTS <<<"$password"
+				gpg -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" <<<"$password"
 				break
 			else
 				echo "Error: the entered passwords do not match."
@@ -413,7 +413,7 @@ cmd_insert() {
 	else
 		local password
 		read -r -p "Enter password for $path: " -e password
-		gpg -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" $GPG_OPTS <<<"$password"
+		gpg -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" <<<"$password"
 	fi
 	git_add_file "$passfile" "Add given password for $path to store."
 }
@@ -438,11 +438,11 @@ cmd_edit() {
 
 	local action="Add"
 	if [[ -f $passfile ]]; then
-		gpg -d -o "$tmp_file" $GPG_OPTS "$passfile" || exit 1
+		gpg -d -o "$tmp_file" "${GPG_OPTS[@]}" "$passfile" || exit 1
 		action="Edit"
 	fi
 	${EDITOR:-vi} "$tmp_file"
-	while ! gpg -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" $GPG_OPTS "$tmp_file"; do
+	while ! gpg -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" "$tmp_file"; do
 		echo "GPG encryption failed. Retrying."
 		sleep 1
 	done
@@ -480,7 +480,7 @@ cmd_generate() {
 
 	local pass="$(pwgen -s $symbols $length 1)"
 	[[ -n $pass ]] || exit 1
-	gpg -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" $GPG_OPTS <<<"$pass"
+	gpg -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" <<<"$pass"
 	git_add_file "$passfile" "Add generated password for $path to store."
 
 	if [[ $clip -eq 0 ]]; then
