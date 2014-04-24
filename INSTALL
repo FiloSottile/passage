@@ -12,3 +12,21 @@ BINDIR      default: $(PREFIX)/bin
 LIBDIR      default: $(PREFIX)/lib
 MANDIR      default: $(PREFIX)/share/man
 SYSCONFDIR  default: /etc
+
+-- Completion Files --
+
+The install target will automatically determine the existance
+of bash, zsh, and fish, and install the completion files as
+needed. If you'd like to force installation, you may set
+FORCE_BASHCOMP, FORCE_ZSHCOMP, or FORCE_FISHCOMP to 1, or set
+FORCE_ALL to 1.
+
+-- Test Suite --
+
+Pass has a test suite which uses Sharness:
+<https://github.com/mlafeldt/sharness>
+
+To run all tests, run 'make test'.
+
+To debug an individual test, run it directly with '-v', e.g.:
+    $ tests/t0001-sanity-checks.sh -v
