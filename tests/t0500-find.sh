@@ -12,7 +12,7 @@ test_expect_success 'Make sure find resolves correct files' '
 	"$PASS" generate Fishthings 122 &&
 	"$PASS" generate Fishies/stuff 21 &&
 	"$PASS" generate Fishies/otherstuff 1234 &&
-	[[ $("$PASS" find fish | sed "s/^[ \`|-]*//g;s/\\x1B\\[[0-9;]*[a-zA-Z]//g" | tr "\\n" -) == "Search Terms: fish-Fish-Fishies-otherstuff-stuff-Fishthings-" ]]
+	[[ $("$PASS" find fish | sed "s/^[ \`|-]*//g;s/$(printf \\x1b)\\[[0-9;]*[a-zA-Z]//g" | tr "\\n" -) == "Search Terms: fish-Fish-Fishies-otherstuff-stuff-Fishthings-" ]]
 '
 
 test_done
