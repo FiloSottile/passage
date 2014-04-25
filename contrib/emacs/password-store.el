@@ -34,7 +34,7 @@
 (require 'f)
 (require 's)
 
-(defvar pass-executable
+(defvar password-store-executable
   (executable-find "pass")
   "Pass executable.")
 
@@ -53,7 +53,7 @@ failure."
     (let ((exit-code
 	   (apply 'call-process
 		  (append
-		   (list pass-executable nil (current-buffer) nil)
+		   (list password-store-executable nil (current-buffer) nil)
 		   args))))
       (if (zerop exit-code)
 	  (buffer-string)
@@ -143,7 +143,7 @@ Default PASSWORD-LENGTH is `password-store-password-length'."
   "Insert a new ENTRY containing PASSWORD."
   (interactive (list (read-string "Password entry: ")
 		     (read-passwd "Password: " t)))
-  (message (s-chomp (shell-command-to-string (format "echo %s | %s insert -m -f %s" password pass-executable entry)))))
+  (message (s-chomp (shell-command-to-string (format "echo %s | %s insert -m -f %s" password password-store-executable entry)))))
 
 ;;;###autoload
 (defun password-store-remove (entry)
