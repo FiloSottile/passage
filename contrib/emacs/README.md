@@ -14,17 +14,17 @@ website for instructions
 
 Interactive:
 
-	M-x password-store-insert
-	Password entry: example
-	Password: ........
-	Confirm password: ........
-	
-	M-x password-store-copy
-	Password entry: example
-	Copied example to the kill ring. Will clear in 45 seconds.
-	Password cleared.
+    M-x password-store-insert
+    Password entry: example
+    Password: ........
+    Confirm password: ........
+
+    M-x password-store-copy
+    Password entry: example
+    Copied example to the kill ring. Will clear in 45 seconds.
+    Password cleared.
 
 Lisp:
 
-	(password-store-insert "example" "password")
-	(password-store-get "example") ; Returns "password"
+    (password-store-insert "example" "password")
+    (password-store-get "example") ; Returns "password"
