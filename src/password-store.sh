@@ -32,7 +32,7 @@ git_commit() {
 	local sign=""
 	[[ -d $GIT_DIR ]] || return
 	[[ $(git config --bool --get pass.signcommits) == "true" ]] && sign="-S"
-	git commit $sign -m "$1"
+	git commit -q $sign -m "$1"
 }
 yesno() {
 	[[ -t 0 ]] || return 0
