@@ -60,6 +60,61 @@ outputs error message on failure."
 	  (buffer-string)
 	(error (s-chomp (buffer-string)))))))
 
+(defun password-store--run-init (gpg-ids &optional folder)
+  (apply 'password-store--run "init"
+         (if folder (format "--path=%s" folder))
+         gpg-ids))
+
+(defun password-store--run-list (&optional subdir)
+  (error "Not implemented"))
+
+(defun password-store--run-grep (&optional string)
+  (error "Not implemented"))
+
+(defun password-store--run-find (&optional string)
+  (error "Not implemented"))
+
+(defun password-store--run-show (entry)
+  (password-store--run "show"
+                       entry))
+
+(defun password-store--run-insert (entry password &optional force)
+  (error "Not implemented"))
+
+(defun password-store--edit (entry)
+  (error "Not implemented"))
+
+(defun password-store--run-generate (entry password-length &optional force no-symbols)
+  (password-store--run "generate"
+                       (if force "--force")
+                       (if no-symbols "--no-symbols")
+                       entry
+                       (number-to-string password-length)))
+
+(defun password-store--run-remove (entry &optional force)
+  (password-store--run "remove"
+                       (if force "--force")
+                       entry))
+
+(defun password-store--run-rename (entry new-entry &optional force)
+  (password-store--run "rename"
+                       (if force "--force")
+                       entry
+                       new-entry))
+
+(defun password-store--run-copy (entry new-entry &optional force)
+  (password-store--run "copy"
+                       (if force "--force")
+                       entry
+                       new-entry))
+
+(defun password-store--run-git (&rest args)
+  (apply 'password-store--run "git"
+         args))
+
+(defun password-store--run-version ()
+  (password-store--run "version"))
+
 (defvar password-store-kill-ring-pointer nil
   "The tail of of the kill ring ring whose car is the password.")
 
@@ -98,7 +153,7 @@ need to be commited manually if git is being used."
   "Return password for ENTRY.
 
 Returns the first line of the password data."
-  (car (s-lines (password-store--run "show" entry))))
+  (car (s-lines (password-store--run-show entry))))
 
 ;;;###autoload
 (defun password-store-clear ()
@@ -136,7 +191,7 @@ Default PASSWORD-LENGTH is `password-store-password-length'."
   (unless password-length (setq password-length password-store-password-length))
   ;; A message with the output of the command is not printed because
   ;; the output contains the password.
-  (password-store--run "generate" "-f" entry (number-to-string password-length))
+  (password-store--run-generate entry (number-to-string password-length) t)
   nil)
 
 ;;;###autoload
@@ -150,7 +205,7 @@ Default PASSWORD-LENGTH is `password-store-password-length'."
 (defun password-store-remove (entry)
   "Remove existing password for ENTRY."
   (interactive (list (completing-read "Password entry: " (password-store-list))))
-  (message (s-chomp (password-store--run "rm" "-f" entry))))
+  (message (s-chomp (password-store--run-remove entry t))))
 
 ;;;###autoload
 (defun password-store-url (entry)
@@ -169,6 +224,6 @@ avoid sending a password to the browser."
 (defun password-store-version ()
   "Show version of pass executable."
   (interactive)
-  (message (s-chomp (password-store--run "version"))))
+  (message (s-chomp (password-store--run-version))))
 
 ;;; password-store.el ends here
