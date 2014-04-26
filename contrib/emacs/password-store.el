@@ -31,6 +31,7 @@
 
 ;;; Code:
 
+(require 'dash)
 (require 'f)
 (require 's)
 
@@ -47,14 +48,14 @@
 (defun password-store--run (&rest args)
   "Run pass with ARGS.
 
-Returns the output on success, or outputs error message on
-failure."
+Nil arguments are ignored.  Returns the output on success, or
+outputs error message on failure."
   (with-temp-buffer
     (let ((exit-code
 	   (apply 'call-process
 		  (append
 		   (list password-store-executable nil (current-buffer) nil)
-		   args))))
+		   (-reject 'null args)))))
       (if (zerop exit-code)
 	  (buffer-string)
 	(error (s-chomp (buffer-string)))))))
