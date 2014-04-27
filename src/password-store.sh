@@ -136,9 +136,9 @@ check_sneaky_paths() {
 #
 
 clip() {
-	# This base64 business is a disgusting hack to deal with newline inconsistancies
-	# in shell. There must be a better way to deal with this, but because I'm a dolt,
-	# we're going with this for now.
+	# This base64 business is because bash cannot store binary data in a shell
+	# variable. Specifically, it cannot store nulls nor (non-trivally) store
+	# trailing new lines.
 
 	local sleep_argv0="password store sleep on display $DISPLAY"
 	pkill -f "^$sleep_argv0" 2>/dev/null && sleep 0.5
