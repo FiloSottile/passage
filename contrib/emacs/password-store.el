@@ -57,7 +57,7 @@ outputs error message on failure."
 		   (list password-store-executable nil (current-buffer) nil)
 		   (-reject 'null args)))))
       (if (zerop exit-code)
-	  (buffer-string)
+	  (s-chomp (buffer-string))
 	(error (s-chomp (buffer-string)))))))
 
 (defun password-store--run-init (gpg-ids &optional folder)
@@ -199,13 +199,13 @@ Default PASSWORD-LENGTH is `password-store-password-length'."
   "Insert a new ENTRY containing PASSWORD."
   (interactive (list (read-string "Password entry: ")
 		     (read-passwd "Password: " t)))
-  (message (s-chomp (shell-command-to-string (format "echo %s | %s insert -m -f %s" password password-store-executable entry)))))
+  (message (shell-command-to-string (format "echo %s | %s insert -m -f %s" password password-store-executable entry))))
 
 ;;;###autoload
 (defun password-store-remove (entry)
   "Remove existing password for ENTRY."
   (interactive (list (completing-read "Password entry: " (password-store-list))))
-  (message (s-chomp (password-store--run-remove entry t))))
+  (message (password-store--run-remove entry t)))
 
 ;;;###autoload
 (defun password-store-url (entry)
@@ -224,6 +224,6 @@ avoid sending a password to the browser."
 (defun password-store-version ()
   "Show version of pass executable."
   (interactive)
-  (message (s-chomp (password-store--run-version))))
+  (message (password-store--run-version)))
 
 ;;; password-store.el ends here
