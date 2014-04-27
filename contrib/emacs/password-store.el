@@ -91,9 +91,10 @@ outputs error message on failure."
                        entry
                        (number-to-string password-length)))
 
-(defun password-store--run-remove (entry &optional force)
+(defun password-store--run-remove (entry &optional recursive)
   (password-store--run "remove"
-                       (if force "--force")
+                       "--force"
+                       (if recursive "--recursive")
                        entry))
 
 (defun password-store--run-rename (entry new-entry &optional force)
