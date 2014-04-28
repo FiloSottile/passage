@@ -31,9 +31,9 @@ all:
 install-common:
 	@install -v -d "$(DESTDIR)$(MANDIR)/man1" && install -m 0644 -v man/pass.1 "$(DESTDIR)$(MANDIR)/man1/pass.1"
 
-	@[ "$(FORCE_BASHCOMP)" == "1" ] && install -v -d "$(BASHCOMP_PATH)" && install -m 0644 -v src/completion/pass.bash-completion "$(BASHCOMP_PATH)/pass" || true
-	@[ "$(FORCE_ZSHCOMP)" == "1" ] && install -v -d "$(ZSHCOMP_PATH)" && install -m 0644 -v src/completion/pass.zsh-completion "$(ZSHCOMP_PATH)/_pass" || true
-	@[ "$(FORCE_FISHCOMP)" == "1" ] && install -v -d "$(FISHCOMP_PATH)" && install -m 0644 -v src/completion/pass.fish-completion "$(FISHCOMP_PATH)/pass.fish" || true
+	@[ "$(FORCE_BASHCOMP)" = "1" ] && install -v -d "$(BASHCOMP_PATH)" && install -m 0644 -v src/completion/pass.bash-completion "$(BASHCOMP_PATH)/pass" || true
+	@[ "$(FORCE_ZSHCOMP)" = "1" ] && install -v -d "$(ZSHCOMP_PATH)" && install -m 0644 -v src/completion/pass.zsh-completion "$(ZSHCOMP_PATH)/_pass" || true
+	@[ "$(FORCE_FISHCOMP)" = "1" ] && install -v -d "$(FISHCOMP_PATH)" && install -m 0644 -v src/completion/pass.fish-completion "$(FISHCOMP_PATH)/pass.fish" || true
 
 
 ifneq ($(strip $(wildcard $(PLATFORMFILE))),)
