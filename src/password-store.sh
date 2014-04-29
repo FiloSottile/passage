@@ -407,10 +407,14 @@ cmd_edit() {
 	local passfile="$PREFIX/$path.gpg"
 	local template="$PROGRAM.XXXXXXXXXXXXX"
 
-	trap '$SHRED "$tmp_file"; rm -rf "$SECURE_TMPDIR" "$tmp_file"' INT TERM EXIT
-
 	tmpdir #Defines $SECURE_TMPDIR
 	local tmp_file="$(TMPDIR="$SECURE_TMPDIR" mktemp -t "$template")"
+	eval "shred_tmpfile() {
+		$SHRED '$tmp_file'
+		rm -rf '$SECURE_TMPDIR' '$tmp_file'
+	}"
+	trap shred_tmpfile INT TERM EXIT
+
 
 	local action="Add"
 	if [[ -f $passfile ]]; then
