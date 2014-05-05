@@ -192,7 +192,7 @@ Default PASSWORD-LENGTH is `password-store-password-length'."
   (unless password-length (setq password-length password-store-password-length))
   ;; A message with the output of the command is not printed because
   ;; the output contains the password.
-  (password-store--run-generate entry (number-to-string password-length) t)
+  (password-store--run-generate entry password-length t)
   nil)
 
 ;;;###autoload
