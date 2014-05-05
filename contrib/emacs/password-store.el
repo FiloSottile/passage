@@ -227,4 +227,6 @@ avoid sending a password to the browser."
   (interactive)
   (message (password-store--run-version)))
 
+(provide 'password-store)
+
 ;;; password-store.el ends here
