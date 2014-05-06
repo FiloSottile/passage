@@ -230,10 +230,11 @@ cmd_usage() {
 	        overwriting existing password unless forced.
 	    $PROGRAM edit pass-name
 	        Insert a new password or edit an existing password using ${EDITOR:-vi}.
-	    $PROGRAM generate [--no-symbols,-n] [--clip,-c] [--force,-f] pass-name pass-length
+	    $PROGRAM generate [--no-symbols,-n] [--clip,-c] [--in-place,-i] [--force,-f] pass-name pass-length
 	        Generate a new password of pass-length with optionally no symbols.
 	        Optionally put it on the clipboard and clear board after 45 seconds.
 	        Prompt before overwriting existing password unless forced.
+		Optionally replace only the first line of an existing file with a new password.
 	    $PROGRAM rm [--recursive,-r] [--force,-f] pass-name
 	        Remove existing password or directory, optionally forcefully.
 	    $PROGRAM mv [--force,-f] old-path new-path
@@ -430,18 +431,19 @@ cmd_edit() {
 }
 
 cmd_generate() {
-	local opts clip=0 force=0 symbols="-y"
-	opts="$($GETOPT -o ncf -l no-symbols,clip,force -n "$PROGRAM" -- "$@")"
+	local opts clip=0 force=0 symbols="-y" inplace=0
+	opts="$($GETOPT -o ncif -l no-symbols,clip,in-place,force -n "$PROGRAM" -- "$@")"
 	local err=$?
 	eval set -- "$opts"
 	while true; do case $1 in
 		-n|--no-symbols) symbols=""; shift ;;
 		-c|--clip) clip=1; shift ;;
 		-f|--force) force=1; shift ;;
+		-i|--in-place) inplace=1; shift ;;
 		--) shift; break ;;
 	esac done
 
-	[[ $err -ne 0 || $# -ne 2 ]] && die "Usage: $PROGRAM $COMMAND [--no-symbols,-n] [--clip,-c] [--force,-f] pass-name pass-length"
+	[[ $err -ne 0 || $# -ne 2 ]] && die "Usage: $PROGRAM $COMMAND [--no-symbols,-n] [--clip,-c] [--in-place,-i] [--force,-f] pass-name pass-length"
 	local path="$1"
 	local length="$2"
 	check_sneaky_paths "$path"
@@ -450,12 +452,24 @@ cmd_generate() {
 	set_gpg_recipients "$(dirname "$path")"
 	local passfile="$PREFIX/$path.gpg"
 
-	[[ $force -eq 0 && -e $passfile ]] && yesno "An entry already exists for $path. Overwrite it?"
+	[[ $inplace -eq 0 && $force -eq 0 && -e $passfile ]] && yesno "An entry already exists for $path. Overwrite it?"
 
 	local pass="$(pwgen -s $symbols $length 1)"
 	[[ -n $pass ]] || exit 1
-	$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" <<<"$pass"
-	git_add_file "$passfile" "Add generated password for $path to store."
+	if [[ $inplace -eq 0 ]]; then
+		$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" <<<"$pass"
+	else
+		local passfile_temp="${passfile}.tmp.${RANDOM}.${RANDOM}.${RANDOM}.${RANDOM}.--"
+		if $GPG -d "${GPG_OPTS[@]}" "$passfile" | sed $'1c \\\n'"$(sed 's/[\/&]/\\&/g' <<<"$pass")"$'\n' | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile_temp" "${GPG_OPTS[@]}"; then
+			mv "$passfile_temp" "$passfile"
+		else
+			rm -f "$passfile_temp"
+			die "Could not reencrypt new password."
+		fi
+	fi
+	local verb="Add"
+	[[ $inplace -eq 1 ]] && verb="Replace"
+	git_add_file "$passfile" "$verb generated password for ${path}."
 
 	if [[ $clip -eq 0 ]]; then
 		echo "The generated password to $path is:"
