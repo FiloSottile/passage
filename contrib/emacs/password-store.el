@@ -186,6 +186,13 @@ after `password-store-timeout' seconds."
     (run-at-time password-store-timeout nil 'password-store-clear)))
 
 ;;;###autoload
+(defun password-store-insert (entry password)
+  "Insert a new ENTRY containing PASSWORD."
+  (interactive (list (read-string "Password entry: ")
+		     (read-passwd "Password: " t)))
+  (message (shell-command-to-string (format "echo %s | %s insert -m -f %s" password password-store-executable entry))))
+
+;;;###autoload
 (defun password-store-generate (entry &optional password-length)
   "Generate a new password for ENTRY with PASSWORD-LENGTH.
 
@@ -200,17 +207,16 @@ Default PASSWORD-LENGTH is `password-store-password-length'."
   nil)
 
 ;;;###autoload
-(defun password-store-insert (entry password)
-  "Insert a new ENTRY containing PASSWORD."
-  (interactive (list (read-string "Password entry: ")
-		     (read-passwd "Password: " t)))
-  (message (shell-command-to-string (format "echo %s | %s insert -m -f %s" password password-store-executable entry))))
-
-;;;###autoload
 (defun password-store-remove (entry)
   "Remove existing password for ENTRY."
   (interactive (list (password-store--completing-read)))
   (message (password-store--run-remove entry t)))
+
+;;;###autoload
+(defun password-store-version ()
+  "Show version of pass executable."
+  (interactive)
+  (message (password-store--run-version)))
 
 ;;;###autoload
 (defun password-store-url (entry)
@@ -224,12 +230,6 @@ avoid sending a password to the browser."
 	    (string-prefix-p "https://" url))
 	(browse-url url)
       (error "%s" "String does not look like a URL"))))
-
-;;;###autoload
-(defun password-store-version ()
-  "Show version of pass executable."
-  (interactive)
-  (message (password-store--run-version)))
 
 (provide 'password-store)
 
