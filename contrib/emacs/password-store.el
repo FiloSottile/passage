@@ -132,6 +132,10 @@ outputs error message on failure."
   "Return entry name corresponding to FILE."
   (f-no-ext (f-relative file (password-store-dir))))
 
+(defun password-store--completing-read ()
+  "Read a password entry in the minibuffer, with completion."
+  (completing-read "Password entry: " (password-store-list)))
+
 (defun password-store-list (&optional subdir)
   "List password entries under SUBDIR."
   (unless subdir (setq subdir ""))
@@ -146,7 +150,7 @@ outputs error message on failure."
 
 This edits the password file directly in Emacs, so changes will
 need to be commited manually if git is being used."
-  (interactive (list (completing-read "Password entry: " (password-store-list))))
+  (interactive (list (password-store--completing-read)))
   (find-file (password-store--entry-to-file entry)))
 
 ;;;###autoload
@@ -173,7 +177,7 @@ Returns the first line of the password data."
 Clear previous password from kill ring.  Pointer to kill ring is
 stored in `password-store-kill-ring-pointer'.  Password is cleared
 after `password-store-timeout' seconds."
-  (interactive (list (completing-read "Password entry: " (password-store-list))))
+  (interactive (list (password-store--completing-read)))
   (let ((password (password-store-get entry)))
     (password-store-clear)
     (kill-new password)
@@ -205,7 +209,7 @@ Default PASSWORD-LENGTH is `password-store-password-length'."
 ;;;###autoload
 (defun password-store-remove (entry)
   "Remove existing password for ENTRY."
-  (interactive (list (completing-read "Password entry: " (password-store-list))))
+  (interactive (list (password-store--completing-read)))
   (message (password-store--run-remove entry t)))
 
 ;;;###autoload
@@ -214,7 +218,7 @@ Default PASSWORD-LENGTH is `password-store-password-length'."
 
 This will only browse URLs that start with http:// or http:// to
 avoid sending a password to the browser."
-  (interactive (list (completing-read "Password entry: " (password-store-list))))
+  (interactive (list (password-store--completing-read)))
   (let ((url (password-store-get entry)))
     (if (or (string-prefix-p "http://" url)
 	    (string-prefix-p "https://" url))
