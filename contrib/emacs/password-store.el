@@ -81,7 +81,7 @@ outputs error message on failure."
 (defun password-store--run-insert (entry password &optional force)
   (error "Not implemented"))
 
-(defun password-store--edit (entry)
+(defun password-store--run-edit (entry)
   (error "Not implemented"))
 
 (defun password-store--run-generate (entry password-length &optional force no-symbols)
