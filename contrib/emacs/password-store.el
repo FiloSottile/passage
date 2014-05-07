@@ -213,6 +213,13 @@ Default PASSWORD-LENGTH is `password-store-password-length'."
   (message (password-store--run-remove entry t)))
 
 ;;;###autoload
+(defun password-store-rename (entry new-entry)
+  "Rename ENTRY to NEW-ENTRY."
+  (interactive (list (password-store--completing-read)
+                     (read-string "Rename entry to: ")))
+  (message (password-store--run-rename entry new-entry t)))
+
+;;;###autoload
 (defun password-store-version ()
   "Show version of pass executable."
   (interactive)
