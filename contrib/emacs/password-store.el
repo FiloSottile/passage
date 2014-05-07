@@ -186,6 +186,14 @@ after `password-store-timeout' seconds."
     (run-at-time password-store-timeout nil 'password-store-clear)))
 
 ;;;###autoload
+(defun password-store-init (gpg-id)
+  "Initialize new password store and use GPG-ID for encryption.
+
+Separate multiple IDs with spaces."
+  (interactive (list (read-string "GPG ID: ")))
+  (message (password-store--run-init (split-string gpg-id))))
+
+;;;###autoload
 (defun password-store-insert (entry password)
   "Insert a new ENTRY containing PASSWORD."
   (interactive (list (read-string "Password entry: ")
