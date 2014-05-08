@@ -77,6 +77,7 @@ complete -c $PROG -f -A -n '__fish_pass_needs_command' -a generate -d 'Command: 
 complete -c $PROG -f -A -n '__fish_pass_uses_command generate' -s n -l no-symbols -d 'Do not use special symbols'
 complete -c $PROG -f -A -n '__fish_pass_uses_command generate' -s c -l clip -d 'Put the password in clipboard'
 complete -c $PROG -f -A -n '__fish_pass_uses_command generate' -s f -l force -d 'Do not prompt before overwritting'
+complete -c $PROG -f -A -n '__fish_pass_uses_command generate' -s i -l in-place -d 'Replace only the first line with the generated password'
 complete -c $PROG -f -A -n '__fish_pass_uses_command generate' -a "(__fish_pass_print_entry_dirs)"
 
 complete -c $PROG -f -A -n '__fish_pass_needs_command' -a mv -d 'Command: rename existing password'

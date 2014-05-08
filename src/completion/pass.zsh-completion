@@ -42,7 +42,11 @@ _pass () {
 					"-n[don't include symbols in password]" \
 					"--no-symbols[don't include symbols in password]" \
 					"-c[copy password to the clipboard]" \
-					"--clip[copy password to the clipboard]"
+					"--clip[copy password to the clipboard]" \
+					"-f[force overwrite]" \
+					"--force[force overwrite]" \
+					"-i[replace first line]" \
+					"--in-place[replace first line]"
 				_pass_complete_entries_with_subdirs
 				;;
 			cp|copy|mv|rename)

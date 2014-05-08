@@ -86,7 +86,7 @@ _pass()
 				_pass_complete_entries
 				;;
 			generate)
-				COMPREPLY+=($(compgen -W "-n --no-symbols -c --clip -f --force" -- ${cur}))
+				COMPREPLY+=($(compgen -W "-n --no-symbols -c --clip -f --force -i --in-place" -- ${cur}))
 				_pass_complete_entries
 				;;
 			cp|copy|mv|rename)
