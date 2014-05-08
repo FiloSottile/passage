@@ -32,7 +32,7 @@ git_commit() {
 	local sign=""
 	[[ -d $GIT_DIR ]] || return
 	[[ $(git config --bool --get pass.signcommits) == "true" ]] && sign="-S"
-	git commit -q $sign -m "$1"
+	git commit $sign -m "$1"
 }
 yesno() {
 	[[ -t 0 ]] || return 0
@@ -472,8 +472,7 @@ cmd_generate() {
 	git_add_file "$passfile" "$verb generated password for ${path}."
 
 	if [[ $clip -eq 0 ]]; then
-		echo "The generated password to $path is:"
-		echo "$pass"
+		printf "\e[1m\e[37mThe generated password for \e[4m%s\e[24m is:\e[0m\n\e[1m\e[93m%s\e[0m\n" "$path" "$pass"
 	else
 		clip "$pass" "$path"
 	fi
