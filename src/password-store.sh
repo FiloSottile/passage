@@ -230,7 +230,7 @@ cmd_usage() {
 	        overwriting existing password unless forced.
 	    $PROGRAM edit pass-name
 	        Insert a new password or edit an existing password using ${EDITOR:-vi}.
-	    $PROGRAM generate [--no-symbols,-n] [--clip,-c] [--in-place,-i] [--force,-f] pass-name pass-length
+	    $PROGRAM generate [--no-symbols,-n] [--clip,-c] [--in-place,-i | --force,-f] pass-name pass-length
 	        Generate a new password of pass-length with optionally no symbols.
 	        Optionally put it on the clipboard and clear board after 45 seconds.
 	        Prompt before overwriting existing password unless forced.
@@ -443,7 +443,7 @@ cmd_generate() {
 		--) shift; break ;;
 	esac done
 
-	[[ $err -ne 0 || $# -ne 2 ]] && die "Usage: $PROGRAM $COMMAND [--no-symbols,-n] [--clip,-c] [--in-place,-i] [--force,-f] pass-name pass-length"
+	[[ $err -ne 0 || $# -ne 2 || ( $force -eq 1 && $inplace -eq 1 ) ]] && die "Usage: $PROGRAM $COMMAND [--no-symbols,-n] [--clip,-c] [--in-place,-i | --force,-f] pass-name pass-length"
 	local path="$1"
 	local length="$2"
 	check_sneaky_paths "$path"
