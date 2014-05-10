@@ -425,7 +425,7 @@ cmd_edit() {
 		$GPG -d -o "$tmp_file" "${GPG_OPTS[@]}" "$passfile" || exit 1
 		action="Edit"
 	fi
-	${EDITOR:-vi} "$tmp_file"
+	"${EDITOR:-vi}" "$tmp_file"
 	while ! $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" "$tmp_file"; do
 		echo "GPG encryption failed. Retrying."
 		sleep 1
