@@ -557,6 +557,11 @@ cmd_git() {
 	if [[ $1 == "init" ]]; then
 		git "$@" || exit 1
 		git_add_file "$PREFIX" "Add current contents of password store."
+
+		echo '*.gpg diff=gpg' > "$PREFIX/.gitattributes"
+		git_add_file .gitattributes "Assigning diff attribute for gpg files"
+		git config --local diff.gpg.binary true
+		git config --local diff.gpg.textconv "$GPG ${GPG_OPTS[*]} --decrypt"
 	elif [[ -d $GIT_DIR ]]; then
 		exec git "$@"
 	else
