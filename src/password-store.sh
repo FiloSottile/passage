@@ -163,10 +163,13 @@ clip() {
 	echo "Copied $2 to clipboard. Will clear in $CLIP_TIME seconds."
 }
 tmpdir() {
+	local warn=1
+	[[ $1 == "nowarn" ]] && warn=0
+	local template="$PROGRAM.XXXXXXXXXXXXX"
 	if [[ -d /dev/shm && -w /dev/shm && -x /dev/shm ]]; then
 		SECURE_TMPDIR="$(TMPDIR=/dev/shm mktemp -d -t "$template")"
 	else
-		yesno "$(cat <<-_EOF
+		[[ $warn -eq 1 ]] && yesno "$(cat <<-_EOF
 		Your system does not have /dev/shm, which means that it may
 		be difficult to entirely erase the temporary non-encrypted
 		password file after editing.
@@ -554,16 +557,20 @@ cmd_copy_move() {
 }
 
 cmd_git() {
+	tmpdir nowarn #Defines $SECURE_TMPDIR. We don't warn, because at most, this only copies encrypted files.
+	trap "rm -rf '$SECURE_TMPDIR'" INT TERM EXIT
+	export TMPDIR="$SECURE_TMPDIR"
+
 	if [[ $1 == "init" ]]; then
 		git "$@" || exit 1
 		git_add_file "$PREFIX" "Add current contents of password store."
 
 		echo '*.gpg diff=gpg' > "$PREFIX/.gitattributes"
-		git_add_file .gitattributes "Assigning diff attribute for gpg files"
+		git_add_file .gitattributes "Configure git repository for gpg file diff."
 		git config --local diff.gpg.binary true
-		git config --local diff.gpg.textconv "$GPG ${GPG_OPTS[*]} --decrypt"
+		git config --local diff.gpg.textconv "$GPG -d ${GPG_OPTS[*]}"
 	elif [[ -d $GIT_DIR ]]; then
-		exec git "$@"
+		git "$@"
 	else
 		die "Error: the password store is not a git repository. Try \"$PROGRAM git init\"."
 	fi
