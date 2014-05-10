@@ -103,7 +103,7 @@ reencrypt_path() {
 		set_gpg_recipients "$passfile_dir"
 		if [[ $prev_gpg_recipients != "${GPG_RECIPIENTS[*]}" ]]; then
 			for index in "${!GPG_RECIPIENTS[@]}"; do
-				local group="$(sed -n "s/^cfg:group:${GPG_RECIPIENTS[$index]}:\\(.*\\)\$/\\1/p" <<<"$groups" | head -n 1)"
+				local group="$(sed -n "s/^cfg:group:$(sed 's/[\/&]/\\&/g' <<<"${GPG_RECIPIENTS[$index]}"):\\(.*\\)\$/\\1/p" <<<"$groups" | head -n 1)"
 				[[ -z $group ]] && continue
 				IFS=";" eval 'GPG_RECIPIENTS+=( $group )' # http://unix.stackexchange.com/a/92190
 				unset GPG_RECIPIENTS[$index]
