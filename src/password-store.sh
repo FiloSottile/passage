@@ -557,10 +557,6 @@ cmd_copy_move() {
 }
 
 cmd_git() {
-	tmpdir nowarn #Defines $SECURE_TMPDIR. We don't warn, because at most, this only copies encrypted files.
-	trap "rm -rf '$SECURE_TMPDIR'" INT TERM EXIT
-	export TMPDIR="$SECURE_TMPDIR"
-
 	if [[ $1 == "init" ]]; then
 		git "$@" || exit 1
 		git_add_file "$PREFIX" "Add current contents of password store."
@@ -570,6 +566,9 @@ cmd_git() {
 		git config --local diff.gpg.binary true
 		git config --local diff.gpg.textconv "$GPG -d ${GPG_OPTS[*]}"
 	elif [[ -d $GIT_DIR ]]; then
+		tmpdir nowarn #Defines $SECURE_TMPDIR. We don't warn, because at most, this only copies encrypted files.
+		trap "rm -rf '$SECURE_TMPDIR'" INT TERM EXIT
+		export TMPDIR="$SECURE_TMPDIR"
 		git "$@"
 	else
 		die "Error: the password store is not a git repository. Try \"$PROGRAM git init\"."
