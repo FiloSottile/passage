@@ -164,11 +164,10 @@ Returns the first line of the password data."
 (defun password-store-clear ()
   "Clear password in kill ring."
   (interactive)
-  (if password-store-kill-ring-pointer
-      (progn
-	(setcar password-store-kill-ring-pointer "")
-	(setq password-store-kill-ring-pointer nil)
-	(message "Password cleared."))))
+  (when password-store-kill-ring-pointer
+    (setcar password-store-kill-ring-pointer "")
+    (setq password-store-kill-ring-pointer nil)
+    (message "Password cleared.")))
 
 ;;;###autoload
 (defun password-store-copy (entry)
