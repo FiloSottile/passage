@@ -205,7 +205,7 @@ cmd_version() {
 	=             Jason A. Donenfeld           =
 	=               Jason@zx2c4.com            =
 	=                                          =
-	= http://zx2c4.com/projects/password-store =
+	=      http://www.passwordstore.org/       =
 	============================================
 	_EOF
 }

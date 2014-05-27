@@ -8,7 +8,7 @@ This is a very simple password store that encrypts passwords using gpg and
 places the encrypted password in a directory. It can generate new passwords
 and keep track of old ones.
 
-Visit the project page for more information: http://zx2c4.com/projects/password-store
+Visit the project page for more information: http://www.passwordstore.org/
 
 Please see the man page for documentation and examples.
 
