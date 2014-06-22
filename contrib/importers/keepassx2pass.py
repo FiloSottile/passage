@@ -34,7 +34,10 @@ def cleanTitle(title):
 
 def path_for(element, path=''):
     """ Generate path name from elements title and current path """
-    title = cleanTitle(space_to_camelcase(element.find('title').text))
+    title_text = element.find('title').text
+    if title_text is None:
+        title_text = ''
+    title = cleanTitle(space_to_camelcase(title_text))
     return '/'.join([path, title])
 
 def password_data(element):
