@@ -163,11 +163,16 @@ clip() {
 	echo "Copied $2 to clipboard. Will clear in $CLIP_TIME seconds."
 }
 tmpdir() {
+	[[ -n $SECURE_TMPDIR ]] && return
 	local warn=1
 	[[ $1 == "nowarn" ]] && warn=0
 	local template="$PROGRAM.XXXXXXXXXXXXX"
 	if [[ -d /dev/shm && -w /dev/shm && -x /dev/shm ]]; then
 		SECURE_TMPDIR="$(TMPDIR=/dev/shm mktemp -d -t "$template")"
+		remove_tmpfile() {
+			rm -rf "$SECURE_TMPDIR"
+		}
+		trap remove_tmpfile INT TERM EXIT
 	else
 		[[ $warn -eq 1 ]] && yesno "$(cat <<-_EOF
 		Your system does not have /dev/shm, which means that it may
@@ -178,6 +183,11 @@ tmpdir() {
 		_EOF
 		)"
 		SECURE_TMPDIR="$(mktemp -d -t "$template")"
+		shred_tmpfile() {
+			find "$SECURE_TMPDIR" -type f -exec $SHRED {} +
+			rm -rf "$SECURE_TMPDIR"
+		}
+		trap shred_tmpfile INT TERM EXIT
 	fi
 
 }
@@ -413,11 +423,6 @@ cmd_edit() {
 
 	tmpdir #Defines $SECURE_TMPDIR
 	local tmp_file="$(TMPDIR="$SECURE_TMPDIR" mktemp -t "$template")"
-	eval "shred_tmpfile() {
-		$SHRED '$tmp_file'
-		rm -rf '$SECURE_TMPDIR' '$tmp_file'
-	}"
-	trap shred_tmpfile INT TERM EXIT
 
 
 	local action="Add"

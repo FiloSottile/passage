@@ -16,19 +16,19 @@ clip() {
 }
 
 tmpdir() {
-	cleanup_tmp() {
-		[[ -d $SECURE_TMPDIR ]] || return
-		rm -rf "$tmp_file" "$SECURE_TMPDIR" 2>/dev/null
+	[[ -n $SECURE_TMPDIR ]] && return
+	unmount_tmpdir() {
+		[[ -n $SECURE_TMPDIR && -d $SECURE_TMPDIR && -n $DARWIN_RAMDISK_DEV ]] || return
 		umount "$SECURE_TMPDIR"
-		diskutil quiet eject "$ramdisk_dev"
-		rmdir "$SECURE_TMPDIR"
+		diskutil quiet eject "$DARWIN_RAMDISK_DEV"
+		rm -rf "$SECURE_TMPDIR"
 	}
-	trap cleanup_tmp INT TERM EXIT
+	trap unmount_tmpdir INT TERM EXIT
 	SECURE_TMPDIR="$(mktemp -t "$template" -d)"
-	local ramdisk_dev="$(hdid -drivekey system-image=yes -nomount 'ram://32768' | cut -d ' ' -f 1)" # 32768 sectors = 16 mb
-	[[ -z $ramdisk_dev ]] && exit 1
-	newfs_hfs -M 700 "$ramdisk_dev" &>/dev/null || exit 1
-	mount -t hfs -o noatime -o nobrowse "$ramdisk_dev" "$SECURE_TMPDIR" || exit 1
+	DARWIN_RAMDISK_DEV="$(hdid -drivekey system-image=yes -nomount 'ram://32768' | cut -d ' ' -f 1)" # 32768 sectors = 16 mb
+	[[ -z $DARWIN_RAMDISK_DEV ]] && die "Error: could not create ramdisk."
+	newfs_hfs -M 700 "$DARWIN_RAMDISK_DEV" &>/dev/null || die "Error: could not create filesystem on ramdisk."
+	mount -t hfs -o noatime -o nobrowse "$DARWIN_RAMDISK_DEV" "$SECURE_TMPDIR" || die "Error: could not mount filesystem on ramdisk."
 }
 
 GETOPT="$(brew --prefix gnu-getopt 2>/dev/null || echo /usr/local)/bin/getopt"
