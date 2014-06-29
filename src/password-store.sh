@@ -432,8 +432,7 @@ cmd_edit() {
 	fi
 	${EDITOR:-vi} "$tmp_file"
 	while ! $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" "$tmp_file"; do
-		echo "GPG encryption failed. Retrying."
-		sleep 1
+		yesno "GPG encryption failed. Would you like to try again?"
 	done
 	git_add_file "$passfile" "$action password for $path using ${EDITOR:-vi}."
 }
