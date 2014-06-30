@@ -421,7 +421,7 @@ cmd_edit() {
 	local passfile="$PREFIX/$path.gpg"
 
 	tmpdir #Defines $SECURE_TMPDIR
-	local tmp_file="$(mktemp "$SECURE_TMPDIR/XXXXXXXXXXXXX.txt")"
+	local tmp_file="$(mktemp -u "$SECURE_TMPDIR/XXXXX")-${path//\//-}.txt"
 
 
 	local action="Add"
@@ -430,6 +430,7 @@ cmd_edit() {
 		action="Edit"
 	fi
 	${EDITOR:-vi} "$tmp_file"
+	[[ -f $tmp_file ]] || die "New password not saved."
 	while ! $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" "$tmp_file"; do
 		yesno "GPG encryption failed. Would you like to try again?"
 	done
