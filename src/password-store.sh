@@ -168,7 +168,7 @@ tmpdir() {
 	[[ $1 == "nowarn" ]] && warn=0
 	local template="$PROGRAM.XXXXXXXXXXXXX"
 	if [[ -d /dev/shm && -w /dev/shm && -x /dev/shm ]]; then
-		SECURE_TMPDIR="$(TMPDIR=/dev/shm mktemp -d -t "$template")"
+		SECURE_TMPDIR="$(mktemp -d "/dev/shm/$template")"
 		remove_tmpfile() {
 			rm -rf "$SECURE_TMPDIR"
 		}
@@ -182,7 +182,7 @@ tmpdir() {
 		Are you sure you would like to continue?
 		_EOF
 		)"
-		SECURE_TMPDIR="$(mktemp -d -t "$template")"
+		SECURE_TMPDIR="$(mktemp -d "${TMPDIR:-/tmp}/$template")"
 		shred_tmpfile() {
 			find "$SECURE_TMPDIR" -type f -exec $SHRED {} +
 			rm -rf "$SECURE_TMPDIR"
@@ -419,10 +419,9 @@ cmd_edit() {
 	mkdir -p -v "$PREFIX/$(dirname "$path")"
 	set_gpg_recipients "$(dirname "$path")"
 	local passfile="$PREFIX/$path.gpg"
-	local template="$PROGRAM.XXXXXXXXXXXXX"
 
 	tmpdir #Defines $SECURE_TMPDIR
-	local tmp_file="$(TMPDIR="$SECURE_TMPDIR" mktemp -t "$template")"
+	local tmp_file="$(mktemp "$SECURE_TMPDIR/XXXXXXXXXXXXX.txt")"
 
 
 	local action="Add"
