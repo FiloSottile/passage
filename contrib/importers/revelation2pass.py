@@ -57,7 +57,10 @@ def password_data(element):
     """ Return password data and additional info if available from
     password entry element. """
     data = OrderedDict()
-    data['password'] = element.find('field[@id="generic-password"]').text
+    try:
+        data['password'] = element.find('field[@id="generic-password"]').text
+    except AttributeError:
+        data['password'] = None
     data['type'] = element.attrib['type']
     for field in element.findall('field'):
         field_id = field.attrib['id']
