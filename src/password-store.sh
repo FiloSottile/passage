@@ -245,7 +245,7 @@ cmd_usage() {
 	        Insert a new password or edit an existing password using ${EDITOR:-vi}.
 	    $PROGRAM generate [--no-symbols,-n] [--clip,-c] [--in-place,-i | --force,-f] pass-name pass-length
 	        Generate a new password of pass-length with optionally no symbols.
-	        Optionally put it on the clipboard and clear board after 45 seconds.
+	        Optionally put it on the clipboard and clear board after $CLIP_TIME seconds.
 	        Prompt before overwriting existing password unless forced.
 	        Optionally replace only the first line of an existing file with a new password.
 	    $PROGRAM rm [--recursive,-r] [--force,-f] pass-name
