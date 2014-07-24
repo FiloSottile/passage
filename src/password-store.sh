@@ -360,7 +360,7 @@ cmd_grep() {
 		passfile="${passfile##*/}"
 		printf "\e[94m%s/\e[1m%s\e[0m:\n" "$passfile_dir" "$passfile"
 		echo "$grepresults"
-	done < <(find -L "$PREFIX/" -iname '*.gpg' -print0)
+	done < <(find -L "$PREFIX" -iname '*.gpg' -print0)
 }
 
 cmd_insert() {
