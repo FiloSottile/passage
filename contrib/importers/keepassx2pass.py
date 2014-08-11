@@ -47,7 +47,7 @@ def password_data(element):
     ret = passwd + "\n" if passwd else "\n"
     for field in ['username', 'url', 'comment']:
         fel = element.find(field)
-        children = [str(e.text or '') + str(e.tail or '') for e in list(fel)]
+        children = [unicode(e.text or '') + unicode(e.tail or '') for e in list(fel)]
         if len(children) > 0:
             children.insert(0, '')
         text = (fel.text or '') + "\n".join(children)
