@@ -592,7 +592,7 @@ case "$1" in
 	show|ls|list) shift;		cmd_show "$@" ;;
 	find|search) shift;		cmd_find "$@" ;;
 	grep) shift;			cmd_grep "$@" ;;
-	insert) shift;			cmd_insert "$@" ;;
+	insert|add) shift;		cmd_insert "$@" ;;
 	edit) shift;			cmd_edit "$@" ;;
 	generate) shift;		cmd_generate "$@" ;;
 	delete|rm|remove) shift;	cmd_delete "$@" ;;
