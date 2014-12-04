@@ -8,7 +8,7 @@ PLATFORMFILE := src/platform/$(shell uname | cut -d _ -f 1 | tr '[:upper:]' '[:l
 
 BASHCOMP_PATH ?= $(DESTDIR)$(PREFIX)/share/bash-completion/completions
 ZSHCOMP_PATH ?= $(DESTDIR)$(PREFIX)/share/zsh/site-functions
-FISHCOMP_PATH ?= $(DESTDIR)$(PREFIX)/share/fish/completions
+FISHCOMP_PATH ?= $(DESTDIR)$(PREFIX)/share/fish/vendor_completions.d
 
 ifeq ($(FORCE_ALL),1)
 FORCE_BASHCOMP := 1
