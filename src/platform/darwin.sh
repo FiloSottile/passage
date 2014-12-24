@@ -31,5 +31,5 @@ tmpdir() {
 	mount -t hfs -o noatime -o nobrowse "$DARWIN_RAMDISK_DEV" "$SECURE_TMPDIR" || die "Error: could not mount filesystem on ramdisk."
 }
 
-GETOPT="$(brew --prefix gnu-getopt 2>/dev/null || which port 2>/dev/null && echo /opt/local || echo /usr/local)/bin/getopt"
+GETOPT="$(brew --prefix gnu-getopt 2>/dev/null || { which port &>/dev/null && echo /opt/local; } || echo /usr/local)/bin/getopt"
 SHRED="srm -f -z"
