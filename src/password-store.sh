@@ -80,16 +80,7 @@ set_gpg_recipients() {
 		GPG_RECIPIENTS+=( "$gpg_id" )
 	done < "$current"
 }
-agent_check() {
-	[[ ! -t 0 || -n $GPG_AGENT_INFO ]] || yesno "$(cat <<-_EOF
-	You are not running gpg-agent. This means that you will
-	need to enter your password for each and every gpg file
-	that pass processes. This could be quite tedious.
 
-	Are you sure you would like to continue without gpg-agent?
-	_EOF
-	)"
-}
 reencrypt_path() {
 	local prev_gpg_recipients="" gpg_keys="" current_keys="" index passfile
 	local groups="$($GPG --list-config --with-colons | grep "^cfg:group:.*")"
@@ -299,7 +290,6 @@ cmd_init() {
 		git_add_file "$gpg_id" "Set GPG id to ${id_print%, }."
 	fi
 
-	agent_check
 	reencrypt_path "$PREFIX/$id_path"
 	git_add_file "$PREFIX/$id_path" "Reencrypt password store using new GPG id ${id_print%, }."
 }
@@ -350,7 +340,6 @@ cmd_find() {
 
 cmd_grep() {
 	[[ $# -ne 1 ]] && die "Usage: $PROGRAM $COMMAND search-string"
-	agent_check
 	local search="$1" passfile grepresults
 	while read -r -d "" passfile; do
 		grepresults="$($GPG -d "${GPG_OPTS[@]}" "$passfile" | grep --color=always "$search")"
