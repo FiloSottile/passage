@@ -200,7 +200,10 @@ Separate multiple IDs with spaces."
   "Insert a new ENTRY containing PASSWORD."
   (interactive (list (read-string "Password entry: ")
 		     (read-passwd "Password: " t)))
-  (message (shell-command-to-string (format "echo %s | %s insert -m -f %s" password password-store-executable entry))))
+  (message (shell-command-to-string (format "echo %s | %s insert -m -f %s"
+					    (shell-quote-argument password)
+					    password-store-executable
+					    (shell-quote-argument entry)))))
 
 ;;;###autoload
 (defun password-store-generate (entry &optional password-length)
