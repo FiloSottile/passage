@@ -131,11 +131,10 @@ clip() {
 	# This base64 business is because bash cannot store binary data in a shell
 	# variable. Specifically, it cannot store nulls nor (non-trivally) store
 	# trailing new lines.
-
 	local sleep_argv0="password store sleep on display $DISPLAY"
 	pkill -f "^$sleep_argv0" 2>/dev/null && sleep 0.5
-	local before="$(xclip -o -selection "$X_SELECTION" | base64)"
-	echo -n "$1" | xclip -selection "$X_SELECTION"
+	local before="$(xclip -o -selection "$X_SELECTION" 2>/dev/null | base64)"
+	echo -n "$1" | xclip -selection "$X_SELECTION" || die "Error: Could not copy data to the clipboard"
 	(
 		( exec -a "$sleep_argv0" sleep "$CLIP_TIME" )
 		local now="$(xclip -o -selection "$X_SELECTION" | base64)"
