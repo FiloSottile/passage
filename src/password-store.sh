@@ -346,9 +346,10 @@ cmd_grep() {
 		[ $? -ne 0 ] && continue
 		passfile="${passfile%.gpg}"
 		passfile="${passfile#$PREFIX/}"
-		local passfile_dir="${passfile%/*}"
+		local passfile_dir="${passfile%/*}/"
+		[[ $passfile_dir == "${passfile}/" ]] && passfile_dir=""
 		passfile="${passfile##*/}"
-		printf "\e[94m%s/\e[1m%s\e[0m:\n" "$passfile_dir" "$passfile"
+		printf "\e[94m%s\e[1m%s\e[0m:\n" "$passfile_dir" "$passfile"
 		echo "$grepresults"
 	done < <(find -L "$PREFIX" -iname '*.gpg' -print0)
 }
