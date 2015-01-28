@@ -21,12 +21,6 @@ gpg_keys_from_group() {
 	canonicalize_gpg_keys "${keys[@]}"
 }
 
-if $GPG --with-colons --list-config | grep -q '^cfg:version:2.1.[01]$'; then
-	skip_all="These tests are broken with GnuPG 2.1.0 and 2.1.1."
-	test_done
-	exit 0
-fi
-
 test_expect_success 'Setup initial key and git' '
 	"$PASS" init $KEY1 && "$PASS" git init
 '
