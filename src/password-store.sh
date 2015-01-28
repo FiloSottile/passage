@@ -310,7 +310,7 @@ cmd_show() {
 	check_sneaky_paths "$path"
 	if [[ -f $passfile ]]; then
 		if [[ $clip -eq 0 ]]; then
-			exec $GPG -d "${GPG_OPTS[@]}" "$passfile"
+			$GPG -d "${GPG_OPTS[@]}" "$passfile" || exit $?
 		else
 			local pass="$($GPG -d "${GPG_OPTS[@]}" "$passfile" | head -n 1)"
 			[[ -n $pass ]] || exit 1
