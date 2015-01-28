@@ -7,10 +7,10 @@ cd "$(dirname "$0")"
 INITIAL_PASSWORD="will this password live? a big question indeed..."
 
 canonicalize_gpg_keys() {
-	$GPG --list-keys --keyid-format long "$@" | sed -n 's/sub *.*\/\([A-F0-9]\{16\}\) .*/\1/p' | sort -u
+	$GPG --list-keys --with-colons "$@" | sed -n 's/sub:[^:]*:[^:]*:[^:]*:\([^:]*\):[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[a-zA-Z]*e[a-zA-Z]*:.*/\1/p' | LC_ALL=C sort -u
 }
 gpg_keys_from_encrypted_file() {
-	$GPG -v --no-secmem-warning --no-permission-warning --list-only --keyid-format long "$1" 2>&1 | cut -d ' ' -f 5 | sort -u
+	$GPG -v --no-secmem-warning --no-permission-warning --list-only --keyid-format long "$1" 2>&1 | cut -d ' ' -f 5 | LC_ALL=C sort -u
 }
 gpg_keys_from_group() {
 	local output="$($GPG --list-config --with-colons | sed -n "s/^cfg:group:$1:\\(.*\\)/\\1/p" | head -n 1)"
