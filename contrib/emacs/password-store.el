@@ -54,11 +54,16 @@
 Nil arguments are ignored.  Returns the output on success, or
 outputs error message on failure."
   (with-temp-buffer
-    (let ((exit-code
-	   (apply 'call-process
-		  (append
-		   (list password-store-executable nil (current-buffer) nil)
-		   (-reject 'null args)))))
+    (let* ((tempfile (make-temp-file ""))
+	   (exit-code
+	    (apply 'call-process
+		   (append
+		    (list password-store-executable nil (list t tempfile) nil)
+		    (-reject 'null args)))))
+      (unless (zerop exit-code)
+	(erase-buffer)
+	(insert-file-contents tempfile))
+      (delete-file tempfile)
       (if (zerop exit-code)
 	  (s-chomp (buffer-string))
 	(error (s-chomp (buffer-string)))))))
