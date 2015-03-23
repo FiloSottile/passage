@@ -31,7 +31,6 @@
 
 ;;; Code:
 
-(require 'dash)
 (require 'f)
 (require 's)
 
@@ -59,7 +58,7 @@ outputs error message on failure."
             (apply 'call-process
                    (append
                     (list password-store-executable nil (list t tempfile) nil)
-                    (-reject 'null args)))))
+                    (delq nil args)))))
       (unless (zerop exit-code)
         (erase-buffer)
         (insert-file-contents tempfile))
