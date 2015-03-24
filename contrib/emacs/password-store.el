@@ -4,7 +4,7 @@
 
 ;; Author: Svend Sorensen <svend@ciffer.net>
 ;; Version: 0.1
-;; Package-Requires: ((dash "1.5.0") (f "0.11.0") (s "1.9.0"))
+;; Package-Requires: ((f "0.11.0") (s "1.9.0"))
 ;; Keywords: pass
 
 ;; This file is not part of GNU Emacs.
