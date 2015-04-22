@@ -378,7 +378,7 @@ cmd_insert() {
 	if [[ $multiline -eq 1 ]]; then
 		echo "Enter contents of $path and press Ctrl+D when finished:"
 		echo
-		$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}"
+		$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" || exit 1
 	elif [[ $noecho -eq 1 ]]; then
 		local password password_again
 		while true; do
