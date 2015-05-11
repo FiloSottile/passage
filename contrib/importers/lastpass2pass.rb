@@ -76,7 +76,7 @@ entry = ""
 begin
   file = File.open(filename)
   file.each do |line|
-    if line =~ /^http/
+    if line =~ /^(http|ftp|ssh)/
       entries.push(entry)
       entry = ""
     end
@@ -110,8 +110,12 @@ puts "Records parsed: #{records.length}"
 successful = 0
 errors = []
 records.each do |r|
+  if File.exist?("#{r.name}.gpg") and FORCE == false
+    puts "skipped #{r.name}: already exists"
+    next
+  end
   print "Creating record #{r.name}..."
-  IO.popen("pass insert -m#{"f" if FORCE} '#{r.name}' > /dev/null", 'w') do |io|
+  IO.popen("pass insert -m '#{r.name}' > /dev/null", 'w') do |io|
     io.puts r
   end
   if $? == 0
@@ -124,7 +128,7 @@ records.each do |r|
 end
 puts "#{successful} records successfully imported!"
 
-if errors
+if errors.length > 0
   puts "There were #{errors.length} errors:"
   errors.each { |e| print e.name + (e == errors.last ? ".\n" : ", ")}
   puts "These probably occurred because an identically-named record already existed, or because there were multiple entries with the same name in the csv file."
