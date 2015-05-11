@@ -22,7 +22,7 @@ gpg_winpath() {
 	local could_be_filenames="true"
 	local i
 	for ((i=${#args[@]}-1; i>=0; i--)); do
-		if ( [ $i -gt 0 ] && [ "${args[$i-1]}" = "-o" ] ); then
+		if ( [ $i -gt 0 ] && [ "${args[$i-1]}" = "-o" ] && [ "${args[$i]}" != "-" ] ); then
 			args[$i]="$(cygpath -am "${args[$i]}")"
 		elif [ $could_be_filenames = "true" ]; then
 			if [ -e "${args[$i]}" ]; then
