@@ -35,7 +35,7 @@ gpg_winpath() {
 	$GPG_ORIG "${args[@]}"
 }
 
-if $GPG --help | grep -q Gpg4win; then
+if $GPG --help | grep -q 'Home: [A-Z]:[/\\]'; then
 	GPG_ORIG="$GPG"
 	GPG=gpg_winpath
 fi
