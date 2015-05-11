@@ -6,6 +6,7 @@
 
 _pass_complete_entries () {
 	prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store/}"
+	prefix="${prefix%/}/"
 	suffix=".gpg"
 	autoexpand=${1:-0}
 
@@ -42,6 +43,7 @@ _pass_complete_entries () {
 
 _pass_complete_folders () {
 	prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store/}"
+	prefix="${prefix%/}/"
 
 	local IFS=$'\n'
 	local items=($(compgen -d $prefix$cur))
