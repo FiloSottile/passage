@@ -34,12 +34,19 @@
 (require 'f)
 (require 's)
 
+(defgroup password-store '()
+  "Emacs mode for password-store."
+  :prefix "password-store-"
+  :group 'password-store)
+
+(defcustom password-store-password-length 8
+  "Default password length."
+  :group 'password-store
+  :type 'number)
+
 (defvar password-store-executable
   (executable-find "pass")
   "Pass executable.")
-
-(defconst password-store-password-length 8
-  "Default password length.")
 
 (defun password-store-timeout ()
   "Number of seconds to wait before clearing the password."
