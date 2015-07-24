@@ -21,6 +21,6 @@ if [[ $typeit -eq 0 ]]; then
 	pass show -c "$password" 2>/dev/null
 else
 	pass show "$password" |
-        awk 'BEGIN{ORS=""} {print; exit}' |
-        xdotool type --clearmodifiers --file -
+		awk 'BEGIN{ORS=""} {print; exit}' |
+		xdotool type --clearmodifiers --file -
 fi
