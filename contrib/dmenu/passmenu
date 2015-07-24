@@ -20,5 +20,5 @@ password=$(printf '%s\n' "${password_files[@]}" | dmenu "$@")
 if [[ $typeit -eq 0 ]]; then
 	pass show -c "$password" 2>/dev/null
 else
-	xdotool - <<<"type --clearmodifiers -- $(pass show "$password" | head -n 1)"
+	pass show "$password" | tr -d '\n' | xdotool type --clearmodifiers --file -
 fi
