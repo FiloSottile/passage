@@ -204,14 +204,14 @@ after `password-store-timeout' seconds."
 
 Separate multiple IDs with spaces."
   (interactive (list (read-string "GPG ID: ")))
-  (message (password-store--run-init (split-string gpg-id))))
+  (message "%s" (password-store--run-init (split-string gpg-id))))
 
 ;;;###autoload
 (defun password-store-insert (entry password)
   "Insert a new ENTRY containing PASSWORD."
   (interactive (list (read-string "Password entry: ")
                      (read-passwd "Password: " t)))
-  (message (shell-command-to-string (format "echo %s | %s insert -m -f %s"
+  (message "%s" (shell-command-to-string (format "echo %s | %s insert -m -f %s"
                                             (shell-quote-argument password)
                                             password-store-executable
                                             (shell-quote-argument entry)))))
@@ -234,20 +234,20 @@ Default PASSWORD-LENGTH is `password-store-password-length'."
 (defun password-store-remove (entry)
   "Remove existing password for ENTRY."
   (interactive (list (password-store--completing-read)))
-  (message (password-store--run-remove entry t)))
+  (message "%s" (password-store--run-remove entry t)))
 
 ;;;###autoload
 (defun password-store-rename (entry new-entry)
   "Rename ENTRY to NEW-ENTRY."
   (interactive (list (password-store--completing-read)
                      (read-string "Rename entry to: ")))
-  (message (password-store--run-rename entry new-entry t)))
+  (message "%s" (password-store--run-rename entry new-entry t)))
 
 ;;;###autoload
 (defun password-store-version ()
   "Show version of pass executable."
   (interactive)
-  (message (password-store--run-version)))
+  (message "%s" (password-store--run-version)))
 
 ;;;###autoload
 (defun password-store-url (entry)
