@@ -53,7 +53,7 @@ class Record
   def name
     s = ""
     s << @grouping + "/" unless @grouping.empty?
-    s << @name
+    s << @name unless @name == nil
     s.gsub(/ /, "_").gsub(/'/, "")
   end
 
@@ -99,10 +99,10 @@ entries.each do |e|
   password = args.shift
   fav = args.pop
   grouping = args.pop
-  grouping = DEFAULT_GROUP if grouping.empty?
+  grouping = DEFAULT_GROUP if grouping == nil
   name = args.pop
   extra = args.join(",")[1...-1]
-  
+
   records << Record.new(name, url, username, password, extra, grouping, fav)
 end
 puts "Records parsed: #{records.length}"
