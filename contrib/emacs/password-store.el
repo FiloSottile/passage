@@ -48,6 +48,9 @@
   (executable-find "pass")
   "Pass executable.")
 
+(defvar password-store-timeout-timer nil
+  "Timer for clearing clipboard.")
+
 (defun password-store-timeout ()
   "Number of seconds to wait before clearing the password."
   (if (getenv "PASSWORD_STORE_CLIP_TIME")
@@ -178,6 +181,9 @@ Returns the first line of the password data."
 (defun password-store-clear ()
   "Clear password in kill ring."
   (interactive)
+  (when password-store-timeout-timer
+    (cancel-timer password-store-timeout-timer)
+    (setq password-store-timeout-timer nil))
   (when password-store-kill-ring-pointer
     (setcar password-store-kill-ring-pointer "")
     (setq password-store-kill-ring-pointer nil)
@@ -196,7 +202,8 @@ after `password-store-timeout' seconds."
     (kill-new password)
     (setq password-store-kill-ring-pointer kill-ring-yank-pointer)
     (message "Copied %s to the kill ring. Will clear in %s seconds." entry (password-store-timeout))
-    (run-at-time (password-store-timeout) nil 'password-store-clear)))
+    (setq password-store-timeout-timer
+          (run-at-time (password-store-timeout) nil 'password-store-clear))))
 
 ;;;###autoload
 (defun password-store-init (gpg-id)
