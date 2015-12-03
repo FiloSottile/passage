@@ -114,7 +114,7 @@ _pass_cmd_show () {
 _pass_complete_entries_helper () {
 	local IFS=$'\n'
 	local prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
-	_values -C 'passwords' ${$(find -L "$prefix" \( -name .git -o -name .gpg-id \) -prune -o $@ -print 2>/dev/null | sed -e "s#${prefix}/\{0,1\}##" -e 's#\.gpg##' | sort):-""}
+	_values -C 'passwords' ${$(find -L "$prefix" \( -name .git -o -name .gpg-id \) -prune -o $@ -print 2>/dev/null | sed -e "s#${prefix}/\{0,1\}##" -e 's#\.gpg##' -e 's#\\#\\\\#' | sort):-""}
 }
 
 _pass_complete_entries_with_subdirs () {
