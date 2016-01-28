@@ -12,6 +12,13 @@ _pass_complete_entries () {
 
 	local IFS=$'\n'
 	local items=($(compgen -f $prefix$cur))
+
+	# Remember the value of the first item, to see if it is a directory. If
+	# it is a directory, then don't add a space to the completion
+	local firstitem=""
+	# Use counter, can't use ${#items[@]} as we skip hidden directories
+	local i=0
+
 	for item in ${items[@]}; do
 		[[ $item =~ /\.[^/]*$ ]] && continue
 
@@ -38,7 +45,17 @@ _pass_complete_entries () {
 
 		item="${item%$suffix}"
 		COMPREPLY+=("${item#$prefix}")
+		if [[ $i -eq 0 ]]; then
+			firstitem=$item
+		fi
+		let i+=1
 	done
+
+	# The only time we want to add a space to the end is if there is only
+	# one match, and it is not a directory
+	if [[ $i -gt 1 || ( $i -eq 1 && -d $firstitem ) ]]; then
+		compopt -o nospace
+	fi
 }
 
 _pass_complete_folders () {
@@ -71,6 +88,7 @@ _pass()
 			init)
 				if [[ $lastarg == "-p" || $lastarg == "--path" ]]; then
 					_pass_complete_folders
+					compopt -o nospace
 				else
 					COMPREPLY+=($(compgen -W "-p --path" -- ${cur}))
 					_pass_complete_keys
@@ -109,4 +127,4 @@ _pass()
 	fi
 }
 
-complete -o filenames -o nospace -F _pass pass
+complete -o filenames -F _pass pass
