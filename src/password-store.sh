@@ -15,6 +15,7 @@ which gpg2 &>/dev/null && GPG="gpg2"
 PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 X_SELECTION="${PASSWORD_STORE_X_SELECTION:-clipboard}"
 CLIP_TIME="${PASSWORD_STORE_CLIP_TIME:-45}"
+GENERATED_LENGTH="${PASSWORD_STORE_GENERATED_LENGTH:-25}"
 
 export GIT_DIR="${PASSWORD_STORE_GIT:-$PREFIX}/.git"
 export GIT_WORK_TREE="${PASSWORD_STORE_GIT:-$PREFIX}"
@@ -234,8 +235,8 @@ cmd_usage() {
 	        overwriting existing password unless forced.
 	    $PROGRAM edit pass-name
 	        Insert a new password or edit an existing password using ${EDITOR:-vi}.
-	    $PROGRAM generate [--no-symbols,-n] [--clip,-c] [--in-place,-i | --force,-f] pass-name pass-length
-	        Generate a new password of pass-length with optionally no symbols.
+	    $PROGRAM generate [--no-symbols,-n] [--clip,-c] [--in-place,-i | --force,-f] pass-name [pass-length]
+	        Generate a new password of pass-length (or $GENERATED_LENGTH if unspecified) with optionally no symbols.
 	        Optionally put it on the clipboard and clear board after $CLIP_TIME seconds.
 	        Prompt before overwriting existing password unless forced.
 	        Optionally replace only the first line of an existing file with a new password.
@@ -441,9 +442,9 @@ cmd_generate() {
 		--) shift; break ;;
 	esac done
 
-	[[ $err -ne 0 || $# -ne 2 || ( $force -eq 1 && $inplace -eq 1 ) ]] && die "Usage: $PROGRAM $COMMAND [--no-symbols,-n] [--clip,-c] [--in-place,-i | --force,-f] pass-name pass-length"
+	[[ $err -ne 0 || ( $# -ne 2 && $# -ne 1 ) || ( $force -eq 1 && $inplace -eq 1 ) ]] && die "Usage: $PROGRAM $COMMAND [--no-symbols,-n] [--clip,-c] [--in-place,-i | --force,-f] pass-name [pass-length]"
 	local path="$1"
-	local length="$2"
+	local length="${2:-$GENERATED_LENGTH}"
 	check_sneaky_paths "$path"
 	[[ ! $length =~ ^[0-9]+$ ]] && die "Error: pass-length \"$length\" must be a number."
 	mkdir -p -v "$PREFIX/$(dirname "$path")"
