@@ -313,9 +313,9 @@ cmd_show() {
 		if [[ $clip -eq 0 ]]; then
 			$GPG -d "${GPG_OPTS[@]}" "$passfile" || exit $?
 		else
-			[[ $clip_location =~ ^[0-9]+$ ]] || die "Clip location '$clip_location' is not a number"
-			local pass="$($GPG -d "${GPG_OPTS[@]}" "$passfile" | head -n $clip_location | tail -n 1)"
-			[[ -n $pass ]] || exit 1
+			[[ $clip_location =~ ^[0-9]+$ ]] || die "Clip location '$clip_location' is not a number."
+			local pass="$($GPG -d "${GPG_OPTS[@]}" "$passfile" | tail -n +${clip_location} | head -n 1)"
+			[[ -n $pass ]] || die "There is no password to put on the clipboard at line ${clip_location}."
 			clip "$pass" "$path"
 		fi
 	elif [[ -d $PREFIX/$path ]]; then
