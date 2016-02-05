@@ -490,11 +490,10 @@ cmd_delete() {
 	local path="$1"
 	check_sneaky_paths "$path"
 
-	local passfile="$PREFIX/${path%/}"
-	if [[ ! -d $passfile ]]; then
-		passfile="$PREFIX/$path.gpg"
-		[[ ! -f $passfile ]] && die "Error: $path is not in the password store."
-	fi
+	local passdir="$PREFIX/${path%/}"
+	local passfile="$PREFIX/$path.gpg"
+	[[ -f $passfile && -d $passdir && $path == */ || ! -f $passfile ]] && passfile="$passdir"
+	[[ ! -e $passfile ]] && die "Error: $path is not in the password store."
 
 	[[ $force -eq 1 ]] || yesno "Are you sure you would like to delete $path?"
 
