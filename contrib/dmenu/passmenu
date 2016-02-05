@@ -20,7 +20,6 @@ password=$(printf '%s\n' "${password_files[@]}" | dmenu "$@")
 if [[ $typeit -eq 0 ]]; then
 	pass show -c "$password" 2>/dev/null
 else
-	pass show "$password" |
-		awk 'BEGIN{ORS=""} {print; exit}' |
+	pass show "$password" | head -n 1 | tr -d '\n\r' |
 		xdotool type --clearmodifiers --file -
 fi
