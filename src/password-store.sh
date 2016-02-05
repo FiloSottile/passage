@@ -493,7 +493,7 @@ cmd_delete() {
 	local passdir="$PREFIX/${path%/}"
 	local passfile="$PREFIX/$path.gpg"
 	[[ -f $passfile && -d $passdir && $path == */ || ! -f $passfile ]] && passfile="$passdir"
-	[[ ! -e $passfile ]] && die "Error: $path is not in the password store."
+	[[ -e $passfile ]] || die "Error: $path is not in the password store."
 
 	[[ $force -eq 1 ]] || yesno "Are you sure you would like to delete $path?"
 
@@ -519,17 +519,18 @@ cmd_copy_move() {
 	[[ $# -ne 2 ]] && die "Usage: $PROGRAM $COMMAND [--force,-f] old-path new-path"
 	check_sneaky_paths "$@"
 	local old_path="$PREFIX/${1%/}"
-	local new_path="$PREFIX/$2"
 	local old_dir="$old_path"
+	local new_path="$PREFIX/$2"
 
-	if [[ ! -d $old_path ]]; then
+	if ! [[ -f $old_path.gpg && -d $old_path && $1 == */ || ! -f $old_path.gpg ]]; then
 		old_dir="${old_path%/*}"
 		old_path="${old_path}.gpg"
-		[[ ! -f $old_path ]] && die "Error: $1 is not in the password store."
 	fi
+	echo "$old_path"
+	[[ -e $old_path ]] || die "Error: $1 is not in the password store."
 
 	mkdir -p -v "${new_path%/*}"
-	[[ -d $old_path || -d $new_path || $new_path =~ /$ ]] || new_path="${new_path}.gpg"
+	[[ -d $old_path || -d $new_path || $new_path == */ ]] || new_path="${new_path}.gpg"
 
 	local interactive="-i"
 	[[ ! -t 0 || $force -eq 1 ]] && interactive="-f"
