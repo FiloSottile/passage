@@ -366,7 +366,7 @@ cmd_insert() {
 	esac done
 
 	[[ $err -ne 0 || ( $multiline -eq 1 && $noecho -eq 0 ) || $# -ne 1 ]] && die "Usage: $PROGRAM $COMMAND [--echo,-e | --multiline,-m] [--force,-f] pass-name"
-	local path="$1"
+	local path="${1%/}"
 	local passfile="$PREFIX/$path.gpg"
 	check_sneaky_paths "$path"
 
@@ -404,7 +404,7 @@ cmd_insert() {
 cmd_edit() {
 	[[ $# -ne 1 ]] && die "Usage: $PROGRAM $COMMAND pass-name"
 
-	local path="$1"
+	local path="${1%/}"
 	check_sneaky_paths "$path"
 	mkdir -p -v "$PREFIX/$(dirname "$path")"
 	set_gpg_recipients "$(dirname "$path")"
