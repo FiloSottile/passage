@@ -72,9 +72,10 @@ def import_entry(entries, element, path=''):
         
     entries[element_path] = data
 
-def import_group(entries, element, path=''):
+def import_group(entries, element, path='', npath=None):
     """ Import all entries and sub-groups from given group """
-    npath = path_for(element, path)
+    if npath is None:
+        npath = path_for(element, path)
     for group in element.findall('Group'):
         import_group(entries, group, npath)
     for entry in element.findall('Entry'):
@@ -90,11 +91,7 @@ def import_passwords(xml_file, root_path=None):
         xml_tree = ElementTree.XML(text)
         root = xml_tree.find('Root')
         root_group = root.find('Group')
-        import_group(entries,root_group,'')
-        if root_path is None: root_path = root_group.find('Name').text
-        groups = root_group.findall('Group')
-        for group in groups:
-            import_group(entries, group, root_path)
+        import_group(entries, root_group, '', root_path)
         password_count = 0
         for path, data in sorted(entries.iteritems()):
             sys.stdout.write("[>>>>] Importing %s ... " % path.encode("utf-8"))
