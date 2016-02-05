@@ -224,7 +224,7 @@ cmd_usage() {
 	        List passwords.
 	    $PROGRAM find pass-names...
 	    	List passwords that match pass-names.
-	    $PROGRAM [show] [--clip,-c] pass-name
+	    $PROGRAM [show] [--clip[=line-number],-c[line-number]] pass-name
 	        Show existing password and optionally put it on the clipboard.
 	        If put on the clipboard, it will be cleared in $CLIP_TIME seconds.
 	    $PROGRAM grep search-string
@@ -295,16 +295,16 @@ cmd_init() {
 }
 
 cmd_show() {
-	local opts clip=0
-	opts="$($GETOPT -o c -l clip -n "$PROGRAM" -- "$@")"
+	local opts clip_location clip=0
+	opts="$($GETOPT -o c:: -l clip:: -n "$PROGRAM" -- "$@")"
 	local err=$?
 	eval set -- "$opts"
 	while true; do case $1 in
-		-c|--clip) clip=1; shift ;;
+		-c|--clip) clip=1; clip_location="${2:-1}"; shift 2 ;;
 		--) shift; break ;;
 	esac done
 
-	[[ $err -ne 0 ]] && die "Usage: $PROGRAM $COMMAND [--clip,-c] [pass-name]"
+	[[ $err -ne 0 ]] && die "Usage: $PROGRAM $COMMAND [--clip[=line-number],-c[line-number]] [pass-name]"
 
 	local path="$1"
 	local passfile="$PREFIX/$path.gpg"
@@ -313,7 +313,8 @@ cmd_show() {
 		if [[ $clip -eq 0 ]]; then
 			$GPG -d "${GPG_OPTS[@]}" "$passfile" || exit $?
 		else
-			local pass="$($GPG -d "${GPG_OPTS[@]}" "$passfile" | head -n 1)"
+			[[ $clip_location =~ ^[0-9]+$ ]] || die "Clip location '$clip_location' is not a number"
+			local pass="$($GPG -d "${GPG_OPTS[@]}" "$passfile" | head -n $clip_location | tail -n 1)"
 			[[ -n $pass ]] || exit 1
 			clip "$pass" "$path"
 		fi
