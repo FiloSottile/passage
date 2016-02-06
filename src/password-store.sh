@@ -279,19 +279,19 @@ cmd_init() {
 		rm -v -f "$gpg_id" || exit 1
 		if [[ -d $GIT_DIR ]]; then
 			git rm -qr "$gpg_id"
-			git_commit "Deinitialize ${gpg_id}."
+			git_commit "Deinitialize ${gpg_id}${id_path:+ ($id_path)}."
 		fi
 		rmdir -p "${gpg_id%/*}" 2>/dev/null
 	else
 		mkdir -v -p "$PREFIX/$id_path"
 		printf "%s\n" "$@" > "$gpg_id"
 		local id_print="$(printf "%s, " "$@")"
-		echo "Password store initialized for ${id_print%, }"
-		git_add_file "$gpg_id" "Set GPG id to ${id_print%, }."
+		echo "Password store initialized for ${id_print%, }${id_path:+ ($id_path)}"
+		git_add_file "$gpg_id" "Set GPG id to ${id_print%, }${id_path:+ ($id_path)}."
 	fi
 
 	reencrypt_path "$PREFIX/$id_path"
-	git_add_file "$PREFIX/$id_path" "Reencrypt password store using new GPG id ${id_print%, }."
+	git_add_file "$PREFIX/$id_path" "Reencrypt password store using new GPG id ${id_print%, }${id_path:+ ($id_path)}."
 }
 
 cmd_show() {
