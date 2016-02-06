@@ -9,6 +9,15 @@
 # This file is licensed under the GPLv2+. Please see COPYING for more information.
 
 
+# If you use multiple repositories, you can configure completion like this:
+#
+# compdef _pass workpass
+# zstyle ':completion::complete:workpass::' prefix "$HOME/work/pass"
+# workpass() {
+#   PASSWORD_STORE_DIR=$HOME/work/pass pass $@
+# }
+
+
 _pass () {
 	local cmd
 	if (( CURRENT > 2)); then
@@ -113,7 +122,8 @@ _pass_cmd_show () {
 }
 _pass_complete_entries_helper () {
 	local IFS=$'\n'
-	local prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
+	local prefix
+	zstyle -s ":completion:${curcontext}:" prefix prefix || prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
 	_values -C 'passwords' ${$(find -L "$prefix" \( -name .git -o -name .gpg-id \) -prune -o $@ -print 2>/dev/null | sed -e "s#${prefix}/\{0,1\}##" -e 's#\.gpg##' -e 's#\\#\\\\#' | sort):-""}
 }
 
