@@ -21,8 +21,6 @@ Depends on:
   http://www.git-scm.com/
 - xclip
   http://sourceforge.net/projects/xclip/
-- pwgen
-  http://sourceforge.net/projects/pwgen/
 - tree >= 1.7.0
   http://mama.indstate.edu/users/ice/tree/
 - GNU getopt

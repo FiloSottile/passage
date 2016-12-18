@@ -112,11 +112,12 @@ difficult-to-erase disk sectors. If \fI/dev/shm\fP is not accessible, fallback t
 the ordinary \fITMPDIR\fP location, and print a warning.
 .TP
 \fBgenerate\fP [ \fI--no-symbols\fP, \fI-n\fP ] [ \fI--clip\fP, \fI-c\fP ] [ \fI--in-place\fP, \fI-i\fP | \fI--force\fP, \fI-f\fP ] \fIpass-name [pass-length]\fP
-Generate a new password using
-.BR pwgen (1)
-of length \fIpass-length\fP (or \fIPASSWORD_STORE_GENERATED_LENGTH\fP if unspecified)
-and insert into \fIpass-name\fP. If \fI--no-symbols\fP or \fI-n\fP
-is specified, do not use any non-alphanumeric characters in the generated password.
+Generate a new password using \fB/dev/urandom\fP of length \fIpass-length\fP
+(or \fIPASSWORD_STORE_GENERATED_LENGTH\fP if unspecified) and insert into
+\fIpass-name\fP. If \fI--no-symbols\fP or \fI-n\fP is specified, do not use
+any non-alphanumeric characters in the generated password. The character sets used
+in generating passwords can be changed with the \fIPASSWORD_STORE_CHARACTER_SET\fP and
+\fIPASSWORD_STORE_CHARACTER_SET_NO_SYMBOLS\fP environment variables, described below.
 If \fI--clip\fP or \fI-c\fP is specified, do not print the password but instead copy
 it to the clipboard using
 .BR xclip (1)
@@ -420,11 +421,24 @@ Sets the umask of all files modified by pass, by default \fI077\fP.
 The default password length if the \fIpass-length\fP parameter to \fBgenerate\fP
 is unspecified.
 .TP
+.I PASSWORD_STORE_CHARACTER_SET
+The character set to be used in password generation for \fBgenerate\fP. This value
+is to be interpreted by \fBtr\fP. See
+.BR tr (1)
+for more info.
+.TP
+.I PASSWORD_STORE_CHARACTER_SET_NO_SYMBOLS
+The character set to be used in no-symbol password generation for \fBgenerate\fP,
+when \fI--no-symbols\fP, \fI-n\fP is specified. This value is to be interpreted
+by \fBtr\fP. See
+.BR tr (1)
+for more info.
+.TP
 .I EDITOR
 The location of the text editor used by \fBedit\fP.
 .SH SEE ALSO
 .BR gpg2 (1),
-.BR pwgen (1),
+.BR tr (1),
 .BR git (1),
 .BR xclip (1).
 
