@@ -49,6 +49,17 @@ die() {
 	echo "$@" >&2
 	exit 1
 }
+verify_file() {
+	[[ -n $PASSWORD_STORE_SIGNING_KEY ]] || return 0
+	[[ -f $1.sig ]] || die "Signature for $1 does not exist."
+	local fingerprints="$(gpg $PASSWORD_STORE_GPG_OPTS --verify --status-fd=1 "$1.sig" "$1" 2>/dev/null | sed -n 's/\[GNUPG:\] VALIDSIG \([A-F0-9]\{40\}\) .* \([A-F0-9]\{40\}\)$/\1\n\2/p')"
+	local fingerprint found=0
+	for fingerprint in $PASSWORD_STORE_SIGNING_KEY; do
+		[[ $fingerprint =~ ^[A-F0-9]{40}$ ]] || continue
+		[[ $fingerprints == *$fingerprint* ]] && { found=1; break; }
+	done
+	[[ $found -eq 1 ]] || die "Signature for $1 is invalid."
+}
 set_gpg_recipients() {
 	GPG_RECIPIENT_ARGS=( )
 	GPG_RECIPIENTS=( )
@@ -77,6 +88,8 @@ set_gpg_recipients() {
 		cmd_usage
 		exit 1
 	fi
+
+	verify_file "$current"
 
 	local gpg_id
 	while read -r gpg_id; do
@@ -291,6 +304,16 @@ cmd_init() {
 		local id_print="$(printf "%s, " "$@")"
 		echo "Password store initialized for ${id_print%, }${id_path:+ ($id_path)}"
 		git_add_file "$gpg_id" "Set GPG id to ${id_print%, }${id_path:+ ($id_path)}."
+		if [[ -n $PASSWORD_STORE_SIGNING_KEY ]]; then
+			local signing_keys=( ) key
+			for key in $PASSWORD_STORE_SIGNING_KEY; do
+				signing_keys+=( --default-key $key )
+			done
+			gpg "${GPG_OPTS[@]}" "${signing_keys[@]}" --detach-sign "$gpg_id" || die "Could not sign .gpg_id."
+			key="$(gpg --verify --status-fd=1 "$gpg_id.sig" "$gpg_id" 2>/dev/null | sed -n 's/\[GNUPG:\] VALIDSIG [A-F0-9]\{40\} .* \([A-F0-9]\{40\}\)$/\1/p')"
+			[[ -n $key ]] || die "Signing of .gpg_id unsuccessful."
+			git_add_file "$gpg_id.sig" "Signing new GPG id with ${key//[$IFS]/,}."
+		fi
 	fi
 
 	reencrypt_path "$PREFIX/$id_path"
@@ -578,6 +601,7 @@ cmd_extension() {
 	local extension="$EXTENSIONS/$1.bash"
 	check_sneaky_paths "$extension"
 	if [[ -f $extension && -x $extension ]]; then
+		verify_file "$extension"
 		shift
 		source "$extension" "$@"
 	else

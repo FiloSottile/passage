@@ -445,6 +445,13 @@ for more info.
 The location to look for executable extension files, by default
 \fIPASSWORD_STORE_DIR/.extensions\fP.
 .TP
+.I PASSWORD_STORE_SIGNING_KEY
+If this environment variable is set, then all \fB.gpg-id\fP files and extension files
+must be signed using a detached signature using the GPG key specified by the full 40 character
+upper-case fingerprint in this variable. If multiple fingerprints are specified, each
+separated by a whitespace character, then signatures must match at least one.
+The \fBinit\fP command will keep signatures of \fB.gpg-id\fP files up to date.
+.TP
 .I EDITOR
 The location of the text editor used by \fBedit\fP.
 .SH SEE ALSO
