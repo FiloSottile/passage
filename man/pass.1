@@ -30,8 +30,12 @@ If no COMMAND is specified, COMMAND defaults to either
 .B show
 or
 .BR ls ,
-depending on the type of specifier in ARGS. Otherwise COMMAND must be one of
-the valid commands listed below.
+depending on the type of specifier in ARGS. Alternatively, if the file
+\fI.extensions/COMMAND.bash\fP exists inside the password store and is executable
+, then it is sourced into the environment, passing any arguments and environment
+variables.
+
+Otherwise COMMAND must be one of the valid commands listed below.
 
 Several of the commands below rely on or provide additional functionality if
 the password store directory is also a git repository. If the password store
@@ -385,6 +389,9 @@ Contains the default gpg key identification used for encryption and decryption.
 Multiple gpg keys may be specified in this file, one per line. If this file
 exists in any sub directories, passwords inside those sub directories are
 encrypted using those keys. This should be set using the \fBinit\fP command.
+.TP
+.B ~/.password-store/.extensions
+The directory containing extension files.
 
 .SH ENVIRONMENT VARIABLES
 
@@ -433,6 +440,10 @@ when \fI--no-symbols\fP, \fI-n\fP is specified. This value is to be interpreted
 by \fBtr\fP. See
 .BR tr (1)
 for more info.
+.TP
+.I PASSWORD_STORE_EXTENSION_DIR
+The location to look for executable extension files, by default
+\fIPASSWORD_STORE_DIR/.extensions\fP.
 .TP
 .I EDITOR
 The location of the text editor used by \fBedit\fP.

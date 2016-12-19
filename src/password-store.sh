@@ -13,6 +13,7 @@ which gpg2 &>/dev/null && GPG="gpg2"
 [[ -n $GPG_AGENT_INFO || $GPG == "gpg2" ]] && GPG_OPTS+=( "--batch" "--use-agent" )
 
 PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
+EXTENSIONS="${PASSWORD_STORE_EXTENSION_DIR:-$PREFIX/.extensions}"
 X_SELECTION="${PASSWORD_STORE_X_SELECTION:-clipboard}"
 CLIP_TIME="${PASSWORD_STORE_CLIP_TIME:-45}"
 GENERATED_LENGTH="${PASSWORD_STORE_GENERATED_LENGTH:-25}"
@@ -573,6 +574,18 @@ cmd_git() {
 	fi
 }
 
+cmd_extension() {
+	local extension="$EXTENSIONS/$1.bash"
+	check_sneaky_paths "$extension"
+	if [[ -f $extension && -x $extension ]]; then
+		shift
+		source "$extension" "$@"
+	else
+		COMMAND="show"
+		cmd_show "$@"
+	fi
+}
+
 #
 # END subcommand functions
 #
@@ -594,6 +607,6 @@ case "$1" in
 	rename|mv) shift;		cmd_copy_move "move" "$@" ;;
 	copy|cp) shift;			cmd_copy_move "copy" "$@" ;;
 	git) shift;			cmd_git "$@" ;;
-	*) COMMAND="show";		cmd_show "$@" ;;
+	*)				cmd_extension "$@" ;;
 esac
 exit 0
