@@ -30,10 +30,10 @@ If no COMMAND is specified, COMMAND defaults to either
 .B show
 or
 .BR ls ,
-depending on the type of specifier in ARGS. Alternatively, if the file
-\fI.extensions/COMMAND.bash\fP exists inside the password store and is executable
-, then it is sourced into the environment, passing any arguments and environment
-variables.
+depending on the type of specifier in ARGS. Alternatively, if \fIPASSWORD_STORE_ENABLE_EXTENSIONS\fP
+is set to "true", and the file \fI.extensions/COMMAND.bash\fP exists inside the
+password store and is executable, then it is sourced into the environment,
+passing any arguments and environment variables.
 
 Otherwise COMMAND must be one of the valid commands listed below.
 
@@ -441,7 +441,10 @@ by \fBtr\fP. See
 .BR tr (1)
 for more info.
 .TP
-.I PASSWORD_STORE_EXTENSION_DIR
+.I PASSWORD_STORE_ENABLE_EXTENSIONS
+This environment variable must be set to "true" for extensions to be enabled.
+.TP
+.I PASSWORD_STORE_EXTENSIONS_DIR
 The location to look for executable extension files, by default
 \fIPASSWORD_STORE_DIR/.extensions\fP.
 .TP
