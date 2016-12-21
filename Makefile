@@ -40,12 +40,12 @@ ifneq ($(strip $(wildcard $(PLATFORMFILE))),)
 install: install-common
 	@install -v -d "$(DESTDIR)$(LIBDIR)/password-store" && install -m 0644 -v "$(PLATFORMFILE)" "$(DESTDIR)$(LIBDIR)/password-store/platform.sh"
 	@install -v -d "$(DESTDIR)$(BINDIR)/"
-	sed 's:.*PLATFORM_FUNCTION_FILE.*:source "$(DESTDIR)$(LIBDIR)/password-store/platform.sh":' src/password-store.sh > "$(DESTDIR)$(BINDIR)/pass"
+	sed 's:.*PLATFORM_FUNCTION_FILE.*:source "$(LIBDIR)/password-store/platform.sh":;s:^SYSTEM_EXTENSION_DIR=.*:SYSTEM_EXTENSION_DIR="$(LIBDIR)/password-store/extensions":' src/password-store.sh > "$(DESTDIR)$(BINDIR)/pass"
 	@chmod 0755 "$(DESTDIR)$(BINDIR)/pass"
 else
 install: install-common
 	@install -v -d "$(DESTDIR)$(BINDIR)/"
-	sed '/PLATFORM_FUNCTION_FILE/d' src/password-store.sh > "$(DESTDIR)$(BINDIR)/pass"
+	sed '/PLATFORM_FUNCTION_FILE/d;s:^SYSTEM_EXTENSION_DIR=.*:SYSTEM_EXTENSION_DIR="$(LIBDIR)/password-store/extensions":' src/password-store.sh > "$(DESTDIR)$(BINDIR)/pass"
 	@chmod 0755 "$(DESTDIR)$(BINDIR)/pass"
 endif
 

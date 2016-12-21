@@ -603,12 +603,21 @@ cmd_extension_or_show() {
 		cmd_show "$@"
 	fi
 }
+
+SYSTEM_EXTENSION_DIR=""
 cmd_extension() {
-	[[ $PASSWORD_STORE_ENABLE_EXTENSIONS == true ]] || return 1
-	local extension="$EXTENSIONS/$1.bash"
-	check_sneaky_paths "$extension"
-	[[ -f $extension && -x $extension ]] || return 1
-	verify_file "$extension"
+	check_sneaky_paths "$1"
+	local user_extension system_extension extension
+	[[ -n $SYSTEM_EXTENSION_DIR ]] && system_extension="$SYSTEM_EXTENSION_DIR/$1.bash"
+	[[ $PASSWORD_STORE_ENABLE_EXTENSIONS == true ]] && user_extension="$EXTENSIONS/$1.bash"
+	if [[ -n $user_extension && -f $user_extension && -x $user_extension ]]; then
+		verify_file "$user_extension"
+		extension="$user_extension"
+	elif [[ -n $system_extension && -f $system_extension && -x $system_extension ]]; then
+		extension="$system_extension"
+	else
+		return 1
+	fi
 	shift
 	source "$extension" "$@"
 	return 0
