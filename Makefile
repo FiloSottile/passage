@@ -31,9 +31,9 @@ all:
 install-common:
 	@install -v -d "$(DESTDIR)$(MANDIR)/man1" && install -m 0644 -v man/pass.1 "$(DESTDIR)$(MANDIR)/man1/pass.1"
 
-	@[ "$(FORCE_BASHCOMP)" = "1" ] && install -v -d "$(BASHCOMP_PATH)" && install -m 0644 -v src/completion/pass.bash-completion "$(BASHCOMP_PATH)/pass" || true
-	@[ "$(FORCE_ZSHCOMP)" = "1" ] && install -v -d "$(ZSHCOMP_PATH)" && install -m 0644 -v src/completion/pass.zsh-completion "$(ZSHCOMP_PATH)/_pass" || true
-	@[ "$(FORCE_FISHCOMP)" = "1" ] && install -v -d "$(FISHCOMP_PATH)" && install -m 0644 -v src/completion/pass.fish-completion "$(FISHCOMP_PATH)/pass.fish" || true
+	@[ "$(FORCE_BASHCOMP)" = "1" ] && install -v -d "$(DESTDIR)$(BASHCOMP_PATH)" && install -m 0644 -v src/completion/pass.bash-completion "$(DESTDIR)$(BASHCOMP_PATH)/pass" || true
+	@[ "$(FORCE_ZSHCOMP)" = "1" ] && install -v -d "$(DESTDIR)$(ZSHCOMP_PATH)" && install -m 0644 -v src/completion/pass.zsh-completion "$(DESTDIR)$(ZSHCOMP_PATH)/_pass" || true
+	@[ "$(FORCE_FISHCOMP)" = "1" ] && install -v -d "$(DESTDIR)$(FISHCOMP_PATH)" && install -m 0644 -v src/completion/pass.fish-completion "$(DESTDIR)$(FISHCOMP_PATH)/pass.fish" || true
 
 
 ifneq ($(strip $(wildcard $(PLATFORMFILE))),)
@@ -54,9 +54,9 @@ uninstall:
 		"$(DESTDIR)$(BINDIR)/pass" \
 		"$(DESTDIR)$(LIBDIR)/password-store/" \
 		"$(DESTDIR)$(MANDIR)/man1/pass.1" \
-		"$(BASHCOMP_PATH)/pass" \
-		"$(ZSHCOMP_PATH)/_pass" \
-		"$(FISHCOMP_PATH)/pass.fish"
+		"$(DESTDIR)$(BASHCOMP_PATH)/pass" \
+		"$(DESTDIR)$(ZSHCOMP_PATH)/_pass" \
+		"$(DESTDIR)$(FISHCOMP_PATH)/pass.fish"
 	@rmdir "$(DESTDIR)$(LIBDIR)/password-store/" 2>/dev/null || true
 
 TESTS = $(sort $(wildcard tests/t[0-9][0-9][0-9][0-9]-*.sh))
