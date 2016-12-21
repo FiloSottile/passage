@@ -2,13 +2,13 @@
 
 # Copyright (C) 2014 Tobias V. Langhoff <tobias@langhoff.no>. All Rights Reserved.
 # This file is licensed under GPLv2+. Please see COPYING for more information.
-# 
+#
 # 1Password Importer
-# 
+#
 # Reads files exported from 1Password and imports them into pass. Supports comma
 # and tab delimited text files, as well as logins (but not other items) stored
 # in the 1Password Interchange File (1PIF) format.
-# 
+#
 # Supports using the title (default) or URL as pass-name, depending on your
 # preferred organization. Also supports importing metadata, adding them with
 # `pass insert --multiline`; the username and URL are compatible with
@@ -44,7 +44,7 @@ optparse = OptionParser.new do |opts|
     options.meta = meta
   end
 
-  begin 
+  begin
     opts.parse!
   rescue OptionParser::InvalidOption
     $stderr.puts optparse
@@ -95,25 +95,33 @@ if File.extname(filename) =~ /.txt/i
 elsif File.extname(filename) =~ /.1pif/i
   require "json"
 
-  # 1PIF is almost JSON, but not quite
-  pif = "[#{File.open(filename).read}]"
-  pif.gsub!(/^\*\*\*.*\*\*\*$/, ",")
-  pif = JSON.parse(pif, {symbolize_names: true})
-
   options.name = :location if options.name == :url
 
+  # 1PIF is almost JSON, but not quite.  Remove the ***...*** lines
+  # separating records, and then remove the trailing comma
+  pif = File.open(filename).read.gsub(/^\*\*\*.*\*\*\*$/, ",").chomp.chomp(",")
+
   # Import 1PIF
-  pif.each do |entry|
+  JSON.parse("[#{pif}]", symbolize_names: true).each do |entry|
     next unless entry[:typeName] == "webforms.WebForm"
+    next if entry[:secureContents][:fields].nil?
+
     pass = {}
+
     pass[:name] = "#{(options.group + "/") if options.group}#{entry[options.name]}"
+
     pass[:title] = entry[:title]
+
     pass[:password] = entry[:secureContents][:fields].detect do |field|
-      field[:name] == "password"
+      field[:designation] == "password"
     end[:value]
-    pass[:login] = entry[:secureContents][:fields].detect do |field|
-      field[:name] == "username"
-    end[:value]
+
+    username = entry[:secureContents][:fields].detect do |field|
+      field[:designation] == "username"
+    end
+    # might be nil
+    pass[:login] = username[:value] if username
+
     pass[:url] = entry[:location]
     pass[:notes] = entry[:secureContents][:notesPlain]
     passwords << pass
@@ -125,7 +133,7 @@ puts "Read #{passwords.length} passwords."
 errors = []
 # Save the passwords
 passwords.each do |pass|
-  IO.popen("pass insert #{"-f " if options.force}-m '#{pass[:name]}' > /dev/null", "w") do |io|
+  IO.popen("pass insert #{"-f " if options.force}-m \"#{pass[:name]}\" > /dev/null", "w") do |io|
     io.puts pass[:password]
     if options.meta
       io.puts "login: #{pass[:login]}" unless pass[:login].to_s.empty?
