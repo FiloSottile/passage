@@ -1,8 +1,9 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 #
 # Copyright (C) 2012 Juhamatti Niemelä <iiska@iki.fi>. All Rights Reserved.
 # This file is licensed under the GPLv2+. Please see COPYING for more information.
+#
+# Usage ./keepassx2pass.py export.xml
 
 import sys
 import re
@@ -44,10 +45,10 @@ def password_data(element):
     """ Return password data and additional info if available from
     password entry element. """
     passwd = element.find('password').text
-    ret = passwd + "\n" if passwd else "\n"
+    ret = (passwd + "\n") if passwd else "\n"
     for field in ['username', 'url', 'comment']:
         fel = element.find(field)
-        children = [unicode(e.text or '') + unicode(e.tail or '') for e in list(fel)]
+        children = [(e.text or '') + (e.tail or '') for e in list(fel)]
         if len(children) > 0:
             children.insert(0, '')
         text = (fel.text or '') + "\n".join(children)
@@ -58,11 +59,11 @@ def password_data(element):
 def import_entry(element, path=''):
     """ Import new password entry to password-store using pass insert
     command """
-    print "Importing " + path_for(element, path)
+    print("Importing " + path_for(element, path))
     proc = Popen(['pass', 'insert', '--multiline', '--force',
                   path_for(element, path)],
-              stdin=PIPE, stdout=PIPE)
-    proc.communicate(password_data(element).encode('utf8'))
+                  stdin=PIPE, stdout=PIPE)
+    proc.communicate(password_data(element).encode())
     proc.wait()
 
 def import_group(element, path=''):
