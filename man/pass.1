@@ -90,12 +90,15 @@ List names of passwords inside the tree that match \fIpass-names\fP by using the
 .BR tree (1)
 program. This command is alternatively named \fBsearch\fP.
 .TP
-\fBshow\fP [ \fI--clip\fP[=\fIline-number\fP], \fI-c\fP[\fIline-number\fP] ] \fIpass-name\fP
+\fBshow\fP [ \fI--clip\fP[=\fIline-number\fP], \fI-c\fP[\fIline-number\fP] ] [ \fI--qrcode\fP[=\fIline-number\fP], \fI-q\fP[\fIline-number\fP] ] \fIpass-name\fP
 Decrypt and print a password named \fIpass-name\fP. If \fI--clip\fP or \fI-c\fP
 is specified, do not print the password but instead copy the first (or otherwise specified)
 line to the clipboard using
 .BR xclip (1)
-and then restore the clipboard after 45 (or \fIPASSWORD_STORE_CLIP_TIME\fP) seconds.
+and then restore the clipboard after 45 (or \fIPASSWORD_STORE_CLIP_TIME\fP) seconds. If \fI--qrcode\fP
+or \fI-q\fP is specified, do not print the password but instead display a QR code using
+.BR qrencode (1)
+either to the terminal or graphically if supported.
 .TP
 \fBinsert\fP [ \fI--echo\fP, \fI-e\fP | \fI--multiline\fP, \fI-m\fP ] [ \fI--force\fP, \fI-f\fP ] \fIpass-name\fP
 Insert a new password into the password store called \fIpass-name\fP. This will
@@ -125,8 +128,10 @@ in generating passwords can be changed with the \fIPASSWORD_STORE_CHARACTER_SET\
 If \fI--clip\fP or \fI-c\fP is specified, do not print the password but instead copy
 it to the clipboard using
 .BR xclip (1)
-and then restore the clipboard after 45 (or \fIPASSWORD_STORE_CLIP_TIME\fP) seconds.
-Prompt before overwriting an existing password,
+and then restore the clipboard after 45 (or \fIPASSWORD_STORE_CLIP_TIME\fP) seconds. If \fI--qrcode\fP
+or \fI-q\fP is specified, do not print the password but instead display a QR code using
+.BR qrencode (1)
+either to the terminal or graphically if supported. Prompt before overwriting an existing password,
 unless \fI--force\fP or \fI-f\fP is specified. If \fI--in-place\fP or \fI-i\fP is
 specified, do not interactively prompt, and only replace the first line of the password
 file with the new generated password, keeping the remainder of the file intact.
@@ -461,7 +466,8 @@ The location of the text editor used by \fBedit\fP.
 .BR gpg2 (1),
 .BR tr (1),
 .BR git (1),
-.BR xclip (1).
+.BR xclip (1),
+.BR qrencode (1).
 
 .SH AUTHOR
 .B pass

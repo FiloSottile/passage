@@ -26,3 +26,5 @@ Depends on:
 - GNU getopt
   http://www.kernel.org/pub/linux/utils/util-linux/
   http://software.frodo.looijaard.name/getopt/
+- qrencode
+  https://fukuchi.org/works/qrencode/
