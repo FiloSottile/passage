@@ -127,7 +127,7 @@ reencrypt_path() {
 			mv "$passfile_temp" "$passfile" || rm -f "$passfile_temp"
 		fi
 		prev_gpg_recipients="${GPG_RECIPIENTS[*]}"
-	done < <(find "$1" -iname '*.gpg' -print0)
+	done < <(find "$1" -path '*/.git' -prune -o -iname '*.gpg' -print0)
 }
 check_sneaky_paths() {
 	local path
@@ -400,7 +400,7 @@ cmd_grep() {
 		passfile="${passfile##*/}"
 		printf "\e[94m%s\e[1m%s\e[0m:\n" "$passfile_dir" "$passfile"
 		echo "$grepresults"
-	done < <(find -L "$PREFIX" -iname '*.gpg' -print0)
+	done < <(find -L "$PREFIX" -path '*/.git' -prune -o -iname '*.gpg' -print0)
 }
 
 cmd_insert() {
