@@ -28,14 +28,14 @@ export GIT_WORK_TREE="${PASSWORD_STORE_GIT:-$PREFIX}"
 #
 
 git_add_file() {
-	[[ -d $GIT_DIR ]] || return
+	[[ -e $GIT_DIR ]] || return
 	git add "$1" || return
 	[[ -n $(git status --porcelain "$1") ]] || return
 	git_commit "$2"
 }
 git_commit() {
 	local sign=""
-	[[ -d $GIT_DIR ]] || return
+	[[ -e $GIT_DIR ]] || return
 	[[ $(git config --bool --get pass.signcommits) == "true" ]] && sign="-S"
 	git commit $sign -m "$1"
 }
@@ -310,7 +310,7 @@ cmd_init() {
 	if [[ $# -eq 1 && -z $1 ]]; then
 		[[ ! -f "$gpg_id" ]] && die "Error: $gpg_id does not exist and so cannot be removed."
 		rm -v -f "$gpg_id" || exit 1
-		if [[ -d $GIT_DIR ]]; then
+		if [[ -e $GIT_DIR ]]; then
 			git rm -qr "$gpg_id"
 			git_commit "Deinitialize ${gpg_id}${id_path:+ ($id_path)}."
 		fi
@@ -551,7 +551,7 @@ cmd_delete() {
 	[[ $force -eq 1 ]] || yesno "Are you sure you would like to delete $path?"
 
 	rm $recursive -f -v "$passfile"
-	if [[ -d $GIT_DIR && ! -e $passfile ]]; then
+	if [[ -e $GIT_DIR && ! -e $passfile ]]; then
 		git rm -qr "$passfile"
 		git_commit "Remove $path from store."
 	fi
@@ -592,7 +592,7 @@ cmd_copy_move() {
 		mv $interactive -v "$old_path" "$new_path" || exit 1
 		[[ -e "$new_path" ]] && reencrypt_path "$new_path"
 
-		if [[ -d $GIT_DIR && ! -e $old_path ]]; then
+		if [[ -e $GIT_DIR && ! -e $old_path ]]; then
 			git rm -qr "$old_path"
 			git_add_file "$new_path" "Rename ${1} to ${2}."
 		fi
@@ -613,7 +613,7 @@ cmd_git() {
 		git_add_file .gitattributes "Configure git repository for gpg file diff."
 		git config --local diff.gpg.binary true
 		git config --local diff.gpg.textconv "$GPG -d ${GPG_OPTS[*]}"
-	elif [[ -d $GIT_DIR ]]; then
+	elif [[ -e $GIT_DIR ]]; then
 		tmpdir nowarn #Defines $SECURE_TMPDIR. We don't warn, because at most, this only copies encrypted files.
 		export TMPDIR="$SECURE_TMPDIR"
 		git "$@"
