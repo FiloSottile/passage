@@ -33,7 +33,8 @@ or
 depending on the type of specifier in ARGS. Alternatively, if \fIPASSWORD_STORE_ENABLE_EXTENSIONS\fP
 is set to "true", and the file \fI.extensions/COMMAND.bash\fP exists inside the
 password store and is executable, then it is sourced into the environment,
-passing any arguments and environment variables.
+passing any arguments and environment variables. Extensions existing in a
+system-wide directory, only installable by the administrator, are always enabled.
 
 Otherwise COMMAND must be one of the valid commands listed below.
 
@@ -454,7 +455,7 @@ The location to look for executable extension files, by default
 \fIPASSWORD_STORE_DIR/.extensions\fP.
 .TP
 .I PASSWORD_STORE_SIGNING_KEY
-If this environment variable is set, then all \fB.gpg-id\fP files and extension files
+If this environment variable is set, then all \fB.gpg-id\fP files and non-system extension files
 must be signed using a detached signature using the GPG key specified by the full 40 character
 upper-case fingerprint in this variable. If multiple fingerprints are specified, each
 separated by a whitespace character, then signatures must match at least one.
