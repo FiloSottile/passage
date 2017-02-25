@@ -12,7 +12,7 @@ test_expect_success 'Test "generate" command' '
 
 test_expect_success 'Test replacement of first line' '
 	"$PASS" insert -m cred2 <<<"$(printf "this is a big\\npassword\\nwith\\nmany\\nlines\\nin it bla bla")" &&
-	PATH="$TEST_HOME:$PATH" FAKE_PWGEN_PASSWORD="This is a fake password" "$PASS" generate -i cred2 88 &&
+	PATH="$TEST_HOME:$PATH" FAKE_PWGEN_PASSWORD="This is a fake password" "$PASS" generate -i cred2 23 &&
 	[[ $("$PASS" show cred2) == "$(printf "This is a fake password\\npassword\\nwith\\nmany\\nlines\\nin it bla bla")" ]]
 '
 
