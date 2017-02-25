@@ -388,7 +388,7 @@ cmd_show() {
 }
 
 cmd_find() {
-	[[ -z "$@" ]] && die "Usage: $PROGRAM $COMMAND pass-names..."
+	[[ $# -eq 0 ]] && die "Usage: $PROGRAM $COMMAND pass-names..."
 	IFS="," eval 'echo "Search Terms: $*"'
 	local terms="*$(printf '%s*|*' "$@")"
 	tree -C -l --noreport -P "${terms%|*}" --prune --matchdirs --ignore-case "$PREFIX" | tail -n +2 | sed -E 's/\.gpg(\x1B\[[0-9]+m)?( ->|$)/\1\2/g'
@@ -399,7 +399,7 @@ cmd_grep() {
 	local search="$1" passfile grepresults
 	while read -r -d "" passfile; do
 		grepresults="$($GPG -d "${GPG_OPTS[@]}" "$passfile" | grep --color=always "$search")"
-		[ $? -ne 0 ] && continue
+		[[ $? -ne 0 ]] && continue
 		passfile="${passfile%.gpg}"
 		passfile="${passfile#$PREFIX/}"
 		local passfile_dir="${passfile%/*}/"
