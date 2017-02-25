@@ -41,8 +41,10 @@ Otherwise COMMAND must be one of the valid commands listed below.
 Several of the commands below rely on or provide additional functionality if
 the password store directory is also a git repository. If the password store
 directory is a git repository, all password store modification commands will
-cause a corresponding git commit. See the \fIEXTENDED GIT EXAMPLE\fP section
-for a detailed description using \fBinit\fP and
+cause a corresponding git commit. Sub-directories may be separate nested git
+repositories, and pass will use the inner-most directory relative to the
+current password. See the \fIEXTENDED GIT EXAMPLE\fP section for a detailed
+description using \fBinit\fP and
 .BR git (1).
 
 The \fBinit\fP command must be run before other commands in order to initialize
@@ -409,11 +411,6 @@ Overrides the default password storage directory.
 Overrides the default gpg key identification set by \fBinit\fP. Keys must not
 contain spaces and thus use of the hexadecimal key signature is recommended.
 Multiple keys may be specified separated by spaces. 
-.TP
-.I PASSWORD_STORE_GIT
-Overrides the default root of the git repository, which is helpful if
-\fIPASSWORD_STORE_DIR\fP is temporarily set to a sub-directory of the default
-password store.
 .TP
 .I PASSWORD_STORE_GPG_OPTS
 Additional options to be passed to all invocations of GPG.

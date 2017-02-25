@@ -20,24 +20,30 @@ GENERATED_LENGTH="${PASSWORD_STORE_GENERATED_LENGTH:-25}"
 CHARACTER_SET="${PASSWORD_STORE_CHARACTER_SET:-[:graph:]}"
 CHARACTER_SET_NO_SYMBOLS="${PASSWORD_STORE_CHARACTER_SET_NO_SYMBOLS:-[:alnum:]}"
 
-export GIT_DIR="${PASSWORD_STORE_GIT:-$PREFIX}/.git"
-export GIT_WORK_TREE="${PASSWORD_STORE_GIT:-$PREFIX}"
+export GIT_CEILING_DIRECTORIES="$PREFIX/.."
 
 #
 # BEGIN helper functions
 #
 
+set_git() {
+	INNER_GIT_DIR="${1%/*}"
+	while [[ ! -d $INNER_GIT_DIR && ${INNER_GIT_DIR%/*}/ == "${PREFIX%/}/"* ]]; do
+		INNER_GIT_DIR="${INNER_GIT_DIR%/*}"
+	done
+	[[ $(git -C "$INNER_GIT_DIR" rev-parse --is-inside-work-tree 2>/dev/null) == true ]] || INNER_GIT_DIR=""
+}
 git_add_file() {
-	[[ -e $GIT_DIR ]] || return
-	git add "$1" || return
-	[[ -n $(git status --porcelain "$1") ]] || return
+	[[ -n $INNER_GIT_DIR ]] || return
+	git -C "$INNER_GIT_DIR" add "$1" || return
+	[[ -n $(git -C "$INNER_GIT_DIR" status --porcelain "$1") ]] || return
 	git_commit "$2"
 }
 git_commit() {
 	local sign=""
-	[[ -e $GIT_DIR ]] || return
-	[[ $(git config --bool --get pass.signcommits) == "true" ]] && sign="-S"
-	git commit $sign -m "$1"
+	[[ -n $INNER_GIT_DIR ]] || return
+	[[ $(git -C "$INNER_GIT_DIR" config --bool --get pass.signcommits) == "true" ]] && sign="-S"
+	git -C "$INNER_GIT_DIR" commit $sign -m "$1"
 }
 yesno() {
 	[[ -t 0 ]] || return 0
@@ -306,12 +312,13 @@ cmd_init() {
 	[[ -n $id_path && ! -d $PREFIX/$id_path && -e $PREFIX/$id_path ]] && die "Error: $PREFIX/$id_path exists but is not a directory."
 
 	local gpg_id="$PREFIX/$id_path/.gpg-id"
+	set_git "$gpg_id"
 
 	if [[ $# -eq 1 && -z $1 ]]; then
 		[[ ! -f "$gpg_id" ]] && die "Error: $gpg_id does not exist and so cannot be removed."
 		rm -v -f "$gpg_id" || exit 1
-		if [[ -e $GIT_DIR ]]; then
-			git rm -qr "$gpg_id"
+		if [[ -n $INNER_GIT_DIR ]]; then
+			git -C "$INNER_GIT_DIR" rm -qr "$gpg_id"
 			git_commit "Deinitialize ${gpg_id}${id_path:+ ($id_path)}."
 		fi
 		rmdir -p "${gpg_id%/*}" 2>/dev/null
@@ -419,6 +426,7 @@ cmd_insert() {
 	local path="${1%/}"
 	local passfile="$PREFIX/$path.gpg"
 	check_sneaky_paths "$path"
+	set_git "$passfile"
 
 	[[ $force -eq 0 && -e $passfile ]] && yesno "An entry already exists for $path. Overwrite it?"
 
@@ -459,6 +467,7 @@ cmd_edit() {
 	mkdir -p -v "$PREFIX/$(dirname "$path")"
 	set_gpg_recipients "$(dirname "$path")"
 	local passfile="$PREFIX/$path.gpg"
+	set_git "$passfile"
 
 	tmpdir #Defines $SECURE_TMPDIR
 	local tmp_file="$(mktemp -u "$SECURE_TMPDIR/XXXXXX")-${path//\//-}.txt"
@@ -500,6 +509,7 @@ cmd_generate() {
 	mkdir -p -v "$PREFIX/$(dirname "$path")"
 	set_gpg_recipients "$(dirname "$path")"
 	local passfile="$PREFIX/$path.gpg"
+	set_git "$passfile"
 
 	[[ $inplace -eq 0 && $force -eq 0 && -e $passfile ]] && yesno "An entry already exists for $path. Overwrite it?"
 
@@ -545,14 +555,17 @@ cmd_delete() {
 
 	local passdir="$PREFIX/${path%/}"
 	local passfile="$PREFIX/$path.gpg"
-	[[ -f $passfile && -d $passdir && $path == */ || ! -f $passfile ]] && passfile="$passdir"
+	[[ -f $passfile && -d $passdir && $path == */ || ! -f $passfile ]] && passfile="${passdir%/}/"
 	[[ -e $passfile ]] || die "Error: $path is not in the password store."
+	set_git "$passfile"
 
 	[[ $force -eq 1 ]] || yesno "Are you sure you would like to delete $path?"
 
 	rm $recursive -f -v "$passfile"
-	if [[ -e $GIT_DIR && ! -e $passfile ]]; then
-		git rm -qr "$passfile"
+	set_git "$passfile"
+	if [[ -n $INNER_GIT_DIR && ! -e $passfile ]]; then
+		git -C "$INNER_GIT_DIR" rm -qr "$passfile"
+		set_git "$passfile"
 		git_commit "Remove $path from store."
 	fi
 	rmdir -p "${passfile%/*}" 2>/dev/null
@@ -588,13 +601,22 @@ cmd_copy_move() {
 	local interactive="-i"
 	[[ ! -t 0 || $force -eq 1 ]] && interactive="-f"
 
+	set_git "$new_path"
 	if [[ $move -eq 1 ]]; then
 		mv $interactive -v "$old_path" "$new_path" || exit 1
 		[[ -e "$new_path" ]] && reencrypt_path "$new_path"
 
-		if [[ -e $GIT_DIR && ! -e $old_path ]]; then
-			git rm -qr "$old_path"
+		set_git "$new_path"
+		if [[ -n $INNER_GIT_DIR && ! -e $old_path ]]; then
+			git -C "$INNER_GIT_DIR" rm -qr "$old_path" 2>/dev/null
+			set_git "$new_path"
 			git_add_file "$new_path" "Rename ${1} to ${2}."
+		fi
+		set_git "$old_path"
+		if [[ -n $INNER_GIT_DIR && ! -e $old_path ]]; then
+			git -C "$INNER_GIT_DIR" rm -qr "$old_path" 2>/dev/null
+			set_git "$old_path"
+			[[ -n $(git -C "$INNER_GIT_DIR" status --porcelain "$old_path") ]] && git_commit "Remove ${1}."
 		fi
 		rmdir -p "$old_dir" 2>/dev/null
 	else
@@ -605,18 +627,20 @@ cmd_copy_move() {
 }
 
 cmd_git() {
+	set_git "$PREFIX/"
 	if [[ $1 == "init" ]]; then
-		git "$@" || exit 1
+		INNER_GIT_DIR="$PREFIX"
+		git -C "$INNER_GIT_DIR" "$@" || exit 1
 		git_add_file "$PREFIX" "Add current contents of password store."
 
 		echo '*.gpg diff=gpg' > "$PREFIX/.gitattributes"
 		git_add_file .gitattributes "Configure git repository for gpg file diff."
-		git config --local diff.gpg.binary true
-		git config --local diff.gpg.textconv "$GPG -d ${GPG_OPTS[*]}"
-	elif [[ -e $GIT_DIR ]]; then
+		git -C "$INNER_GIT_DIR" config --local diff.gpg.binary true
+		git -C "$INNER_GIT_DIR" config --local diff.gpg.textconv "$GPG -d ${GPG_OPTS[*]}"
+	elif [[ -n $INNER_GIT_DIR ]]; then
 		tmpdir nowarn #Defines $SECURE_TMPDIR. We don't warn, because at most, this only copies encrypted files.
 		export TMPDIR="$SECURE_TMPDIR"
-		git "$@"
+		git -C "$INNER_GIT_DIR" "$@"
 	else
 		die "Error: the password store is not a git repository. Try \"$PROGRAM git init\"."
 	fi
