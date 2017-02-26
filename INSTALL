@@ -17,10 +17,10 @@ SYSCONFDIR  default: /etc
 
 The install target will automatically determine the existance
 of bash, zsh, and fish, and install the completion files as
-needed. If you'd like to force installation, you may set
-FORCE_BASHCOMP, FORCE_ZSHCOMP, or FORCE_FISHCOMP to 1, or set
-FORCE_ALL to 1. The exact paths of the completions can be
-controlled with BASHCOMP_PATH, ZSHCOMP_PATH, and FISHCOMP_PATH.
+needed. If you'd like to choose manually, you may set WITH_ALLCOMP,
+WITH_BASHCOMP, WITH_ZSHCOMP, or WITH_FISHCOMP to "yes" or "no". The
+exact paths of the completions can be controlled with BASHCOMPDIR,
+ZSHCOMPDIR, and FISHCOMPDIR.
 
 -- Test Suite --
 
