@@ -2,7 +2,6 @@
  * pass insert, pass ls
  * pass insert [with -e, with -m, without either]
  * pass insert, cp, mv, rm, generate [with -f, without -f, on existing]
- * pass generate [with -n vs without -n]
  * git operations on all commands
  * Are empty folders pruned for rm, cp, mv, init (when "" is the argument) [with git, and without git]
  * Are git commits happening as planned? Are they being signed when signing is enabled?
