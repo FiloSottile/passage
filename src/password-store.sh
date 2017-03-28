@@ -58,7 +58,7 @@ die() {
 verify_file() {
 	[[ -n $PASSWORD_STORE_SIGNING_KEY ]] || return 0
 	[[ -f $1.sig ]] || die "Signature for $1 does not exist."
-	local fingerprints="$(gpg $PASSWORD_STORE_GPG_OPTS --verify --status-fd=1 "$1.sig" "$1" 2>/dev/null | sed -n 's/\[GNUPG:\] VALIDSIG \([A-F0-9]\{40\}\) .* \([A-F0-9]\{40\}\)$/\1\n\2/p')"
+	local fingerprints="$($GPG $PASSWORD_STORE_GPG_OPTS --verify --status-fd=1 "$1.sig" "$1" 2>/dev/null | sed -n 's/\[GNUPG:\] VALIDSIG \([A-F0-9]\{40\}\) .* \([A-F0-9]\{40\}\)$/\1\n\2/p')"
 	local fingerprint found=0
 	for fingerprint in $PASSWORD_STORE_SIGNING_KEY; do
 		[[ $fingerprint =~ ^[A-F0-9]{40}$ ]] || continue
@@ -333,8 +333,8 @@ cmd_init() {
 			for key in $PASSWORD_STORE_SIGNING_KEY; do
 				signing_keys+=( --default-key $key )
 			done
-			gpg "${GPG_OPTS[@]}" "${signing_keys[@]}" --detach-sign "$gpg_id" || die "Could not sign .gpg_id."
-			key="$(gpg --verify --status-fd=1 "$gpg_id.sig" "$gpg_id" 2>/dev/null | sed -n 's/\[GNUPG:\] VALIDSIG [A-F0-9]\{40\} .* \([A-F0-9]\{40\}\)$/\1/p')"
+			$GPG "${GPG_OPTS[@]}" "${signing_keys[@]}" --detach-sign "$gpg_id" || die "Could not sign .gpg_id."
+			key="$($GPG --verify --status-fd=1 "$gpg_id.sig" "$gpg_id" 2>/dev/null | sed -n 's/\[GNUPG:\] VALIDSIG [A-F0-9]\{40\} .* \([A-F0-9]\{40\}\)$/\1/p')"
 			[[ -n $key ]] || die "Signing of .gpg_id unsuccessful."
 			git_add_file "$gpg_id.sig" "Signing new GPG id with ${key//[$IFS]/,}."
 		fi
