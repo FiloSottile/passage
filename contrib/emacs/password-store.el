@@ -1,10 +1,10 @@
 ;;; password-store.el --- Password store (pass) support
 
-;; Copyright (C) 2014 Svend Sorensen <svend@ciffer.net>
+;; Copyright (C) 2014-2017 Svend Sorensen <svend@ciffer.net>
 
 ;; Author: Svend Sorensen <svend@ciffer.net>
 ;; Version: 0.1
-;; Package-Requires: ((f "0.11.0") (s "1.9.0"))
+;; Package-Requires: ((f "0.11.0") (s "1.9.0") (with-editor "2.5.11"))
 ;; Keywords: pass
 
 ;; This file is not part of GNU Emacs.
@@ -33,6 +33,7 @@
 
 (require 'f)
 (require 's)
+(require 'with-editor)
 
 (defgroup password-store '()
   "Emacs mode for password-store."
@@ -77,6 +78,15 @@ outputs error message on failure."
           (s-chomp (buffer-string))
         (error (s-chomp (buffer-string)))))))
 
+(defun password-store--run-async (&rest args)
+  "Run pass asynchronously with ARGS.
+
+Nil arguments are ignored."
+  (with-editor-async-shell-command
+   (mapconcat 'identity
+              (cons password-store-executable
+                    (delq nil args)) " ")))
+
 (defun password-store--run-init (gpg-ids &optional folder)
   (apply 'password-store--run "init"
          (if folder (format "--path=%s" folder))
@@ -99,7 +109,8 @@ outputs error message on failure."
   (error "Not implemented"))
 
 (defun password-store--run-edit (entry)
-  (error "Not implemented"))
+  (password-store--run-async "edit"
+                             entry))
 
 (defun password-store--run-generate (entry password-length &optional force no-symbols)
   (password-store--run "generate"
@@ -163,12 +174,9 @@ outputs error message on failure."
 
 ;;;###autoload
 (defun password-store-edit (entry)
-  "Edit password for ENTRY.
-
-This edits the password file directly in Emacs, so changes will
-need to be commited manually if git is being used."
+  "Edit password for ENTRY."
   (interactive (list (password-store--completing-read)))
-  (find-file (password-store--entry-to-file entry)))
+  (password-store--run-edit entry))
 
 ;;;###autoload
 (defun password-store-get (entry)
