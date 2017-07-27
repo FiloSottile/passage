@@ -3,7 +3,7 @@
 ;; Copyright (C) 2014-2017 Svend Sorensen <svend@ciffer.net>
 
 ;; Author: Svend Sorensen <svend@ciffer.net>
-;; Version: 0.1
+;; Version: 1.0.0
 ;; Package-Requires: ((f "0.11.0") (s "1.9.0") (with-editor "2.5.11"))
 ;; Keywords: pass
 
