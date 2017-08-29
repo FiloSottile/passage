@@ -83,10 +83,11 @@ outputs error message on failure."
   "Run pass asynchronously with ARGS.
 
 Nil arguments are ignored."
-  (with-editor-async-shell-command
-   (mapconcat 'identity
-              (cons password-store-executable
-                    (delq nil args)) " ")))
+  (let ((args (mapcar #'shell-quote-argument args)))
+    (with-editor-async-shell-command
+     (mapconcat 'identity
+                (cons password-store-executable
+                      (delq nil args)) " "))))
 
 (defun password-store--run-init (gpg-ids &optional folder)
   (apply 'password-store--run "init"
