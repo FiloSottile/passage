@@ -3,7 +3,7 @@
 ;; Copyright (C) 2014-2017 Svend Sorensen <svend@svends.net>
 
 ;; Author: Svend Sorensen <svend@svends.net>
-;; Version: 1.0.0
+;; Version: 1.0.1
 ;; URL: https://www.passwordstore.org/
 ;; Package-Requires: ((emacs "24") (f "0.11.0") (s "1.9.0") (with-editor "2.5.11"))
 ;; Keywords: tools pass password password-store
@@ -228,10 +228,11 @@ Separate multiple IDs with spaces."
   "Insert a new ENTRY containing PASSWORD."
   (interactive (list (read-string "Password entry: ")
                      (read-passwd "Password: " t)))
-  (message "%s" (shell-command-to-string (format "echo %s | %s insert -m -f %s"
-                                            (shell-quote-argument password)
-                                            password-store-executable
-                                            (shell-quote-argument entry)))))
+  (message "%s" (shell-command-to-string
+                 (format "echo %s | %s insert -m -f %s"
+                         (shell-quote-argument password)
+                         password-store-executable
+                         (shell-quote-argument entry)))))
 
 ;;;###autoload
 (defun password-store-generate (entry &optional password-length)
