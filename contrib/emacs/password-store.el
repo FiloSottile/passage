@@ -4,8 +4,9 @@
 
 ;; Author: Svend Sorensen <svend@ciffer.net>
 ;; Version: 1.0.0
-;; Package-Requires: ((f "0.11.0") (s "1.9.0") (with-editor "2.5.11"))
-;; Keywords: pass
+;; URL: https://www.passwordstore.org/
+;; Package-Requires: ((emacs "24") (f "0.11.0") (s "1.9.0") (with-editor "2.5.11"))
+;; Keywords: tools pass password password-store
 
 ;; This file is not part of GNU Emacs.
 
