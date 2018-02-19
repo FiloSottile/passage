@@ -20,6 +20,7 @@ function __fish_pass_needs_command
     end
     return 1
 end
+
 function __fish_pass_uses_command
     set cmd (commandline -opc)
     if [ (count $cmd) -gt 1 ]
@@ -33,24 +34,22 @@ end
 function __fish_pass_print_gpg_keys
     gpg2 --list-keys | grep uid | sed 's/.*<\(.*\)>/\1/'
 end
+
+function __fish_pass_print
+    set -l ext $argv[1]
+    set -l strip $argv[2]
+    set -l prefix (__fish_pass_get_prefix)
+    printf '%s\n' "$prefix"/**"$ext" | sed "s#$prefix/\(.*\)$strip#\1#"
+end
+
 function __fish_pass_print_entry_dirs
-    set -l prefix (__fish_pass_get_prefix)
-    set -l dirs
-    eval "set dirs "$prefix"/**/"
-    for dir in $dirs
-        set entry (echo "$dir" | sed "s#$prefix/\(.*\)#\1#")
-        echo "$entry"
-    end
+    __fish_pass_print "/"
 end
+
 function __fish_pass_print_entries
-    set -l prefix (__fish_pass_get_prefix)
-    set -l files
-    eval "set files "$prefix"/**.gpg"
-    for file in $files
-        set file (echo "$file" | sed "s#$prefix/\(.*\)\.gpg#\1#")
-        echo "$file"
-    end
+    __fish_pass_print ".gpg" ".gpg"
 end
+
 function __fish_pass_print_entries_and_dirs
     __fish_pass_print_entry_dirs
     __fish_pass_print_entries
