@@ -18,4 +18,16 @@ test_expect_success 'Make sure grep prints normal lines' '
 	grep -q "They are" <<<"$results"
 '
 
+test_expect_success 'Test passing the "-i" option to grep' '
+	"$PASS" init $KEY1 &&
+	"$PASS" insert -e blah1 <<<"I wonder..." &&
+	"$PASS" insert -e blah2 <<<"Will it ignore" &&
+	"$PASS" insert -e blah3 <<<"case when searching?" &&
+	"$PASS" insert -e folder/blah4 <<<"Yes, it does. Wonderful!" &&
+	results="$("$PASS" grep -i wonder)" &&
+	[[ $(wc -l <<<"$results") -eq 4 ]] &&
+	grep -q blah1 <<<"$results" &&
+	grep -q blah4 <<<"$results"
+'
+
 test_done
