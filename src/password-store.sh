@@ -395,10 +395,10 @@ cmd_find() {
 }
 
 cmd_grep() {
-	[[ $# -ne 1 ]] && die "Usage: $PROGRAM $COMMAND search-string"
-	local search="$1" passfile grepresults
+	[[ $# -lt 1 ]] && die "Usage: $PROGRAM $COMMAND search-string"
+	local passfile grepresults
 	while read -r -d "" passfile; do
-		grepresults="$($GPG -d "${GPG_OPTS[@]}" "$passfile" | grep --color=always "$search")"
+		grepresults="$($GPG -d "${GPG_OPTS[@]}" "$passfile" | grep --color=always "$@")"
 		[[ $? -ne 0 ]] && continue
 		passfile="${passfile%.gpg}"
 		passfile="${passfile#$PREFIX/}"
