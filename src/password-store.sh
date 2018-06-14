@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (C) 2012 - 2017 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
+# Copyright (C) 2012 - 2018 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
 # This file is licensed under the GPLv2+. Please see COPYING for more information.
 
 umask "${PASSWORD_STORE_UMASK:-077}"
@@ -58,7 +58,7 @@ die() {
 verify_file() {
 	[[ -n $PASSWORD_STORE_SIGNING_KEY ]] || return 0
 	[[ -f $1.sig ]] || die "Signature for $1 does not exist."
-	local fingerprints="$($GPG $PASSWORD_STORE_GPG_OPTS --verify --status-fd=1 "$1.sig" "$1" 2>/dev/null | sed -n 's/\[GNUPG:\] VALIDSIG \([A-F0-9]\{40\}\) .* \([A-F0-9]\{40\}\)$/\1\n\2/p')"
+	local fingerprints="$($GPG $PASSWORD_STORE_GPG_OPTS --verify --status-fd=1 "$1.sig" "$1" 2>/dev/null | sed -n 's/^\[GNUPG:\] VALIDSIG \([A-F0-9]\{40\}\) .* \([A-F0-9]\{40\}\)$/\1\n\2/p')"
 	local fingerprint found=0
 	for fingerprint in $PASSWORD_STORE_SIGNING_KEY; do
 		[[ $fingerprint =~ ^[A-F0-9]{40}$ ]] || continue
@@ -123,7 +123,7 @@ reencrypt_path() {
 				IFS=";" eval 'GPG_RECIPIENTS+=( $group )' # http://unix.stackexchange.com/a/92190
 				unset "GPG_RECIPIENTS[$index]"
 			done
-			gpg_keys="$($GPG $PASSWORD_STORE_GPG_OPTS --list-keys --with-colons "${GPG_RECIPIENTS[@]}" | sed -n 's/sub:[^:]*:[^:]*:[^:]*:\([^:]*\):[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[a-zA-Z]*e[a-zA-Z]*:.*/\1/p' | LC_ALL=C sort -u)"
+			gpg_keys="$($GPG $PASSWORD_STORE_GPG_OPTS --list-keys --with-colons "${GPG_RECIPIENTS[@]}" | sed -n 's/^sub:[^:]*:[^:]*:[^:]*:\([^:]*\):[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[a-zA-Z]*e[a-zA-Z]*:.*/\1/p' | LC_ALL=C sort -u)"
 		fi
 		current_keys="$(LC_ALL=C $GPG $PASSWORD_STORE_GPG_OPTS -v --no-secmem-warning --no-permission-warning --decrypt --list-only --keyid-format long "$passfile" 2>&1 | sed -n 's/^gpg: public key is \([A-F0-9]\+\)$/\1/p' | LC_ALL=C sort -u)"
 
@@ -334,7 +334,7 @@ cmd_init() {
 				signing_keys+=( --default-key $key )
 			done
 			$GPG "${GPG_OPTS[@]}" "${signing_keys[@]}" --detach-sign "$gpg_id" || die "Could not sign .gpg_id."
-			key="$($GPG --verify --status-fd=1 "$gpg_id.sig" "$gpg_id" 2>/dev/null | sed -n 's/\[GNUPG:\] VALIDSIG [A-F0-9]\{40\} .* \([A-F0-9]\{40\}\)$/\1/p')"
+			key="$($GPG --verify --status-fd=1 "$gpg_id.sig" "$gpg_id" 2>/dev/null | sed -n 's/^\[GNUPG:\] VALIDSIG [A-F0-9]\{40\} .* \([A-F0-9]\{40\}\)$/\1/p')"
 			[[ -n $key ]] || die "Signing of .gpg_id unsuccessful."
 			git_add_file "$gpg_id.sig" "Signing new GPG id with ${key//[$IFS]/,}."
 		fi
