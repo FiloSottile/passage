@@ -11,7 +11,7 @@ clip() {
 		local now="$(base64 < /dev/clipboard)"
 		[[ $now != $(echo -n "$1" | base64) ]] && before="$now"
 		echo "$before" | base64 -d > /dev/clipboard
-	) 2>/dev/null & disown
+	) >/dev/null 2>&1 & disown
 	echo "Copied $2 to clipboard. Will clear in $CLIP_TIME seconds."
 }
 

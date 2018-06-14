@@ -173,7 +173,7 @@ clip() {
 		qdbus org.kde.klipper /klipper org.kde.klipper.klipper.clearClipboardHistory &>/dev/null
 
 		echo "$before" | base64 -d | xclip -selection "$X_SELECTION"
-	) 2>/dev/null & disown
+	) >/dev/null 2>&1 & disown
 	echo "Copied $2 to clipboard. Will clear in $CLIP_TIME seconds."
 }
 
