@@ -203,7 +203,7 @@ tmpdir() {
 		remove_tmpfile() {
 			rm -rf "$SECURE_TMPDIR"
 		}
-		trap remove_tmpfile INT TERM EXIT
+		trap remove_tmpfile EXIT
 	else
 		[[ $warn -eq 1 ]] && yesno "$(cat <<-_EOF
 		Your system does not have /dev/shm, which means that it may
@@ -218,7 +218,7 @@ tmpdir() {
 			find "$SECURE_TMPDIR" -type f -exec $SHRED {} +
 			rm -rf "$SECURE_TMPDIR"
 		}
-		trap shred_tmpfile INT TERM EXIT
+		trap shred_tmpfile EXIT
 	fi
 
 }
