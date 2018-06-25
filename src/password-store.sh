@@ -447,7 +447,7 @@ cmd_insert() {
 			read -r -p "Retype password for $path: " -s password_again || exit 1
 			echo
 			if [[ $password == "$password_again" ]]; then
-				$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" <<<"$password" || die "Password encryption aborted."
+				echo "$password" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" || die "Password encryption aborted."
 				break
 			else
 				die "Error: the entered passwords do not match."
@@ -456,7 +456,7 @@ cmd_insert() {
 	else
 		local password
 		read -r -p "Enter password for $path: " -e password
-		$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" <<<"$password" || die "Password encryption aborted."
+		echo "$password" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" || die "Password encryption aborted."
 	fi
 	git_add_file "$passfile" "Add given password for $path to store."
 }
@@ -519,7 +519,7 @@ cmd_generate() {
 	read -r -n $length pass < <(LC_ALL=C tr -dc "$characters" < /dev/urandom)
 	[[ ${#pass} -eq $length ]] || die "Could not generate password from /dev/urandom."
 	if [[ $inplace -eq 0 ]]; then
-		$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" <<<"$pass" || die "Password encryption aborted."
+		echo "$pass" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" || die "Password encryption aborted."
 	else
 		local passfile_temp="${passfile}.tmp.${RANDOM}.${RANDOM}.${RANDOM}.${RANDOM}.--"
 		if { echo "$pass"; $GPG -d "${GPG_OPTS[@]}" "$passfile" | tail -n +2; } | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile_temp" "${GPG_OPTS[@]}"; then
