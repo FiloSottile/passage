@@ -81,7 +81,7 @@ _pass()
 {
 	COMPREPLY=()
 	local cur="${COMP_WORDS[COMP_CWORD]}"
-	local commands="init ls find grep show insert generate edit rm mv cp git help version"
+	local commands="init ls find grep show insert generate edit rm mv cp git help version ${PASSWORD_STORE_EXTENSION_COMMANDS[*]}"
 	if [[ $COMP_CWORD -gt 1 ]]; then
 		local lastarg="${COMP_WORDS[$COMP_CWORD-1]}"
 		case "${COMP_WORDS[1]}" in
@@ -121,6 +121,17 @@ _pass()
 				COMPREPLY+=($(compgen -W "init push pull config log reflog rebase" -- ${cur}))
 				;;
 		esac
+
+		# To add completion for an extension command define a function like this:
+		# __password_store_extension_complete_<COMMAND>() {
+		#     COMPREPLY+=($(compgen -W "-o --option" -- ${cur}))
+		#     _pass_complete_entries 1
+		# }
+		#
+		# and add the command to the $PASSWORD_STORE_EXTENSION_COMMANDS array
+		if [[ " ${PASSWORD_STORE_EXTENSION_COMMANDS[*]} " == *" ${COMP_WORDS[1]} "* ]] && type "__password_store_extension_complete_${COMP_WORDS[1]}" &> /dev/null; then
+			"__password_store_extension_complete_${COMP_WORDS[1]}"
+		fi
 	else
 		COMPREPLY+=($(compgen -W "${commands}" -- ${cur}))
 		_pass_complete_entries 1
