@@ -538,7 +538,7 @@ cmd_generate() {
 	elif [[ $qrcode -eq 1 ]]; then
 		qrcode "$pass" "$path"
 	else
-		printf "\e[1m\e[37mThe generated password for \e[4m%s\e[24m is:\e[0m\n\e[1m\e[93m%s\e[0m\n" "$path" "$pass"
+		printf "\e[1mThe generated password for \e[4m%s\e[24m is:\e[0m\n\e[1m\e[93m%s\e[0m\n" "$path" "$pass"
 	fi
 }
 
