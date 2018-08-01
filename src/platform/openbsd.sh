@@ -38,3 +38,4 @@ tmpdir() {
 
 GETOPT="gnugetopt"
 SHRED="rm -P -f"
+BASE64="openssl base64"
