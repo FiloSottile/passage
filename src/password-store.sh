@@ -242,7 +242,7 @@ cmd_version() {
 	============================================
 	= pass: the standard unix password manager =
 	=                                          =
-	=                  v1.7.2                  =
+	=                  v1.7.3                  =
 	=                                          =
 	=             Jason A. Donenfeld           =
 	=               Jason@zx2c4.com            =
