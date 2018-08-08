@@ -87,6 +87,15 @@ test_expect_success 'Reencryption subfolder multiple keys, move, deinit' '
 	[[ $(canonicalize_gpg_keys $KEY3 $KEY4 $KEY2) == "$(gpg_keys_from_encrypted_file "$PASSWORD_STORE_DIR/anotherfolder2/anotherfolder/cred1.gpg")" ]]
 '
 
+test_expect_success 'Reencryption skips links' '
+	ln -s "$PASSWORD_STORE_DIR/folder/cred1.gpg" "$PASSWORD_STORE_DIR/folder/linked_cred.gpg" &&
+	[[ -L $PASSWORD_STORE_DIR/folder/linked_cred.gpg ]] &&
+	git add "$PASSWORD_STORE_DIR/folder/linked_cred.gpg" &&
+	git commit "$PASSWORD_STORE_DIR/folder/linked_cred.gpg" -m "Added linked cred" &&
+	"$PASS" init -p folder $KEY3 &&
+	[[ -L $PASSWORD_STORE_DIR/folder/linked_cred.gpg ]]
+'
+
 #TODO: test with more varieties of move and copy!
 
 test_expect_success 'Password lived through all transformations' '
