@@ -1,9 +1,9 @@
 ;;; password-store.el --- Password store (pass) support
 
-;; Copyright (C) 2014-2017 Svend Sorensen <svend@svends.net>
+;; Copyright (C) 2014-2018 Svend Sorensen <svend@svends.net>
 
 ;; Author: Svend Sorensen <svend@svends.net>
-;; Version: 1.0.1
+;; Version: 1.0.2
 ;; URL: https://www.passwordstore.org/
 ;; Package-Requires: ((emacs "24") (f "0.11.0") (s "1.9.0") (with-editor "2.5.11"))
 ;; Keywords: tools pass password password-store
@@ -271,7 +271,7 @@ Default PASSWORD-LENGTH is `password-store-password-length'."
 (defun password-store-url (entry)
   "Browse URL stored in ENTRY.
 
-This will only browse URLs that start with http:// or http:// to
+This will only browse URLs that start with http:// or https:// to
 avoid sending a password to the browser."
   (interactive (list (password-store--completing-read)))
   (let ((url (password-store-get entry)))

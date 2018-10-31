@@ -1,3 +1,7 @@
+# 1.0.2
+
+* (bugfix) Fix typo in password-store-url function doc string
+
 # 1.0.1
 
 * (bugfix) Quote shell arguments in async call
