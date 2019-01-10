@@ -1,11 +1,11 @@
-;;; password-store.el --- Password store (pass) support
+;;; password-store.el --- Password store (pass) support  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2018 Svend Sorensen <svend@svends.net>
 
 ;; Author: Svend Sorensen <svend@svends.net>
 ;; Version: 1.0.2
 ;; URL: https://www.passwordstore.org/
-;; Package-Requires: ((emacs "24") (f "0.11.0") (s "1.9.0") (with-editor "2.5.11"))
+;; Package-Requires: ((emacs "25") (f "0.11.0") (s "1.9.0") (with-editor "2.5.11"))
 ;; Keywords: tools pass password password-store
 
 ;; This file is not part of GNU Emacs.
@@ -59,30 +59,44 @@
       (string-to-number (getenv "PASSWORD_STORE_CLIP_TIME"))
     45))
 
+(defun password-store--run-1 (callback &rest args)
+  "Run pass with ARGS.
+
+Nil arguments are ignored.  Calls CALLBACK with the output on success,
+or outputs error message on failure."
+  (let ((output ""))
+    (make-process
+     :name "password-store-gpg"
+     :command (cons password-store-executable args)
+     :connection-type 'pipe
+     :noquery t
+     :filter (lambda (process text)
+               (setq output (concat output text)))
+     :sentinel (lambda (process state)
+                 (cond
+                  ((string= state "finished\n")
+                   (funcall callback output))
+                  ((string= state "open\n") (accept-process-output process))
+                  (t (error (concat "password-store: " state))))))))
+
 (defun password-store--run (&rest args)
   "Run pass with ARGS.
 
 Nil arguments are ignored.  Returns the output on success, or
 outputs error message on failure."
-  (with-temp-buffer
-    (let* ((tempfile (make-temp-file ""))
-           (exit-code
-            (apply 'call-process
-                   (append
-                    (list password-store-executable nil (list t tempfile) nil)
-                    (delq nil args)))))
-      (unless (zerop exit-code)
-        (erase-buffer)
-        (insert-file-contents tempfile))
-      (delete-file tempfile)
-      (if (zerop exit-code)
-          (s-chomp (buffer-string))
-        (error (s-chomp (buffer-string)))))))
+  (let ((output nil)
+        (slept-for 0))
+    (apply #'password-store--run-1 (lambda (password)
+                                     (setq output password))
+           args)
+    (while (not output)
+      (sleep-for .1))
+    output))
 
 (defun password-store--run-async (&rest args)
   "Run pass asynchronously with ARGS.
 
-Nil arguments are ignored."
+Nil arguments are ignored.  Output is discarded."
   (let ((args (mapcar #'shell-quote-argument args)))
     (with-editor-async-shell-command
      (mapconcat 'identity
@@ -103,9 +117,10 @@ Nil arguments are ignored."
 (defun password-store--run-find (&optional string)
   (error "Not implemented"))
 
-(defun password-store--run-show (entry)
-  (password-store--run "show"
-                       entry))
+(defun password-store--run-show (entry &optional callback)
+  (if callback
+      (password-store--run-1 callback "show" entry)
+    (password-store--run "show" entry)))
 
 (defun password-store--run-insert (entry password &optional force)
   (error "Not implemented"))
@@ -181,11 +196,17 @@ Nil arguments are ignored."
   (password-store--run-edit entry))
 
 ;;;###autoload
-(defun password-store-get (entry)
+(defun password-store-get (entry &optional callback)
   "Return password for ENTRY.
 
-Returns the first line of the password data."
-  (car (s-lines (password-store--run-show entry))))
+Returns the first line of the password data.
+When CALLBACK is non-`NIL', call CALLBACK with the first line instead."
+  (if callback
+      (password-store--run-show
+       entry
+       (lambda (password)
+         (funcall callback (car (s-lines password)))))
+    (car (s-lines (password-store--run-show entry)))))
 
 ;;;###autoload
 (defun password-store-clear ()
@@ -207,13 +228,15 @@ Clear previous password from kill ring.  Pointer to kill ring is
 stored in `password-store-kill-ring-pointer'.  Password is cleared
 after `password-store-timeout' seconds."
   (interactive (list (password-store--completing-read)))
-  (let ((password (password-store-get entry)))
-    (password-store-clear)
-    (kill-new password)
-    (setq password-store-kill-ring-pointer kill-ring-yank-pointer)
-    (message "Copied %s to the kill ring. Will clear in %s seconds." entry (password-store-timeout))
-    (setq password-store-timeout-timer
-          (run-at-time (password-store-timeout) nil 'password-store-clear))))
+  (password-store-get
+   entry
+   (lambda (password)
+     (password-store-clear)
+     (kill-new password)
+     (setq password-store-kill-ring-pointer kill-ring-yank-pointer)
+     (message "Copied %s to the kill ring. Will clear in %s seconds." entry (password-store-timeout))
+     (setq password-store-timeout-timer
+           (run-at-time (password-store-timeout) nil 'password-store-clear)))))
 
 ;;;###autoload
 (defun password-store-init (gpg-id)
