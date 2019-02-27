@@ -99,6 +99,8 @@ Decrypt and print a password named \fIpass-name\fP. If \fI--clip\fP or \fI-c\fP
 is specified, do not print the password but instead copy the first (or otherwise specified)
 line to the clipboard using
 .BR xclip (1)
+or
+.BR wl-clipboard(1)
 and then restore the clipboard after 45 (or \fIPASSWORD_STORE_CLIP_TIME\fP) seconds. If \fI--qrcode\fP
 or \fI-q\fP is specified, do not print the password but instead display a QR code using
 .BR qrencode (1)
@@ -132,6 +134,8 @@ in generating passwords can be changed with the \fIPASSWORD_STORE_CHARACTER_SET\
 If \fI--clip\fP or \fI-c\fP is specified, do not print the password but instead copy
 it to the clipboard using
 .BR xclip (1)
+or
+.BR wl-clipboard(1)
 and then restore the clipboard after 45 (or \fIPASSWORD_STORE_CLIP_TIME\fP) seconds. If \fI--qrcode\fP
 or \fI-q\fP is specified, do not print the password but instead display a QR code using
 .BR qrencode (1)
@@ -466,6 +470,7 @@ The location of the text editor used by \fBedit\fP.
 .BR tr (1),
 .BR git (1),
 .BR xclip (1),
+.BR wl-clipboard (1),
 .BR qrencode (1).
 
 .SH AUTHOR

@@ -19,8 +19,10 @@ Depends on:
   http://www.gnupg.org/
 - git
   http://www.git-scm.com/
-- xclip
+- xclip (for X11 environments)
   http://sourceforge.net/projects/xclip/
+- wl-clipboard (for wlroots Wayland-based environments)
+  https://github.com/bugaevc/wl-clipboard
 - tree >= 1.7.0
   http://mama.indstate.edu/users/ice/tree/
 - GNU getopt
