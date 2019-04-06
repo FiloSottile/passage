@@ -3,7 +3,7 @@
 ;; Copyright (C) 2014-2018 Svend Sorensen <svend@svends.net>
 
 ;; Author: Svend Sorensen <svend@svends.net>
-;; Version: 1.0.2
+;; Version: 2.0.0
 ;; URL: https://www.passwordstore.org/
 ;; Package-Requires: ((emacs "25") (f "0.11.0") (s "1.9.0") (with-editor "2.5.11"))
 ;; Keywords: tools pass password password-store
