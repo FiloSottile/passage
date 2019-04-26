@@ -3,7 +3,7 @@
 ;; Copyright (C) 2014-2018 Svend Sorensen <svend@svends.net>
 
 ;; Author: Svend Sorensen <svend@svends.net>
-;; Version: 2.0.0
+;; Version: 2.0.1
 ;; URL: https://www.passwordstore.org/
 ;; Package-Requires: ((emacs "25") (f "0.11.0") (s "1.9.0") (with-editor "2.5.11"))
 ;; Keywords: tools pass password password-store
@@ -67,7 +67,7 @@ or outputs error message on failure."
   (let ((output ""))
     (make-process
      :name "password-store-gpg"
-     :command (cons password-store-executable args)
+     :command (cons password-store-executable (delq nil args))
      :connection-type 'pipe
      :noquery t
      :filter (lambda (process text)
@@ -88,7 +88,7 @@ outputs error message on failure."
         (slept-for 0))
     (apply #'password-store--run-1 (lambda (password)
                                      (setq output password))
-           args)
+           (delq nil args))
     (while (not output)
       (sleep-for .1))
     output))
