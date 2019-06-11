@@ -1,9 +1,9 @@
 ;;; password-store.el --- Password store (pass) support  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2014-2018 Svend Sorensen <svend@svends.net>
+;; Copyright (C) 2014-2019 Svend Sorensen <svend@svends.net>
 
 ;; Author: Svend Sorensen <svend@svends.net>
-;; Version: 2.0.1
+;; Version: 2.0.2
 ;; URL: https://www.passwordstore.org/
 ;; Package-Requires: ((emacs "25") (f "0.11.0") (s "1.9.0") (with-editor "2.5.11"))
 ;; Keywords: tools pass password password-store
@@ -186,8 +186,9 @@ Nil arguments are ignored.  Output is discarded."
   (unless subdir (setq subdir ""))
   (let ((dir (f-join (password-store-dir) subdir)))
     (if (f-directory? dir)
-        (mapcar 'password-store--file-to-entry
-                (f-files dir (lambda (file) (equal (f-ext file) "gpg")) t)))))
+        (delete-dups
+         (mapcar 'password-store--file-to-entry
+                 (f-files dir (lambda (file) (equal (f-ext file) "gpg")) t))))))
 
 ;;;###autoload
 (defun password-store-edit (entry)
