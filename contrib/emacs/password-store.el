@@ -177,9 +177,11 @@ Nil arguments are ignored.  Output is discarded."
   "Return entry name corresponding to FILE."
   (f-no-ext (f-relative file (password-store-dir))))
 
-(defun password-store--completing-read ()
-  "Read a password entry in the minibuffer, with completion."
-  (completing-read "Password entry: " (password-store-list)))
+(defun password-store--completing-read (&optional require-match)
+  "Read a password entry in the minibuffer, with completion.
+
+Require a matching password if `REQUIRE-MATCH' is 't'."
+  (completing-read "Password entry: " (password-store-list) nil require-match))
 
 (defun password-store-list (&optional subdir)
   "List password entries under SUBDIR."
@@ -193,7 +195,7 @@ Nil arguments are ignored.  Output is discarded."
 ;;;###autoload
 (defun password-store-edit (entry)
   "Edit password for ENTRY."
-  (interactive (list (password-store--completing-read)))
+  (interactive (list (password-store--completing-read t)))
   (password-store--run-edit entry))
 
 ;;;###autoload
@@ -228,7 +230,7 @@ When CALLBACK is non-`NIL', call CALLBACK with the first line instead."
 Clear previous password from kill ring.  Pointer to kill ring is
 stored in `password-store-kill-ring-pointer'.  Password is cleared
 after `password-store-timeout' seconds."
-  (interactive (list (password-store--completing-read)))
+  (interactive (list (password-store--completing-read t)))
   (password-store-get
    entry
    (lambda (password)
@@ -275,13 +277,13 @@ Default PASSWORD-LENGTH is `password-store-password-length'."
 ;;;###autoload
 (defun password-store-remove (entry)
   "Remove existing password for ENTRY."
-  (interactive (list (password-store--completing-read)))
+  (interactive (list (password-store--completing-read t)))
   (message "%s" (password-store--run-remove entry t)))
 
 ;;;###autoload
 (defun password-store-rename (entry new-entry)
   "Rename ENTRY to NEW-ENTRY."
-  (interactive (list (password-store--completing-read)
+  (interactive (list (password-store--completing-read t)
                      (read-string "Rename entry to: ")))
   (message "%s" (password-store--run-rename entry new-entry t)))
 
@@ -297,7 +299,7 @@ Default PASSWORD-LENGTH is `password-store-password-length'."
 
 This will only browse URLs that start with http:// or https:// to
 avoid sending a password to the browser."
-  (interactive (list (password-store--completing-read)))
+  (interactive (list (password-store--completing-read t)))
   (let ((url (password-store-get entry)))
     (if (or (string-prefix-p "http://" url)
             (string-prefix-p "https://" url))
