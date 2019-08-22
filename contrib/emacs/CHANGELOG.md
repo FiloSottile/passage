@@ -1,3 +1,10 @@
+# 2.0.3
+	
+* (feature) Update password-store-password-length default value to 25
+	
+* (feature) Add option password-store-time-before-clipboard-restore; delete
+            password-store-timeout and use the new option instead.
+	
 # 1.0.2
 
 * (bugfix) Fix typo in password-store-url function doc string

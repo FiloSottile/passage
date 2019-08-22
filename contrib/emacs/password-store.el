@@ -3,7 +3,8 @@
 ;; Copyright (C) 2014-2019 Svend Sorensen <svend@svends.net>
 
 ;; Author: Svend Sorensen <svend@svends.net>
-;; Version: 2.0.2
+;; Maintainer: Tino Calancha <tino.calancha@gmail.com>
+;; Version: 2.0.3
 ;; URL: https://www.passwordstore.org/
 ;; Package-Requires: ((emacs "25") (f "0.11.0") (s "1.9.0") (with-editor "2.5.11"))
 ;; Keywords: tools pass password password-store
@@ -41,8 +42,16 @@
   :prefix "password-store-"
   :group 'password-store)
 
-(defcustom password-store-password-length 8
+(defcustom password-store-password-length 25
   "Default password length."
+  :group 'password-store
+  :type 'number)
+
+(defcustom password-store-time-before-clipboard-restore
+  (if (getenv "PASSWORD_STORE_CLIP_TIME")
+      (string-to-number (getenv "PASSWORD_STORE_CLIP_TIME"))
+    45)
+  "Number of seconds to wait before restoring the clipboard."
   :group 'password-store
   :type 'number)
 
@@ -52,12 +61,6 @@
 
 (defvar password-store-timeout-timer nil
   "Timer for clearing clipboard.")
-
-(defun password-store-timeout ()
-  "Number of seconds to wait before clearing the password."
-  (if (getenv "PASSWORD_STORE_CLIP_TIME")
-      (string-to-number (getenv "PASSWORD_STORE_CLIP_TIME"))
-    45))
 
 (defun password-store--run-1 (callback &rest args)
   "Run pass with ARGS.
@@ -229,7 +232,7 @@ When CALLBACK is non-`NIL', call CALLBACK with the first line instead."
 
 Clear previous password from kill ring.  Pointer to kill ring is
 stored in `password-store-kill-ring-pointer'.  Password is cleared
-after `password-store-timeout' seconds."
+after `password-store-time-before-clipboard-restore' seconds."
   (interactive (list (password-store--completing-read t)))
   (password-store-get
    entry
@@ -237,9 +240,11 @@ after `password-store-timeout' seconds."
      (password-store-clear)
      (kill-new password)
      (setq password-store-kill-ring-pointer kill-ring-yank-pointer)
-     (message "Copied %s to the kill ring. Will clear in %s seconds." entry (password-store-timeout))
+     (message "Copied %s to the kill ring. Will clear in %s seconds."
+              entry password-store-time-before-clipboard-restore)
      (setq password-store-timeout-timer
-           (run-at-time (password-store-timeout) nil 'password-store-clear)))))
+           (run-at-time password-store-time-before-clipboard-restore
+                        nil 'password-store-clear)))))
 
 ;;;###autoload
 (defun password-store-init (gpg-id)
