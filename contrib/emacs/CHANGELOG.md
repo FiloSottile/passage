@@ -1,3 +1,8 @@
+# 2.0.4
+	
+* Re add password-store-timeout function to preserve backward
+  compatibility with other libraries relying on it.
+	
 # 2.0.3
 	
 * (feature) Update password-store-password-length default value to 25

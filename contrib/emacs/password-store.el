@@ -4,7 +4,7 @@
 
 ;; Author: Svend Sorensen <svend@svends.net>
 ;; Maintainer: Tino Calancha <tino.calancha@gmail.com>
-;; Version: 2.0.3
+;; Version: 2.0.4
 ;; URL: https://www.passwordstore.org/
 ;; Package-Requires: ((emacs "25") (f "0.11.0") (s "1.9.0") (with-editor "2.5.11"))
 ;; Keywords: tools pass password password-store
@@ -61,6 +61,13 @@
 
 (defvar password-store-timeout-timer nil
   "Timer for clearing clipboard.")
+
+(defun password-store-timeout ()
+  "Number of seconds to wait before clearing the password.
+
+This function just returns `password-store-time-before-clipboard-restore'.
+Kept for backward compatibility with other libraries."
+  password-store-time-before-clipboard-restore)
 
 (defun password-store--run-1 (callback &rest args)
   "Run pass with ARGS.
