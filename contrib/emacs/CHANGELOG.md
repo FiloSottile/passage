@@ -1,3 +1,7 @@
+# 2.0.5
+	
+Improve password-store-insert message on success/failure
+	
 # 2.0.4
 	
 * Re add password-store-timeout function to preserve backward
