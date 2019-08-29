@@ -1,3 +1,7 @@
+# 2.1.1
+
+* (bugfix) Check that auth-source-pass-filename is bound before use it.
+
 # 2.1.0
 
 * (feature) Support extraction of any secret fields stored in the files.

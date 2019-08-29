@@ -4,7 +4,7 @@
 
 ;; Author: Svend Sorensen <svend@svends.net>
 ;; Maintainer: Tino Calancha <tino.calancha@gmail.com>
-;; Version: 2.1.0
+;; Version: 2.1.1
 ;; URL: https://www.passwordstore.org/
 ;; Package-Requires: ((emacs "25") (f "0.11.0") (s "1.9.0") (with-editor "2.5.11") (auth-source-pass "5.0.0"))
 ;; Keywords: tools pass password password-store
@@ -181,7 +181,7 @@ Nil arguments are ignored.  Output is discarded."
 
 (defun password-store-dir ()
   "Return password store directory."
-  (or auth-source-pass-filename
+  (or (bound-and-true-p auth-source-pass-filename)
       (getenv "PASSWORD_STORE_DIR")
       "~/.password-store"))
 
