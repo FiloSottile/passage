@@ -5,8 +5,8 @@
 
 (development
  (depends-on "f")
- (depends-on "s")
  (depends-on "with-editor")
  (depends-on "ecukes")
  (depends-on "ert-runner")
- (depends-on "el-mock"))
+ (depends-on "el-mock")
+ (depends-on "auth-source-pass"))

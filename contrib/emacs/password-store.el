@@ -4,9 +4,9 @@
 
 ;; Author: Svend Sorensen <svend@svends.net>
 ;; Maintainer: Tino Calancha <tino.calancha@gmail.com>
-;; Version: 2.0.5
+;; Version: 2.1.0
 ;; URL: https://www.passwordstore.org/
-;; Package-Requires: ((emacs "25") (f "0.11.0") (s "1.9.0") (with-editor "2.5.11"))
+;; Package-Requires: ((emacs "25") (f "0.11.0") (s "1.9.0") (with-editor "2.5.11") (auth-source-pass "5.0.0"))
 ;; Keywords: tools pass password password-store
 
 ;; This file is not part of GNU Emacs.
@@ -34,8 +34,8 @@
 ;;; Code:
 
 (require 'f)
-(require 's)
 (require 'with-editor)
+(require 'auth-source-pass)
 
 (defgroup password-store '()
   "Emacs mode for password-store."
@@ -54,6 +54,11 @@
   "Number of seconds to wait before restoring the clipboard."
   :group 'password-store
   :type 'number)
+
+(defcustom password-store-url-field "url"
+  "Field name used in the files to indicate an url."
+  :group 'password-store
+  :type 'string)
 
 (defvar password-store-executable
   (executable-find "pass")
@@ -176,7 +181,8 @@ Nil arguments are ignored.  Output is discarded."
 
 (defun password-store-dir ()
   "Return password store directory."
-  (or (getenv "PASSWORD_STORE_DIR")
+  (or auth-source-pass-filename
+      (getenv "PASSWORD_STORE_DIR")
       "~/.password-store"))
 
 (defun password-store--entry-to-file (entry)
@@ -192,6 +198,18 @@ Nil arguments are ignored.  Output is discarded."
 
 Require a matching password if `REQUIRE-MATCH' is 't'."
   (completing-read "Password entry: " (password-store-list) nil require-match))
+
+(defun password-store-parse-entry (entry)
+  "Return an alist of the data associated with ENTRY.
+
+ENTRY is the name of a password-store entry."
+  (auth-source-pass-parse-entry entry))
+
+(defun password-store-read-field (entry)
+  "Read a field in the minibuffer, with completion for ENTRY."
+  (let* ((inhibit-message t)
+         (valid-fields (mapcar #'car (password-store-parse-entry entry))))
+    (completing-read "Field: " valid-fields nil 'match)))
 
 (defun password-store-list (&optional subdir)
   "List password entries under SUBDIR."
@@ -214,44 +232,79 @@ Require a matching password if `REQUIRE-MATCH' is 't'."
 
 Returns the first line of the password data.
 When CALLBACK is non-`NIL', call CALLBACK with the first line instead."
-  (if callback
+  (let* ((inhibit-message t)
+         (secret (auth-source-pass-get 'secret entry)))
+    (if (not callback) secret
       (password-store--run-show
        entry
-       (lambda (password)
-         (funcall callback (car (s-lines password)))))
-    (car (s-lines (password-store--run-show entry)))))
+       (lambda (_) (funcall callback secret))))))
 
 ;;;###autoload
-(defun password-store-clear ()
-  "Clear password in kill ring."
-  (interactive)
+(defun password-store-get-field (entry field &optional callback)
+  "Return FIELD for ENTRY.
+FIELD is a string, for instance \"url\". 
+When CALLBACK is non-`NIL', call it with the line associated to FIELD instead.
+If FIELD equals to symbol secret, then this function reduces to `password-store-get'."
+  (let* ((inhibit-message t)
+         (secret (auth-source-pass-get field entry)))
+    (if (not callback) secret
+      (password-store--run-show
+       entry
+       (lambda (_) (and secret (funcall callback secret)))))))
+
+
+;;;###autoload
+(defun password-store-clear (field)
+  "Clear FIELD in kill ring."
+  (interactive "i")
+  (unless field (setq field 'secret))
   (when password-store-timeout-timer
     (cancel-timer password-store-timeout-timer)
     (setq password-store-timeout-timer nil))
   (when password-store-kill-ring-pointer
     (setcar password-store-kill-ring-pointer "")
     (setq password-store-kill-ring-pointer nil)
-    (message "Password cleared.")))
+    (message "Field %s cleared." field)))
+
+(defun password-store--save-field-in-kill-ring (entry secret field)
+  (password-store-clear field)
+  (kill-new secret)
+  (setq password-store-kill-ring-pointer kill-ring-yank-pointer)
+  (message "Copied %s for %s to the kill ring. Will clear in %s seconds."
+           field entry password-store-time-before-clipboard-restore)
+  (setq password-store-timeout-timer
+        (run-at-time password-store-time-before-clipboard-restore nil
+                     (lambda () (funcall #'password-store-clear field)))))
 
 ;;;###autoload
 (defun password-store-copy (entry)
-  "Add password for ENTRY to kill ring.
+  "Add password for ENTRY into the kill ring.
 
-Clear previous password from kill ring.  Pointer to kill ring is
-stored in `password-store-kill-ring-pointer'.  Password is cleared
+Clear previous password from the kill ring.  Pointer to the kill ring
+is stored in `password-store-kill-ring-pointer'.  Password is cleared
 after `password-store-time-before-clipboard-restore' seconds."
   (interactive (list (password-store--completing-read t)))
   (password-store-get
    entry
    (lambda (password)
-     (password-store-clear)
-     (kill-new password)
-     (setq password-store-kill-ring-pointer kill-ring-yank-pointer)
-     (message "Copied %s to the kill ring. Will clear in %s seconds."
-              entry password-store-time-before-clipboard-restore)
-     (setq password-store-timeout-timer
-           (run-at-time password-store-time-before-clipboard-restore
-                        nil 'password-store-clear)))))
+     (password-store--save-field-in-kill-ring entry password 'secret))))
+
+;;;###autoload
+(defun password-store-copy-field (entry field)
+  "Add FIELD for ENTRY into the kill ring.
+
+Clear previous secret from the kill ring.  Pointer to the kill ring is
+stored in `password-store-kill-ring-pointer'.  Secret field is cleared
+after `password-store-timeout' seconds.
+If FIELD equals to symbol secret, then this function reduces to `password-store-copy'."
+  (interactive
+   (let ((entry (password-store--completing-read)))
+     (list entry (password-store-read-field entry))))
+  (password-store-get-field
+   entry
+   field
+   (lambda (secret-value)
+     (password-store--save-field-in-kill-ring entry secret-value field))))
 
 ;;;###autoload
 (defun password-store-init (gpg-id)
@@ -264,7 +317,7 @@ Separate multiple IDs with spaces."
 ;;;###autoload
 (defun password-store-insert (entry password)
   "Insert a new ENTRY containing PASSWORD."
-  (interactive (list (read-string "Password entry: ")
+  (interactive (list (password-store--completing-read)
                      (read-passwd "Password: " t)))
   (let* ((command (format "echo %s | %s insert -m -f %s"
                           (shell-quote-argument password)
@@ -281,7 +334,7 @@ Separate multiple IDs with spaces."
   "Generate a new password for ENTRY with PASSWORD-LENGTH.
 
 Default PASSWORD-LENGTH is `password-store-password-length'."
-  (interactive (list (read-string "Password entry: ")
+  (interactive (list (password-store--completing-read)
                      (when current-prefix-arg
                        (abs (prefix-numeric-value current-prefix-arg)))))
   (unless password-length (setq password-length password-store-password-length))
@@ -311,16 +364,12 @@ Default PASSWORD-LENGTH is `password-store-password-length'."
 
 ;;;###autoload
 (defun password-store-url (entry)
-  "Browse URL stored in ENTRY.
-
-This will only browse URLs that start with http:// or https:// to
-avoid sending a password to the browser."
+  "Browse URL stored in ENTRY."
   (interactive (list (password-store--completing-read t)))
-  (let ((url (password-store-get entry)))
-    (if (or (string-prefix-p "http://" url)
-            (string-prefix-p "https://" url))
-        (browse-url url)
-      (error "%s" "String does not look like a URL"))))
+  (let ((url (password-store-get-field entry password-store-url-field)))
+    (if url (browse-url url)
+      (error "Field `%s' not found" password-store-url-field))))
+
 
 (provide 'password-store)
 

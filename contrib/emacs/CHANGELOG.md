@@ -1,7 +1,15 @@
+# 2.1.0
+
+* (feature) Support extraction of any secret fields stored in the files.
+
+* (feature) The library is now integrated with auth-source-pass; thus, the
+            filename of the password-store folder is set with the option
+            auth-source-pass-filename.
+
 # 2.0.5
-	
+
 Improve password-store-insert message on success/failure
-	
+
 # 2.0.4
 	
 * Re add password-store-timeout function to preserve backward

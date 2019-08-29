@@ -15,16 +15,24 @@ website for instructions
 Interactive:
 
     M-x password-store-insert
-    Password entry: example
+    Password entry: foo-account
     Password: ........
     Confirm password: ........
 
     M-x password-store-copy
-    Password entry: example
-    Copied example to the kill ring. Will clear in 45 seconds.
-    Password cleared.
+    Password entry: foo-account
+    Copied password for foo-account to the kill ring. Will clear in 45 seconds.
+    Field password cleared.
+
+    M-x password-store-copy-field
+    Password entry: foo-account
+    Field: username
+    Copied username for foo-account to the kill ring. Will clear in 45 seconds.
+    Field url cleared.
+
 
 Lisp:
 
-    (password-store-insert "example" "password")
-    (password-store-get "example") ; Returns "password"
+    (password-store-insert "foo-account" "password")
+    (password-store-get "foo-account") ; Returns "password"
+    (password-store-get-field "foo-account" "url") ; Returns "url"
