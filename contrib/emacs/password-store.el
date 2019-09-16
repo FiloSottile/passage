@@ -4,7 +4,7 @@
 
 ;; Author: Svend Sorensen <svend@svends.net>
 ;; Maintainer: Tino Calancha <tino.calancha@gmail.com>
-;; Version: 2.1.1
+;; Version: 2.1.2
 ;; URL: https://www.passwordstore.org/
 ;; Package-Requires: ((emacs "25") (f "0.11.0") (s "1.9.0") (with-editor "2.5.11") (auth-source-pass "5.0.0"))
 ;; Keywords: tools pass password password-store
@@ -254,7 +254,7 @@ If FIELD equals to symbol secret, then this function reduces to `password-store-
 
 
 ;;;###autoload
-(defun password-store-clear (field)
+(defun password-store-clear (&optional field)
   "Clear FIELD in kill ring."
   (interactive "i")
   (unless field (setq field 'secret))

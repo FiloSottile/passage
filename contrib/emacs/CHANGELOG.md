@@ -1,3 +1,8 @@
+# 2.1.2
+
+* Make argument optional in password-store-clear to preserve
+  backward compatibility.
+
 # 2.1.1
 
 * (bugfix) Check that auth-source-pass-filename is bound before use it.
