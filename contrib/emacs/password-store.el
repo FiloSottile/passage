@@ -4,9 +4,9 @@
 
 ;; Author: Svend Sorensen <svend@svends.net>
 ;; Maintainer: Tino Calancha <tino.calancha@gmail.com>
-;; Version: 2.1.3
+;; Version: 2.1.4
 ;; URL: https://www.passwordstore.org/
-;; Package-Requires: ((emacs "25") (f "0.11.0") (s "1.9.0") (with-editor "2.5.11") (auth-source-pass "5.0.0"))
+;; Package-Requires: ((emacs "25") (s "1.9.0") (with-editor "2.5.11") (auth-source-pass "5.0.0"))
 ;; Keywords: tools pass password password-store
 
 ;; This file is not part of GNU Emacs.
@@ -33,7 +33,6 @@
 
 ;;; Code:
 
-(require 'f)
 (require 'with-editor)
 (require 'auth-source-pass)
 
@@ -187,11 +186,11 @@ Nil arguments are ignored.  Output is discarded."
 
 (defun password-store--entry-to-file (entry)
   "Return file name corresponding to ENTRY."
-  (concat (f-join (password-store-dir) entry) ".gpg"))
+  (concat (expand-file-name entry (password-store-dir)) ".gpg"))
 
 (defun password-store--file-to-entry (file)
   "Return entry name corresponding to FILE."
-  (f-no-ext (f-relative file (password-store-dir))))
+  (file-name-sans-extension (file-relative-name file (password-store-dir))))
 
 (defun password-store--completing-read (&optional require-match)
   "Read a password entry in the minibuffer, with completion.
@@ -214,11 +213,11 @@ ENTRY is the name of a password-store entry."
 (defun password-store-list (&optional subdir)
   "List password entries under SUBDIR."
   (unless subdir (setq subdir ""))
-  (let ((dir (f-join (password-store-dir) subdir)))
-    (if (f-directory? dir)
+  (let ((dir (expand-file-name subdir (password-store-dir))))
+    (if (file-directory-p dir)
         (delete-dups
          (mapcar 'password-store--file-to-entry
-                 (f-files dir (lambda (file) (equal (f-ext file) "gpg")) t))))))
+                 (directory-files-recursively dir ".+\\.gpg\\'"))))))
 
 ;;;###autoload
 (defun password-store-edit (entry)

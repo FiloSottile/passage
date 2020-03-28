@@ -4,7 +4,6 @@
 (package-file "password-store.el")
 
 (development
- (depends-on "f")
  (depends-on "with-editor")
  (depends-on "ecukes")
  (depends-on "ert-runner")

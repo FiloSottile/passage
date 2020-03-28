@@ -1,3 +1,7 @@
+# 2.1.4
+
+* Drop dependency on f library.
+
 # 2.1.3
 
 * Update password-store-clear docstring; clarify that the
