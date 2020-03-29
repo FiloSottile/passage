@@ -15,6 +15,11 @@ test_expect_success 'Test "show" command with spaces' '
 	[[ $("$PASS" show "I am a cred with lots of spaces") == "BLAH!!" ]]
 '
 
+test_expect_success 'Test "show" command with unicode' '
+	"$PASS" generate 🏠 &&
+	"$PASS" show | grep -q '🏠'
+'
+
 test_expect_success 'Test "show" of nonexistant password' '
 	test_must_fail "$PASS" show cred2
 '
