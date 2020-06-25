@@ -3,7 +3,7 @@
 # Copyright (C) 2012-2014 Dmitry Medvinsky <me@dmedvinsky.name>. All Rights Reserved.
 # This file is licensed under the GPLv2+. Please see COPYING for more information.
 
-set PROG 'pass'
+set -l PROG 'pass'
 
 function __fish_pass_get_prefix
     set -l prefix "$PASSWORD_STORE_DIR"
@@ -18,7 +18,7 @@ function __fish_pass_needs_command
 end
 
 function __fish_pass_uses_command
-    set cmd (commandline -opc)
+    set -l cmd (commandline -opc)
     if [ (count $cmd) -gt 1 ]
         if [ $argv[1] = $cmd[2] ]
             return 0
