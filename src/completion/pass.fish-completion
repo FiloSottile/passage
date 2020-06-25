@@ -52,6 +52,12 @@ function __fish_pass_print_entries_and_dirs
     __fish_pass_print_entries
 end
 
+function __fish_pass_git_complete
+    set -l prefix (__fish_pass_get_prefix)
+    set -l git_cmd (commandline -opc) (commandline -ct)
+    set -e git_cmd[1 2] # Drop "pass git".
+    complete -C"git -C $prefix $git_cmd"
+end
 
 complete -c $PROG -f -n '__fish_pass_needs_command' -a help -d 'Command: show usage help'
 complete -c $PROG -f -n '__fish_pass_needs_command' -a version -d 'Command: show program version'
@@ -101,13 +107,11 @@ complete -c $PROG -f -n '__fish_pass_uses_command -c' -a "(__fish_pass_print_ent
 complete -c $PROG -f -n '__fish_pass_uses_command --clip' -a "(__fish_pass_print_entries)"
 
 complete -c $PROG -f -n '__fish_pass_needs_command' -a git -d 'Command: execute a git command'
-complete -c $PROG -f -n '__fish_pass_uses_command git' -a 'init' -d 'Initialize git repository'
-complete -c $PROG -f -n '__fish_pass_uses_command git' -a 'status' -d 'Show status of the repo'
-complete -c $PROG -f -n '__fish_pass_uses_command git' -a 'add' -d 'Add changes to the index'
-complete -c $PROG -f -n '__fish_pass_uses_command git' -a 'commit' -d 'Commit changes to the repo'
-complete -c $PROG -f -n '__fish_pass_uses_command git' -a 'push' -d 'Push changes to remote repo'
-complete -c $PROG -f -n '__fish_pass_uses_command git' -a 'pull' -d 'Pull changes from remote repo'
-complete -c $PROG -f -n '__fish_pass_uses_command git' -a 'log' -d 'View changelog'
-
+complete -c $PROG -f -n '__fish_pass_uses_command git' -a '(__fish_pass_git_complete)'
 complete -c $PROG -f -n '__fish_pass_needs_command' -a find -d 'Command: find a password file or directory matching pattern'
 complete -c $PROG -f -n '__fish_pass_needs_command' -a grep -d 'Command: search inside of decrypted password files for matching pattern'
+complete -c $PROG -f -n '__fish_pass_uses_command grep' -a '(begin
+    set -l cmd (commandline -opc) (commandline -ct)
+    set -e cmd[1 2] # Drop "pass grep".
+    complete -C"grep $cmd"
+end)'
