@@ -53,7 +53,6 @@ function __fish_pass_print_entries_and_dirs
 end
 
 
-complete -c $PROG -e
 complete -c $PROG -f -n '__fish_pass_needs_command' -a help -d 'Command: show usage help'
 complete -c $PROG -f -n '__fish_pass_needs_command' -a version -d 'Command: show program version'
 
