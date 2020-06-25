@@ -39,7 +39,8 @@ function __fish_pass_print
     set -l ext $argv[1]
     set -l strip $argv[2]
     set -l prefix (__fish_pass_get_prefix)
-    printf '%s\n' "$prefix"/**"$ext" | sed "s#$prefix/\(.*\)$strip#\1#"
+    set -l matches $prefix/**$ext
+    printf '%s\n' $matches | sed "s#$prefix/\(.*\)$strip#\1#"
 end
 
 function __fish_pass_print_entry_dirs
