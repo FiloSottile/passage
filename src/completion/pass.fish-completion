@@ -14,11 +14,7 @@ function __fish_pass_get_prefix
 end
 
 function __fish_pass_needs_command
-    set -l cmd (commandline -opc)
-    if [ (count $cmd) -eq 1 -a $cmd[1] = $PROG ]
-        return 0
-    end
-    return 1
+    [ (count (commandline -opc)) -eq 1 ]
 end
 
 function __fish_pass_uses_command
