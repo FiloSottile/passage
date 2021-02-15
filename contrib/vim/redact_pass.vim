@@ -49,4 +49,10 @@ augroup redact_pass
         \,$TMPDIR/pass.?*/?*.txt
         \,/tmp/pass.?*/?*.txt
         \ call s:CheckArgsRedact()
+  " Work around macOS' dynamic symlink structure for temporary directories
+  if has('mac')
+    autocmd VimEnter
+          \ /private/var/?*/pass.?*/?*.txt
+          \ call s:CheckArgsRedact()
+  endif
 augroup END
