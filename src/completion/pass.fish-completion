@@ -6,11 +6,11 @@
 set -l PROG 'pass'
 
 function __fish_pass_get_prefix
-    set -l prefix "$PASSWORD_STORE_DIR"
-    if [ -z "$prefix" ]
-        set prefix "$HOME/.password-store"
+    if set -q PASSWORD_STORE_DIR
+        realpath -- "$PASSWORD_STORE_DIR"
+    else
+        echo "$HOME/.password-store"
     end
-    echo "$prefix"
 end
 
 function __fish_pass_needs_command
