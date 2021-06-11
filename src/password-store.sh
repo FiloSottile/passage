@@ -355,7 +355,7 @@ cmd_init() {
 				signing_keys+=( --default-key $key )
 			done
 			$GPG "${GPG_OPTS[@]}" "${signing_keys[@]}" --detach-sign "$gpg_id" || die "Could not sign .gpg_id."
-			key="$($GPG --verify --status-fd=1 "$gpg_id.sig" "$gpg_id" 2>/dev/null | sed -n 's/^\[GNUPG:\] VALIDSIG [A-F0-9]\{40\} .* \([A-F0-9]\{40\}\)$/\1/p')"
+			key="$($GPG "${GPG_OPTS[@]}" --verify --status-fd=1 "$gpg_id.sig" "$gpg_id" 2>/dev/null | sed -n 's/^\[GNUPG:\] VALIDSIG [A-F0-9]\{40\} .* \([A-F0-9]\{40\}\)$/\1/p')"
 			[[ -n $key ]] || die "Signing of .gpg_id unsuccessful."
 			git_add_file "$gpg_id.sig" "Signing new GPG id with ${key//[$IFS]/,}."
 		fi
