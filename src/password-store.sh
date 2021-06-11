@@ -100,6 +100,8 @@ set_gpg_recipients() {
 
 	local gpg_id
 	while read -r gpg_id; do
+		gpg_id="${gpg_id%%#*}" # strip comment
+		[[ -n $gpg_id ]] || continue
 		GPG_RECIPIENT_ARGS+=( "-r" "$gpg_id" )
 		GPG_RECIPIENTS+=( "$gpg_id" )
 	done < "$current"
