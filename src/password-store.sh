@@ -70,6 +70,7 @@ verify_file() {
 set_gpg_recipients() {
 	GPG_RECIPIENT_ARGS=( )
 	GPG_RECIPIENTS=( )
+	local gpg_id
 
 	if [[ -n $PASSWORD_STORE_KEY ]]; then
 		for gpg_id in $PASSWORD_STORE_KEY; do
@@ -98,7 +99,6 @@ set_gpg_recipients() {
 
 	verify_file "$current"
 
-	local gpg_id
 	while read -r gpg_id; do
 		gpg_id="${gpg_id%%#*}" # strip comment
 		[[ -n $gpg_id ]] || continue
