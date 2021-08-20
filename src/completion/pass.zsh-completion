@@ -1,4 +1,4 @@
-#compdef pass
+#compdef passage
 #autoload
 
 # Copyright (C) 2012 - 2014:
@@ -11,32 +11,26 @@
 
 # If you use multiple repositories, you can configure completion like this:
 #
-# compdef _pass workpass
+# compdef _passage workpass
 # zstyle ':completion::complete:workpass::' prefix "$HOME/work/pass"
 # workpass() {
-#   PASSWORD_STORE_DIR=$HOME/work/pass pass $@
+#   PASSAGE_DIR=$HOME/work/pass passage $@
 # }
 
 
-_pass () {
+_passage () {
 	local cmd
 	if (( CURRENT > 2)); then
 		cmd=${words[2]}
 		# Set the context for the subcommand.
-		curcontext="${curcontext%:*:*}:pass-$cmd"
+		curcontext="${curcontext%:*:*}:passage-$cmd"
 		# Narrow the range of words we are looking at to exclude `pass'
 		(( CURRENT-- ))
 		shift words
 		# Run the completion for the subcommand
 		case "${cmd}" in
-			init)
-				_arguments : \
-					"-p[gpg-id will only be applied to this subfolder]" \
-					"--path[gpg-id will only be applied to this subfolder]"
-				_pass_complete_keys
-				;;
 			ls|list|edit)
-				_pass_complete_entries_with_subdirs
+				_passage_complete_entries_with_subdirs
 				;;
 			insert)
 				_arguments : \
@@ -44,7 +38,7 @@ _pass () {
 					"--echo[echo password to console]" \
 					"-m[multiline]" \
 					"--multiline[multiline]"
-				_pass_complete_entries_with_subdirs
+				_passage_complete_entries_with_subdirs
 				;;
 			generate)
 				_arguments : \
@@ -56,13 +50,13 @@ _pass () {
 					"--force[force overwrite]" \
 					"-i[replace first line]" \
 					"--in-place[replace first line]"
-				_pass_complete_entries_with_subdirs
+				_passage_complete_entries_with_subdirs
 				;;
 			cp|copy|mv|rename)
 				_arguments : \
 					"-f[force rename]" \
 					"--force[force rename]"
-					_pass_complete_entries_with_subdirs
+					_passage_complete_entries_with_subdirs
 				;;
 			rm)
 				_arguments : \
@@ -70,7 +64,7 @@ _pass () {
 					"--force[force deletion]" \
 					"-r[recursively delete]" \
 					"--recursive[recursively delete]"
-					_pass_complete_entries_with_subdirs
+					_passage_complete_entries_with_subdirs
 				;;
 			git)
 				local -a subcommands
@@ -82,16 +76,15 @@ _pass () {
 					"log:Show git log"
 					"reflog:Show git reflog"
 				)
-				_describe -t commands 'pass git' subcommands
+				_describe -t commands 'passage git' subcommands
 				;;
 			show|*)
-				_pass_cmd_show
+				_passage_cmd_show
 				;;
 		esac
 	else
 		local -a subcommands
 		subcommands=(
-			"init:Initialize new password storage"
 			"ls:List passwords"
 			"find:Find password files or directories based on pattern"
 			"grep:Search inside decrypted password files for matching pattern"
@@ -106,39 +99,33 @@ _pass () {
 			"version:Output version information"
 			"help:Output help message"
 		)
-		_describe -t commands 'pass' subcommands
+		_describe -t commands 'passage' subcommands
 		_arguments : \
 			"--version[Output version information]" \
 			"--help[Output help message]"
-		_pass_cmd_show
+		_passage_cmd_show
 	fi
 }
 
-_pass_cmd_show () {
+_passage_cmd_show () {
 	_arguments : \
 		"-c[put it on the clipboard]" \
 		"--clip[put it on the clipboard]"
-	_pass_complete_entries
+	_passage_complete_entries
 }
-_pass_complete_entries_helper () {
+_passage_complete_entries_helper () {
 	local IFS=$'\n'
 	local prefix
-	zstyle -s ":completion:${curcontext}:" prefix prefix || prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
-	_values -C 'passwords' ${$(find -L "$prefix" \( -name .git -o -name .gpg-id \) -prune -o $@ -print 2>/dev/null | sed -e "s#${prefix}/\{0,1\}##" -e 's#\.gpg##' -e 's#\\#\\\\#g' -e 's#:#\\:#g' | sort):-""}
+	zstyle -s ":completion:${curcontext}:" prefix prefix || prefix="${PASSAGE_DIR:-$HOME/.passage/store}"
+	_values -C 'passwords' ${$(find -L "$prefix" \( -name .git -o -name .age-recipients \) -prune -o $@ -print 2>/dev/null | sed -e "s#${prefix}/\{0,1\}##" -e 's#\.age##' -e 's#\\#\\\\#g' -e 's#:#\\:#g' | sort):-""}
 }
 
-_pass_complete_entries_with_subdirs () {
-	_pass_complete_entries_helper
+_passage_complete_entries_with_subdirs () {
+	_passage_complete_entries_helper
 }
 
-_pass_complete_entries () {
-	_pass_complete_entries_helper -type f
+_passage_complete_entries () {
+	_passage_complete_entries_helper -type f
 }
 
-_pass_complete_keys () {
-	local IFS=$'\n'
-	# Extract names and email addresses from gpg --list-keys
-	_values 'gpg keys' $(gpg2 --list-secret-keys --with-colons | cut -d : -f 10 | sort -u | sed '/^$/d')
-}
-
-_pass
+_passage

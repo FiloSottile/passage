@@ -1,32 +1,53 @@
-======================
-Simple Password Store
-by Jason Donenfeld
-   Jason@zx2c4.com
-======================
+passage
+=======
 
-This is a very simple password store that encrypts passwords using gpg and
-places the encrypted password in a directory. It can generate new passwords
-and keep track of old ones.
+passage is a fork of password-store (https://www.passwordstore.org) that uses
+age (https://age-encryption.org) as a backend instead of GnuPG.
 
-Visit the project page for more information: http://www.passwordstore.org/
+Differences from pass
+---------------------
 
-Please see the man page for documentation and examples.
+The password store is at $HOME/.passage/store by default.
 
-Depends on:
-- bash
-  http://www.gnu.org/software/bash/
-- GnuPG2
-  http://www.gnupg.org/
-- git
-  http://www.git-scm.com/
-- xclip (for X11 environments)
-  http://sourceforge.net/projects/xclip/
-- wl-clipboard (for wlroots Wayland-based environments)
-  https://github.com/bugaevc/wl-clipboard
-- tree >= 1.7.0
-  http://mama.indstate.edu/users/ice/tree/
-- GNU getopt
-  http://www.kernel.org/pub/linux/utils/util-linux/
-  http://software.frodo.looijaard.name/getopt/
-- qrencode
-  https://fukuchi.org/works/qrencode/
+For decryption, the age identities at $HOME/.passage/identities are used with
+the -i age CLI option.
+
+For encryption, the nearest .age-recipients file is used with the -R age CLI
+option. If no .age-recipients files are found, the identities file is used with
+the -i option.
+
+Extensions by default are searched at $HOME/.passage/store. Most password-store
+extensions should work with passage.
+
+The init command is not currently available, and moving or copying a secret
+always re-encrypts it.
+
+Migrating from pass
+-------------------
+
+    set -o pipefail
+    cd "${PASSWORD_STORE_DIR:-$HOME/.password-store}"
+    while read -r -d "" passfile; do
+      name="${${passfile#./}%.gpg}"
+      [[ -f "${PASSAGE_DIR:-$HOME/.passage/store}/$name.age" ]] && continue
+      pass "$name" | passage insert -m "$name" ||
+        { passage rm "$name"; break }
+    done < <(find . -path '*/.git' -prune -o -iname '*.gpg' -print0)
+
+Environment variables
+---------------------
+
+  PASSAGE_DIR               Password store location
+
+  PASSAGE_IDENTITIES_FILE   Identities file location
+
+  PASSAGE_AGE               age binary (tested with age and rage)
+
+  PASSAGE_RECIPIENTS_FILE   Override recipients for encryption operations
+                            Passed to age with -R
+
+  PASSAGE_RECIPIENTS        Override recipients for encryption operations
+                            Space separated, each passed to age with -r
+
+All other environment variables from password-store are respected, such as
+PASSWORD_STORE_EXTENSIONS_DIR and PASSWORD_STORE_GENERATED_LENGTH.

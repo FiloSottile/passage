@@ -2,7 +2,7 @@ Simply typing
 
     make install
 
-should install pass to the standard locations.
+should install passage to the standard locations.
 
 The makefile is aware of the following environment variables:
 
@@ -10,8 +10,6 @@ PREFIX      default: /usr
 DESTDIR     default: 
 BINDIR      default: $(PREFIX)/bin
 LIBDIR      default: $(PREFIX)/lib
-MANDIR      default: $(PREFIX)/share/man
-SYSCONFDIR  default: /etc
 
 -- Completion Files --
 
@@ -21,13 +19,3 @@ needed. If you'd like to choose manually, you may set WITH_ALLCOMP,
 WITH_BASHCOMP, WITH_ZSHCOMP, or WITH_FISHCOMP to "yes" or "no". The
 exact paths of the completions can be controlled with BASHCOMPDIR,
 ZSHCOMPDIR, and FISHCOMPDIR.
-
--- Test Suite --
-
-Pass has a test suite which uses Sharness:
-<https://github.com/mlafeldt/sharness>
-
-To run all tests, run 'make test'.
-
-To debug an individual test, run it directly with '-v', e.g.:
-    $ tests/t0001-sanity-checks.sh -v

@@ -5,9 +5,9 @@
 # This file is licensed under the GPLv2+. Please see COPYING for more information.
 
 _pass_complete_entries () {
-	local prefix="${PASSWORD_STORE_DIR:-$HOME/.password-store/}"
+	local prefix="${PASSAGE_DIR:-$HOME/.passage/store/}"
 	prefix="${prefix%/}/"
-	local suffix=".gpg"
+	local suffix=".age"
 	local autoexpand=${1:-0}
 
 	local IFS=$'\n'
@@ -70,16 +70,6 @@ _pass_complete_folders () {
 	done
 }
 
-_pass_complete_keys () {
-	local GPG="gpg"
-	command -v gpg2 &>/dev/null && GPG="gpg2"
-
-	local IFS=$'\n'
-	# Extract names and email addresses from gpg --list-keys
-	local keys="$($GPG --list-secret-keys --with-colons | cut -d : -f 10 | sort -u | sed '/^$/d')"
-	COMPREPLY+=($(compgen -W "${keys}" -- ${cur}))
-}
-
 _pass()
 {
 	COMPREPLY=()
@@ -88,15 +78,6 @@ _pass()
 	if [[ $COMP_CWORD -gt 1 ]]; then
 		local lastarg="${COMP_WORDS[$COMP_CWORD-1]}"
 		case "${COMP_WORDS[1]}" in
-			init)
-				if [[ $lastarg == "-p" || $lastarg == "--path" ]]; then
-					_pass_complete_folders
-					compopt -o nospace
-				else
-					COMPREPLY+=($(compgen -W "-p --path" -- ${cur}))
-					_pass_complete_keys
-				fi
-				;;
 			ls|list|edit)
 				_pass_complete_entries
 				;;
