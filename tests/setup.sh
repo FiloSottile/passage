@@ -52,7 +52,7 @@ fi
 export GNUPGHOME="$TEST_HOME/gnupg/"
 chmod 700 "$GNUPGHOME"
 GPG="gpg"
-which gpg2 &>/dev/null && GPG="gpg2"
+command -v gpg2 &>/dev/null && GPG="gpg2"
 
 # We don't want any currently running agent to conflict.
 unset GPG_AGENT_INFO

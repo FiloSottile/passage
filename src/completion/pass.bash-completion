@@ -72,7 +72,7 @@ _pass_complete_folders () {
 
 _pass_complete_keys () {
 	local GPG="gpg"
-	which gpg2 &>/dev/null && GPG="gpg2"
+	command -v gpg2 &>/dev/null && GPG="gpg2"
 
 	local IFS=$'\n'
 	# Extract names and email addresses from gpg --list-keys
