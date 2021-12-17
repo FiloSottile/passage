@@ -49,7 +49,7 @@ install: install-common
 else
 install: install-common
 	@install -v -d "$(DESTDIR)$(LIBDIR)/passage/extensions"
-	@trap 'rm -f src/.passage' EXIT; sed '/PLATFORM_FUNCTION_FILE/d;s:^SYSTEM_EXTENSION_DIR=.*:SYSTEM_EXTENSION_DIR="$(LIBDIR)/passage/extensions":' src/passage.sh > src/.passage && \
+	@trap 'rm -f src/.passage' EXIT; sed '/PLATFORM_FUNCTION_FILE/d;s:^SYSTEM_EXTENSION_DIR=.*:SYSTEM_EXTENSION_DIR="$(LIBDIR)/passage/extensions":' src/password-store.sh > src/.passage && \
 	install -v -d "$(DESTDIR)$(BINDIR)/" && install -m 0755 -v src/.passage "$(DESTDIR)$(BINDIR)/passage"
 endif
 
