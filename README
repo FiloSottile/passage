@@ -12,15 +12,49 @@ The password store is at $HOME/.passage/store by default.
 For decryption, the age identities at $HOME/.passage/identities are used with
 the -i age CLI option.
 
-For encryption, the nearest .age-recipients file is used with the -R age CLI
+For encryption, the nearest .age-recipients file (that is, the one in the same
+directory as the secret, or in the closest parent) is used with the -R age CLI
 option. If no .age-recipients files are found, the identities file is used with
 the -i option.
 
-Extensions by default are searched at $HOME/.passage/store. Most password-store
-extensions should work with passage.
+Extensions are searched at $HOME/.passage/store. password-store extensions that
+wish to be compatible with passage can switch on the PASSAGE variable.
 
 The init command is not currently available, and moving or copying a secret
 always re-encrypts it.
+
+Example: simple set up
+----------------------
+
+In this setup, the key is simply saved on disk, which can be useful if the
+password store is synced to a location less trusted than the local disk.
+
+    age-keygen >> $HOME/.passage/identities
+
+Example: set up with a password-protected key
+--------------------------------------------
+
+This setup allows using the identity file password as the primary password
+to unlock the store.
+
+    KEY="$(age-keygen)"
+    echo "$KEY" | age -p -a >> $HOME/.passage/identities
+    echo "$KEY" | age-keygen -y >> $HOME/.passage/store/.age-recipients
+
+Example: set up with rage and age-plugin-yubikey
+------------------------------------------------
+
+This setup uses rage (https://github.com/str4d/rage), since age v1.0.0 does
+not support plugins yet, and the PIV plugin age-plugin-yubikey
+(https://github.com/str4d/age-plugin-yubikey).
+
+It's recommended to add more YubiKeys and/or age keys to the .age-recipients
+file as recovery options, in case this YubiKey is lost.
+
+    export PASSAGE_AGE=rage
+    age-plugin-yubikey # run interactive setup
+    age-plugin-yubikey --identity >> $HOME/.passage/identities
+    age-plugin-yubikey --list >> $HOME/.passage/store/.age-recipients
 
 Migrating from pass
 -------------------
@@ -50,4 +84,4 @@ Environment variables
                             Space separated, each passed to age with -r
 
 All other environment variables from password-store are respected, such as
-PASSWORD_STORE_EXTENSIONS_DIR and PASSWORD_STORE_GENERATED_LENGTH.
+PASSWORD_STORE_CLIP_TIME and PASSWORD_STORE_GENERATED_LENGTH.

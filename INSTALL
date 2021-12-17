@@ -4,6 +4,11 @@ Simply typing
 
 should install passage to the standard locations.
 
+To install on a macOS system with Homebrew type
+
+    make install PREFIX="$(brew --cellar)/passage/$(git describe --tags)"
+    brew link passage
+
 The makefile is aware of the following environment variables:
 
 PREFIX      default: /usr
