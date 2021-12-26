@@ -56,10 +56,26 @@ file as recovery options, in case this YubiKey is lost.
     age-plugin-yubikey --identity >> $HOME/.passage/identities
     age-plugin-yubikey --list >> $HOME/.passage/store/.age-recipients
 
+Integrating with fzf
+--------------------
+
+The following script can be invoked with any (or no) passage flags, and
+spawns a fuzzy search dialog using fzf (https://github.com/junegunn/fzf)
+for selecting the secret.
+
+    #! /usr/bin/env bash
+    set -eou pipefail
+    PREFIX="${PASSAGE_DIR:-$HOME/.passage/store}"
+    name="$(find "$PREFIX" -type f -name '*.age' | \
+      sed -e "s|$PREFIX/||" -e 's|\.age$||' | \
+      fzf --height 40% --reverse)"
+    passage "${@}" "$name"
+
 Migrating from pass
 -------------------
 
-    set -o pipefail
+    #! /usr/bin/env bash
+    set -eou pipefail
     cd "${PASSWORD_STORE_DIR:-$HOME/.password-store}"
     while read -r -d "" passfile; do
       name="${passfile#./}"; name="${name%.gpg}"
