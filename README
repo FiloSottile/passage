@@ -32,7 +32,7 @@ password store is synced to a location less trusted than the local disk.
     age-keygen >> $HOME/.passage/identities
 
 Example: set up with a password-protected key
---------------------------------------------
+---------------------------------------------
 
 This setup allows using the identity file password as the primary password
 to unlock the store.
@@ -62,10 +62,9 @@ Migrating from pass
     set -o pipefail
     cd "${PASSWORD_STORE_DIR:-$HOME/.password-store}"
     while read -r -d "" passfile; do
-      name="${${passfile#./}%.gpg}"
+      name="${passfile#./}"; name="${name%.gpg}"
       [[ -f "${PASSAGE_DIR:-$HOME/.passage/store}/$name.age" ]] && continue
-      pass "$name" | passage insert -m "$name" ||
-        { passage rm "$name"; break }
+      pass "$name" | passage insert -m "$name" || { passage rm "$name"; break; }
     done < <(find . -path '*/.git' -prune -o -iname '*.gpg' -print0)
 
 Environment variables
