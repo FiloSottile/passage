@@ -122,4 +122,4 @@ _pass()
 	fi
 }
 
-complete -o filenames -F _pass pass
+complete -o filenames -F _pass passage
