@@ -59,7 +59,7 @@ _pass_complete_entries () {
 }
 
 _pass_complete_folders () {
-	local prefix="${PASSWORD_STORE_DIR:-$HOME/.passage/store/}"
+	local prefix="${PASSAGE_DIR:-$HOME/.passage/store/}"
 	prefix="${prefix%/}/"
 
 	local IFS=$'\n'
