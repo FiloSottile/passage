@@ -66,9 +66,10 @@ for selecting the secret.
     #! /usr/bin/env bash
     set -eou pipefail
     PREFIX="${PASSAGE_DIR:-$HOME/.passage/store}"
+    FZF_DEFAULT_OPTS=""
     name="$(find "$PREFIX" -type f -name '*.age' | \
       sed -e "s|$PREFIX/||" -e 's|\.age$||' | \
-      fzf --height 40% --reverse)"
+      fzf --height 40% --reverse --no-multi)"
     passage "${@}" "$name"
 
 Migrating from pass
