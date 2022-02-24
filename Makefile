@@ -7,12 +7,10 @@ PLATFORMFILE := src/platform/$(shell uname | cut -d _ -f 1 | tr '[:upper:]' '[:l
 
 BASHCOMPDIR ?= $(PREFIX)/share/bash-completion/completions
 ZSHCOMPDIR ?= $(PREFIX)/share/zsh/site-functions
-FISHCOMPDIR ?= $(PREFIX)/share/fish/vendor_completions.d
 
 ifneq ($(WITH_ALLCOMP),)
 WITH_BASHCOMP := $(WITH_ALLCOMP)
 WITH_ZSHCOMP := $(WITH_ALLCOMP)
-WITH_FISHCOMP := $(WITH_ALLCOMP)
 endif
 ifeq ($(WITH_BASHCOMP),)
 ifneq ($(strip $(wildcard $(BASHCOMPDIR))),)
@@ -24,10 +22,6 @@ ifneq ($(strip $(wildcard $(ZSHCOMPDIR))),)
 WITH_ZSHCOMP := yes
 endif
 endif
-ifeq ($(WITH_FISHCOMP),)
-ifneq ($(strip $(wildcard $(FISHCOMPDIR))),)
-WITH_FISHCOMP := yes
-endif
 endif
 
 all:
@@ -36,7 +30,6 @@ all:
 install-common:
 	@[ "$(WITH_BASHCOMP)" = "yes" ] || exit 0; install -v -d "$(DESTDIR)$(BASHCOMPDIR)" && install -m 0644 -v src/completion/pass.bash-completion "$(DESTDIR)$(BASHCOMPDIR)/passage"
 	@[ "$(WITH_ZSHCOMP)" = "yes" ] || exit 0; install -v -d "$(DESTDIR)$(ZSHCOMPDIR)" && install -m 0644 -v src/completion/pass.zsh-completion "$(DESTDIR)$(ZSHCOMPDIR)/_passage"
-	@[ "$(WITH_FISHCOMP)" = "yes" ] || exit 0; install -v -d "$(DESTDIR)$(FISHCOMPDIR)" && install -m 0644 -v src/completion/pass.fish-completion "$(DESTDIR)$(FISHCOMPDIR)/passage.fish"
 
 
 ifneq ($(strip $(wildcard $(PLATFORMFILE))),)
@@ -59,6 +52,5 @@ uninstall:
 		"$(DESTDIR)$(LIBDIR)/passage" \
 		"$(DESTDIR)$(BASHCOMPDIR)/passage" \
 		"$(DESTDIR)$(ZSHCOMPDIR)/_passage" \
-		"$(DESTDIR)$(FISHCOMPDIR)/passage.fish"
 
 .PHONY: install uninstall install-common clean
