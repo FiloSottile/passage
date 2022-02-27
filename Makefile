@@ -22,7 +22,6 @@ ifneq ($(strip $(wildcard $(ZSHCOMPDIR))),)
 WITH_ZSHCOMP := yes
 endif
 endif
-endif
 
 all:
 	@echo "Passage is a shell script, so there is nothing to do. Try \"make install\" instead."
