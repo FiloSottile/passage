@@ -17,8 +17,8 @@ directory as the secret, or in the closest parent) is used with the -R age CLI
 option. If no .age-recipients files are found, the identities file is used with
 the -i option.
 
-Extensions are searched at $HOME/.passage/extensions. password-store extensions that
-wish to be compatible with passage can switch on the PASSAGE variable.
+Extensions are searched at $HOME/.passage/extensions. password-store extensions
+that wish to be compatible with passage can switch on the PASSAGE variable.
 
 The init command is not currently available, and moving or copying a secret
 always re-encrypts it.
