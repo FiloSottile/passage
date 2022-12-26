@@ -41,17 +41,15 @@ to unlock the store.
     echo "$KEY" | age -p -a >> $HOME/.passage/identities
     echo "$KEY" | age-keygen -y >> $HOME/.passage/store/.age-recipients
 
-Example: set up with rage and age-plugin-yubikey
-------------------------------------------------
+Example: set up with age-plugin-yubikey
+---------------------------------------
 
-This setup uses rage (https://github.com/str4d/rage), since age v1.0.0 does
-not support plugins yet, and the PIV plugin age-plugin-yubikey
-(https://github.com/str4d/age-plugin-yubikey).
+This setup requires age v1.1.0, or rage (https://github.com/str4d/rage), and
+the PIV plugin age-plugin-yubikey (https://github.com/str4d/age-plugin-yubikey).
 
 It's recommended to add more YubiKeys and/or age keys to the .age-recipients
 file as recovery options, in case this YubiKey is lost.
 
-    export PASSAGE_AGE=rage
     age-plugin-yubikey # run interactive setup
     age-plugin-yubikey --identity >> $HOME/.passage/identities
     age-plugin-yubikey --list >> $HOME/.passage/store/.age-recipients
