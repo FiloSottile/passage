@@ -5,3 +5,6 @@
 GETOPT="gnugetopt"
 SHRED="rm -P -f"
 BASE64="openssl base64"
+MKDIR="mkdir"
+TREE="colortree"
+GREPCOLOR=
