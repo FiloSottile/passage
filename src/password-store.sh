@@ -334,13 +334,9 @@ cmd_find() {
 	IFS="," eval 'echo "Search Terms: $*"'
 	local terms
 	terms="*$(printf '%s*|*' "$@")"
-<<<<<<< HEAD
 	${TREE} -N -C -l --noreport -P "${terms%|*}" --prune --matchdirs --ignore-case "$PREFIX" \
 		| tail -n +2 \
 		| sed -E 's/\.age(\x1B\[[0-9]+m)?( ->|$)/\1\2/g'
-=======
-	tree -N -C -l --noreport -P "${terms%|*}" --prune --matchdirs --ignore-case "$PREFIX" | tail -n +2 | sed -E 's/\.age(\x1B\[[0-9]+m)?( ->|$)/\1\2/g'
->>>>>>> b5e73dc (Implement several recommendations from shellcheck)
 }
 
 cmd_grep() {
