@@ -7,7 +7,6 @@ umask "${PASSWORD_STORE_UMASK:-077}"
 set -o pipefail
 
 AGE="${PASSAGE_AGE:-age}"
-PASSAGE="1"
 
 PREFIX="${PASSAGE_DIR:-$HOME/.passage/store}"
 IDENTITIES_FILE="${PASSAGE_IDENTITIES_FILE:-$HOME/.passage/identities}"
@@ -86,14 +85,14 @@ reencrypt_path() {
 	while read -r -d "" passfile; do
 		[[ -L $passfile ]] && continue
 		local passfile_dir="${passfile%/*}"
-		passfile_dir="${passfile_dir#$PREFIX}"
+		passfile_dir="${passfile_dir#"$PREFIX"}"
 		passfile_dir="${passfile_dir#/}"
-		local passfile_display="${passfile#$PREFIX/}"
+		local passfile_display="${passfile#"$PREFIX"/}"
 		passfile_display="${passfile_display%.age}"
 		local passfile_temp="${passfile}.tmp.${RANDOM}.${RANDOM}.${RANDOM}.${RANDOM}.--"
 
 		set_age_recipients "$passfile_dir"
-		echo "$passfile_display: reencrypting with: age ${AGE_RECIPIENT_ARGS[@]}"
+		echo "$passfile_display: reencrypting with: age" "${AGE_RECIPIENT_ARGS[@]}"
 		$AGE -d -i "$IDENTITIES_FILE" "$passfile" | $AGE -e "${AGE_RECIPIENT_ARGS[@]}" -o "$passfile_temp" &&
 		mv "$passfile_temp" "$passfile" || rm -f "$passfile_temp"
 	done < <(find "$1" -path '*/.git' -prune -o -iname '*.age' -print0)
@@ -135,11 +134,13 @@ clip() {
 	# variable. Specifically, it cannot store nulls nor (non-trivally) store
 	# trailing new lines.
 	pkill -f "^$sleep_argv0" 2>/dev/null && sleep 0.5
-	local before="$("${paste_cmd[@]}" 2>/dev/null | $BASE64)"
+	local before
+	before="$("${paste_cmd[@]}" 2>/dev/null | $BASE64)"
 	echo -n "$1" | "${copy_cmd[@]}" || die "Error: Could not copy data to the clipboard"
 	(
 		( exec -a "$sleep_argv0" bash <<<"trap 'kill %1' TERM; sleep '$CLIP_TIME' & wait" )
-		local now="$("${paste_cmd[@]}" | $BASE64)"
+		local now
+		now="$("${paste_cmd[@]}" | $BASE64)"
 		[[ $now != $(echo -n "$1" | $BASE64) ]] && before="$now"
 
 		# It might be nice to programatically check to see if klipper exists,
@@ -172,6 +173,7 @@ qrcode() {
 	echo -n "$1" | qrencode -t utf8
 }
 
+# shellcheck disable=SC2317
 tmpdir() {
 	[[ -n $SECURE_TMPDIR ]] && return
 	local warn=1
@@ -194,7 +196,7 @@ tmpdir() {
 		)"
 		SECURE_TMPDIR="$(mktemp -d "${TMPDIR:-/tmp}/$template")"
 		shred_tmpfile() {
-			find "$SECURE_TMPDIR" -type f -exec $SHRED {} +
+			find "$SECURE_TMPDIR" -type f -exec ${SHRED} {} +
 			rm -rf "$SECURE_TMPDIR"
 		}
 		trap shred_tmpfile EXIT
@@ -302,7 +304,7 @@ cmd_show() {
 			echo "$pass" | $BASE64 -d
 		else
 			[[ $selected_line =~ ^[0-9]+$ ]] || die "Clip location '$selected_line' is not a number."
-			pass="$($AGE -d -i "$IDENTITIES_FILE" "$passfile" | tail -n +${selected_line} | head -n 1)" || exit $?
+			pass="$($AGE -d -i "$IDENTITIES_FILE" "$passfile" | tail -n +"${selected_line}" | head -n 1)" || exit $?
 			[[ -n $pass ]] || die "There is no password to put on the clipboard at line ${selected_line}."
 			if [[ $clip -eq 1 ]]; then
 				clip "$pass" "$path"
@@ -330,10 +332,15 @@ cmd_show() {
 cmd_find() {
 	[[ $# -eq 0 ]] && die "Usage: $PROGRAM $COMMAND pass-names..."
 	IFS="," eval 'echo "Search Terms: $*"'
-	local terms="*$(printf '%s*|*' "$@")"
+	local terms
+	terms="*$(printf '%s*|*' "$@")"
+<<<<<<< HEAD
 	${TREE} -N -C -l --noreport -P "${terms%|*}" --prune --matchdirs --ignore-case "$PREFIX" \
 		| tail -n +2 \
 		| sed -E 's/\.age(\x1B\[[0-9]+m)?( ->|$)/\1\2/g'
+=======
+	tree -N -C -l --noreport -P "${terms%|*}" --prune --matchdirs --ignore-case "$PREFIX" | tail -n +2 | sed -E 's/\.age(\x1B\[[0-9]+m)?( ->|$)/\1\2/g'
+>>>>>>> b5e73dc (Implement several recommendations from shellcheck)
 }
 
 cmd_grep() {
@@ -343,7 +350,7 @@ cmd_grep() {
 		grepresults="$($AGE -d -i "$IDENTITIES_FILE" "$passfile" | grep ${GREPCOLOR} "$@")"
 		[[ $? -ne 0 ]] && continue
 		passfile="${passfile%.age}"
-		passfile="${passfile#$PREFIX/}"
+		passfile="${passfile#"$PREFIX"/}"
 		local passfile_dir="${passfile%/*}/"
 		[[ $passfile_dir == "${passfile}/" ]] && passfile_dir=""
 		passfile="${passfile##*/}"
@@ -412,7 +419,8 @@ cmd_edit() {
 	set_git "$passfile"
 
 	tmpdir #Defines $SECURE_TMPDIR
-	local tmp_file="$(mktemp -u "$SECURE_TMPDIR/XXXXXX")-${path//\//-}.txt"
+	local tmp_file
+	tmp_file="$(mktemp -u "$SECURE_TMPDIR/XXXXXX")-${path//\//-}.txt"
 
 	local action="Add"
 	if [[ -f $passfile ]]; then
@@ -455,7 +463,7 @@ cmd_generate() {
 
 	[[ $inplace -eq 0 && $force -eq 0 && -e $passfile ]] && yesno "An entry already exists for $path. Overwrite it?"
 
-	read -r -n $length pass < <(LC_ALL=C tr -dc "$characters" < /dev/urandom)
+	read -r -n "$length" pass < <(LC_ALL=C tr -dc "$characters" < /dev/urandom)
 	[[ ${#pass} -eq $length ]] || die "Could not generate password from /dev/urandom."
 	if [[ $inplace -eq 0 ]]; then
 		echo "$pass" | $AGE -e "${AGE_RECIPIENT_ARGS[@]}" -o "$passfile" || die "Password encryption aborted."
