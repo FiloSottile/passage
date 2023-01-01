@@ -204,6 +204,9 @@ tmpdir() {
 GETOPT="getopt"
 SHRED="shred -f -z"
 BASE64="base64"
+MKDIR="mkdir -v"
+TREE="tree"
+GREPCOLOR="--color=always"
 
 source "$(dirname "$0")/platform/$(uname | cut -d _ -f 1 | tr '[:upper:]' '[:lower:]').sh" 2>/dev/null # PLATFORM_FUNCTION_FILE
 
@@ -313,7 +316,10 @@ cmd_show() {
 		else
 			echo "${path%\/}"
 		fi
-		tree -N -C -l --noreport "$PREFIX/$path" | tail -n +2 | sed -E 's/\.age(\x1B\[[0-9]+m)?( ->|$)/\1\2/g' # remove .age at end of line, but keep colors
+		# remove .age at end of line, but keep colors
+		${TREE} -N -C -l --noreport "$PREFIX/$path" \
+			| tail -n +2 \
+			| sed -E 's/\.age(\x1B\[[0-9]+m)?( ->|$)/\1\2/g' 
 	elif [[ -z $path ]]; then
 		die "Error: password store is empty."
 	else
@@ -325,14 +331,16 @@ cmd_find() {
 	[[ $# -eq 0 ]] && die "Usage: $PROGRAM $COMMAND pass-names..."
 	IFS="," eval 'echo "Search Terms: $*"'
 	local terms="*$(printf '%s*|*' "$@")"
-	tree -N -C -l --noreport -P "${terms%|*}" --prune --matchdirs --ignore-case "$PREFIX" | tail -n +2 | sed -E 's/\.age(\x1B\[[0-9]+m)?( ->|$)/\1\2/g'
+	${TREE} -N -C -l --noreport -P "${terms%|*}" --prune --matchdirs --ignore-case "$PREFIX" \
+		| tail -n +2 \
+		| sed -E 's/\.age(\x1B\[[0-9]+m)?( ->|$)/\1\2/g'
 }
 
 cmd_grep() {
 	[[ $# -lt 1 ]] && die "Usage: $PROGRAM $COMMAND [GREPOPTIONS] search-string"
 	local passfile grepresults
 	while read -r -d "" passfile; do
-		grepresults="$($AGE -d -i "$IDENTITIES_FILE" "$passfile" | grep --color=always "$@")"
+		grepresults="$($AGE -d -i "$IDENTITIES_FILE" "$passfile" | grep ${GREPCOLOR} "$@")"
 		[[ $? -ne 0 ]] && continue
 		passfile="${passfile%.age}"
 		passfile="${passfile#$PREFIX/}"
@@ -364,7 +372,7 @@ cmd_insert() {
 
 	[[ $force -eq 0 && -e $passfile ]] && yesno "An entry already exists for $path. Overwrite it?"
 
-	mkdir -p -v "$PREFIX/$(dirname -- "$path")"
+	${MKDIR} -p "$PREFIX/$(dirname -- "$path")"
 	set_age_recipients "$(dirname -- "$path")"
 
 	if [[ $multiline -eq 1 ]]; then
@@ -398,7 +406,7 @@ cmd_edit() {
 
 	local path="${1%/}"
 	check_sneaky_paths "$path"
-	mkdir -p -v "$PREFIX/$(dirname -- "$path")"
+	${MKDIR} -p "$PREFIX/$(dirname -- "$path")"
 	set_age_recipients "$(dirname -- "$path")"
 	local passfile="$PREFIX/$path.age"
 	set_git "$passfile"
@@ -440,7 +448,7 @@ cmd_generate() {
 	check_sneaky_paths "$path"
 	[[ $length =~ ^[0-9]+$ ]] || die "Error: pass-length \"$length\" must be a number."
 	[[ $length -gt 0 ]] || die "Error: pass-length must be greater than zero."
-	mkdir -p -v "$PREFIX/$(dirname -- "$path")"
+	${MKDIR} -p "$PREFIX/$(dirname -- "$path")"
 	set_age_recipients "$(dirname -- "$path")"
 	local passfile="$PREFIX/$path.age"
 	set_git "$passfile"
@@ -529,7 +537,7 @@ cmd_copy_move() {
 	echo "$old_path"
 	[[ -e $old_path ]] || die "Error: $1 is not in the password store."
 
-	mkdir -p -v "${new_path%/*}"
+	${MKDIR} -p "${new_path%/*}"
 	[[ -d $old_path || -d $new_path || $new_path == */ ]] || new_path="${new_path}.age"
 
 	local interactive="-i"
