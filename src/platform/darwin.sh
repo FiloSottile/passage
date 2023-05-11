@@ -7,7 +7,7 @@ clip() {
 	local before="$(pbpaste | $BASE64)"
 	echo -n "$1" | pbcopy
 	(
-		( exec -a "$sleep_argv0" sleep "$CLIP_TIME" )
+		(exec -a "$sleep_argv0" "${SLEEP}" "$CLIP_TIME")
 		local now="$(pbpaste | $BASE64)"
 		[[ $now != $(echo -n "$1" | $BASE64) ]] && before="$now"
 		echo "$before" | $BASE64 -d | pbcopy
@@ -39,6 +39,9 @@ qrcode() {
 	fi
 }
 
-GETOPT="$({ test -x /usr/local/opt/gnu-getopt/bin/getopt && echo /usr/local/opt/gnu-getopt; } || brew --prefix gnu-getopt 2>/dev/null || { command -v port &>/dev/null && echo /opt/local; } || echo /usr/local)/bin/getopt"
+getopt_prog="$({ test -x /usr/local/opt/gnu-getopt/bin/getopt && echo /usr/local/opt/gnu-getopt; } || brew --prefix gnu-getopt 2>/dev/null || { command -v port &>/dev/null && echo /opt/local; } || echo /usr/local)/bin/getopt"
+if [ -f "$getopt_prog" ]; then
+    GETOPT=$getopt_prog
+fi
 SHRED="srm -f -z"
 BASE64="openssl base64"
