@@ -258,6 +258,8 @@ cmd_usage() {
 	        Optionally put it on the clipboard and clear board after $CLIP_TIME seconds.
 	        Prompt before overwriting existing password unless forced.
 	        Optionally replace only the first line of an existing file with a new password.
+	    $PROGRAM reencrypt [--path=subfolder,-p subfolder]
+	        Selectively reencrypt existing passwords.
 	    $PROGRAM rm [--recursive,-r] [--force,-f] pass-name
 	        Remove existing password or directory, optionally forcefully.
 	    $PROGRAM mv [--force,-f] old-path new-path
@@ -274,7 +276,25 @@ cmd_usage() {
 	_EOF
 }
 
-# TODO: init-like command to re-encrypt a (sub-)path.
+cmd_reencrypt() {
+	local opts path=""
+	opts="$($GETOPT -o p: -l path: -n "$PROGRAM" -- "$@")"
+	local err=$?
+	eval set -- "$opts"
+	while true; do case $1 in
+		-p|--path) path="$2"; shift 2 ;;
+		--) shift; break ;;
+	esac done
+
+	[[ $err -ne 0 || $# -ne 0 ]] && die "Usage: $PROGRAM $COMMAND [--path=subfolder,-p subfolder]"
+	[[ -n $path ]] && check_sneaky_paths "$path"
+	[[ -n $path && ! -d $PREFIX/$path && -e $PREFIX/$path ]] && die "Error: $PREFIX/$path exists but is not a directory."
+
+	set_git "$PREFIX/$path"
+
+	reencrypt_path "$PREFIX/$path"
+	git_add_file "$PREFIX/$path" "Reencrypted $path."
+}
 
 cmd_show() {
 	local opts selected_line clip=0 qrcode=0
@@ -633,6 +653,7 @@ case "$1" in
 	insert|add) shift;		cmd_insert "$@" ;;
 	edit) shift;			cmd_edit "$@" ;;
 	generate) shift;		cmd_generate "$@" ;;
+	reencrypt) shift;		cmd_reencrypt "$@" ;;
 	delete|rm|remove) shift;	cmd_delete "$@" ;;
 	rename|mv) shift;		cmd_copy_move "move" "$@" ;;
 	copy|cp) shift;			cmd_copy_move "copy" "$@" ;;
