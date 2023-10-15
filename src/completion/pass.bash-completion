@@ -3,8 +3,10 @@
 # Copyright (C) 2012 - 2014 Jason A. Donenfeld <Jason@zx2c4.com> and
 # Brian Mattern <rephorm@rephorm.com>. All Rights Reserved.
 # This file is licensed under the GPLv2+. Please see COPYING for more information.
+#
+# slightly modified for passage
 
-_pass_complete_entries () {
+_passage_complete_entries () {
 	local prefix="${PASSAGE_DIR:-$HOME/.passage/store/}"
 	prefix="${prefix%/}/"
 	local suffix=".age"
@@ -58,7 +60,7 @@ _pass_complete_entries () {
 	fi
 }
 
-_pass_complete_folders () {
+_passage_complete_folders () {
 	local prefix="${PASSAGE_DIR:-$HOME/.passage/store/}"
 	prefix="${prefix%/}/"
 
@@ -70,7 +72,7 @@ _pass_complete_folders () {
 	done
 }
 
-_pass()
+_passage()
 {
 	COMPREPLY=()
 	local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -79,27 +81,27 @@ _pass()
 		local lastarg="${COMP_WORDS[$COMP_CWORD-1]}"
 		case "${COMP_WORDS[1]}" in
 			ls|list|edit)
-				_pass_complete_entries
+				_passage_complete_entries
 				;;
 			show|-*)
 				COMPREPLY+=($(compgen -W "-c --clip" -- ${cur}))
-				_pass_complete_entries 1
+				_passage_complete_entries 1
 				;;
 			insert)
 				COMPREPLY+=($(compgen -W "-e --echo -m --multiline -f --force" -- ${cur}))
-				_pass_complete_entries
+				_passage_complete_entries
 				;;
 			generate)
 				COMPREPLY+=($(compgen -W "-n --no-symbols -c --clip -f --force -i --in-place" -- ${cur}))
-				_pass_complete_entries
+				_passage_complete_entries
 				;;
 			cp|copy|mv|rename)
 				COMPREPLY+=($(compgen -W "-f --force" -- ${cur}))
-				_pass_complete_entries
+				_passage_complete_entries
 				;;
 			rm|remove|delete)
 				COMPREPLY+=($(compgen -W "-r --recursive -f --force" -- ${cur}))
-				_pass_complete_entries
+				_passage_complete_entries
 				;;
 			git)
 				COMPREPLY+=($(compgen -W "init push pull config log reflog rebase" -- ${cur}))
@@ -109,7 +111,7 @@ _pass()
 		# To add completion for an extension command define a function like this:
 		# __password_store_extension_complete_<COMMAND>() {
 		#     COMPREPLY+=($(compgen -W "-o --option" -- ${cur}))
-		#     _pass_complete_entries 1
+		#     _passage_complete_entries 1
 		# }
 		#
 		# and add the command to the $PASSWORD_STORE_EXTENSION_COMMANDS array
@@ -118,8 +120,8 @@ _pass()
 		fi
 	else
 		COMPREPLY+=($(compgen -W "${commands}" -- ${cur}))
-		_pass_complete_entries 1
+		_passage_complete_entries 1
 	fi
 }
 
-complete -o filenames -F _pass passage
+complete -o filenames -F _passage passage
