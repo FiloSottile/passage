@@ -74,7 +74,7 @@ set_age_recipients() {
 	current="$current/.age-recipients"
 
 	if [[ ! -f $current ]]; then
-		AGE_RECIPIENT_ARGS+=( "-i" "$IDENTITIES_FILE" )
+		AGE_RECIPIENT_ARGS+=$AGE_IDENTITY_ARGS
 		return
 	fi
 
@@ -94,7 +94,7 @@ reencrypt_path() {
 
 		set_age_recipients "$passfile_dir"
 		echo "$passfile_display: reencrypting with: age ${AGE_RECIPIENT_ARGS[@]}"
-		$AGE -d -i "$IDENTITIES_FILE" "$passfile" | $AGE -e "${AGE_RECIPIENT_ARGS[@]}" -o "$passfile_temp" &&
+		$AGE -d "${AGE_IDENTITY_ARGS[@]}" "$passfile" | $AGE -e "${AGE_RECIPIENT_ARGS[@]}" -o "$passfile_temp" &&
 		mv "$passfile_temp" "$passfile" || rm -f "$passfile_temp"
 	done < <(find "$1" -path '*/.git' -prune -o -iname '*.age' -print0)
 }
@@ -315,11 +315,11 @@ cmd_show() {
 	check_sneaky_paths "$path"
 	if [[ -f $passfile ]]; then
 		if [[ $clip -eq 0 && $qrcode -eq 0 ]]; then
-			pass="$($AGE -d -i "$IDENTITIES_FILE" "$passfile" | $BASE64)" || exit $?
+			pass="$($AGE -d "${AGE_IDENTITY_ARGS[@]}" "$passfile" | $BASE64)" || exit $?
 			echo "$pass" | $BASE64 -d
 		else
 			[[ $selected_line =~ ^[0-9]+$ ]] || die "Clip location '$selected_line' is not a number."
-			pass="$($AGE -d -i "$IDENTITIES_FILE" "$passfile" | tail -n +${selected_line} | head -n 1)" || exit $?
+			pass="$($AGE -d "${AGE_IDENTITY_ARGS[@]}" "$passfile" | tail -n +${selected_line} | head -n 1)" || exit $?
 			[[ -n $pass ]] || die "There is no password to put on the clipboard at line ${selected_line}."
 			if [[ $clip -eq 1 ]]; then
 				clip "$pass" "$path"
@@ -352,7 +352,7 @@ cmd_grep() {
 	[[ $# -lt 1 ]] && die "Usage: $PROGRAM $COMMAND [GREPOPTIONS] search-string"
 	local passfile grepresults
 	while read -r -d "" passfile; do
-		grepresults="$($AGE -d -i "$IDENTITIES_FILE" "$passfile" | grep --color=always "$@")"
+		grepresults="$($AGE -d "${AGE_IDENTITY_ARGS[@]}" "$passfile" | grep --color=always "$@")"
 		[[ $? -ne 0 ]] && continue
 		passfile="${passfile%.age}"
 		passfile="${passfile#$PREFIX/}"
@@ -428,12 +428,12 @@ cmd_edit() {
 
 	local action="Add"
 	if [[ -f $passfile ]]; then
-		$AGE -d -o "$tmp_file" -i "$IDENTITIES_FILE" "$passfile" || exit 1
+		$AGE -d -o "$tmp_file" "${AGE_IDENTITY_ARGS[@]}" "$passfile" || exit 1
 		action="Edit"
 	fi
 	${EDITOR:-vi} "$tmp_file"
 	[[ -f $tmp_file ]] || die "New password not saved."
-	$AGE -d -o - -i "$IDENTITIES_FILE" "$passfile" 2>/dev/null | diff - "$tmp_file" &>/dev/null && die "Password unchanged."
+	$AGE -d -o - "${AGE_IDENTITY_ARGS[@]}" "$passfile" 2>/dev/null | diff - "$tmp_file" &>/dev/null && die "Password unchanged."
 	while ! $AGE -e "${AGE_RECIPIENT_ARGS[@]}" -o "$passfile" "$tmp_file"; do
 		yesno "Age encryption failed. Would you like to try again?"
 	done
@@ -473,7 +473,7 @@ cmd_generate() {
 		echo "$pass" | $AGE -e "${AGE_RECIPIENT_ARGS[@]}" -o "$passfile" || die "Password encryption aborted."
 	else
 		local passfile_temp="${passfile}.tmp.${RANDOM}.${RANDOM}.${RANDOM}.${RANDOM}.--"
-		if { echo "$pass"; $AGE -d -i "$IDENTITIES_FILE" "$passfile" | tail -n +2; } | $AGE -e "${AGE_RECIPIENT_ARGS[@]}" -o "$passfile_temp"; then
+		if { echo "$pass"; $AGE -d "${AGE_IDENTITY_ARGS[@]}" "$passfile" | tail -n +2; } | $AGE -e "${AGE_RECIPIENT_ARGS[@]}" -o "$passfile_temp"; then
 			mv "$passfile_temp" "$passfile"
 		else
 			rm -f "$passfile_temp"
@@ -631,6 +631,16 @@ cmd_extension() {
 
 PROGRAM="${0##*/}"
 COMMAND="$1"
+
+AGE_IDENTITY_ARGS=( )
+if [[ -d "$IDENTITIES_FILE" ]]; then
+	for f in $IDENTITIES_FILE/*; do
+		AGE_IDENTITY_ARGS+=( "-i" "$f" )
+	done
+	IDENTITIES_FILE="${AGE_IDENTITY_ARGS[1]}"
+else
+	AGE_IDENTITY_ARGS+=( "-i" "$IDENTITIES_FILE" )
+fi
 
 if [[ ! -f "$IDENTITIES_FILE" ]]; then
 	cat >&2 <<-_EOF
