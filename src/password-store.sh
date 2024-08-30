@@ -590,7 +590,7 @@ cmd_git() {
 		echo '*.age diff=age' > "$PREFIX/.gitattributes"
 		git_add_file .gitattributes "Configure git repository for age file diff."
 		git -C "$INNER_GIT_DIR" config --local diff.age.binary true
-		git -C "$INNER_GIT_DIR" config --local diff.age.textconv "$AGE -d ${AGE_IDENTITY_ARGS[@]}"
+		git -C "$INNER_GIT_DIR" config --local diff.age.textconv "$AGE -d -i ${IDENTITIES_FILE}"
 	elif [[ -n $INNER_GIT_DIR ]]; then
 		tmpdir nowarn #Defines $SECURE_TMPDIR. We don't warn, because at most, this only copies encrypted files.
 		export TMPDIR="$SECURE_TMPDIR"
