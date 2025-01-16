@@ -104,6 +104,15 @@ check_sneaky_paths() {
 		[[ $path =~ /\.\.$ || $path =~ ^\.\./ || $path =~ /\.\./ || $path =~ ^\.\.$ ]] && die "Error: You've attempted to pass a sneaky path to passage. Go home."
 	done
 }
+maybe_decrypt_identities() {
+	local first identities
+	first="$(head -1 "$IDENTITIES_FILE")" || die "Failed reading $IDENTITIES_FILE"
+	[[ $first == 'age-encryption.org/v1' || $first == '-----BEGIN AGE ENCRYPTED FILE-----' ]] || return
+	tmpdir #Defines $SECURE_TMPDIR
+	identities="$(mktemp -u "$SECURE_TMPDIR/XXXXXX")-identities" || die "Failed choosing temp file"
+	$AGE -d -o "$identities" "$IDENTITIES_FILE" || die "Failed decrypting $IDENTITIES_FILE"
+	IDENTITIES_FILE="$identities"
+}
 
 #
 # END helper functions
@@ -292,6 +301,7 @@ cmd_reencrypt() {
 
 	set_git "$PREFIX/$path"
 
+	maybe_decrypt_identities
 	reencrypt_path "$PREFIX/$path"
 	git_add_file "$PREFIX/$path" "Reencrypted $path."
 }
@@ -350,6 +360,7 @@ cmd_find() {
 
 cmd_grep() {
 	[[ $# -lt 1 ]] && die "Usage: $PROGRAM $COMMAND [GREPOPTIONS] search-string"
+	maybe_decrypt_identities
 	local passfile grepresults
 	while read -r -d "" passfile; do
 		grepresults="$($AGE -d -i "$IDENTITIES_FILE" "$passfile" | grep --color=always "$@")"
@@ -428,6 +439,7 @@ cmd_edit() {
 
 	local action="Add"
 	if [[ -f $passfile ]]; then
+		maybe_decrypt_identities
 		$AGE -d -o "$tmp_file" -i "$IDENTITIES_FILE" "$passfile" || exit 1
 		action="Edit"
 	fi
