@@ -67,7 +67,7 @@ set_age_recipients() {
 		return
 	fi
 
-	local current="$PREFIX/$1"
+	local current="$PREFIX${1:+/$1}"
 	while [[ $current != "$PREFIX" && ! -f $current/.age-recipients ]]; do
 		current="${current%/*}"
 	done
