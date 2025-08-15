@@ -85,17 +85,17 @@ Migrating from pass
 Environment variables
 ---------------------
 
-  PASSAGE_DIR               Password store location
+    PASSAGE_DIR               Password store location
 
-  PASSAGE_IDENTITIES_FILE   Identities file location
+    PASSAGE_IDENTITIES_FILE   Identities file location
 
-  PASSAGE_AGE               age binary (tested with age and rage)
+    PASSAGE_AGE               age binary (tested with age and rage)
 
-  PASSAGE_RECIPIENTS_FILE   Override recipients for encryption operations
-                            Passed to age with -R
+    PASSAGE_RECIPIENTS_FILE   Override recipients for encryption operations
+                              Passed to age with -R
 
-  PASSAGE_RECIPIENTS        Override recipients for encryption operations
-                            Space separated, each passed to age with -r
+    PASSAGE_RECIPIENTS        Override recipients for encryption operations
+                              Space separated, each passed to age with -r
 
 All other environment variables from password-store are respected, such as
 PASSWORD_STORE_CLIP_TIME and PASSWORD_STORE_GENERATED_LENGTH.
