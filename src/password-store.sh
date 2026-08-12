@@ -115,7 +115,7 @@ check_sneaky_paths() {
 
 clip() {
 	if [[ -n $WAYLAND_DISPLAY ]] && command -v wl-copy &> /dev/null; then
-		local copy_cmd=( wl-copy )
+		local copy_cmd=( wl-copy --sensitive )
 		local paste_cmd=( wl-paste -n )
 		if [[ $X_SELECTION == primary ]]; then
 			copy_cmd+=( --primary )
