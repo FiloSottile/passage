@@ -284,6 +284,7 @@ cmd_reencrypt() {
 	while true; do case $1 in
 		-p|--path) path="$2"; shift 2 ;;
 		--) shift; break ;;
+		*) die "Error: unexpected output from $GETOPT; passage needs GNU getopt." ;;
 	esac done
 
 	[[ $err -ne 0 || $# -ne 0 ]] && die "Usage: $PROGRAM $COMMAND [--path=subfolder,-p subfolder]"
@@ -305,6 +306,7 @@ cmd_show() {
 		-q|--qrcode) qrcode=1; selected_line="${2:-1}"; shift 2 ;;
 		-c|--clip) clip=1; selected_line="${2:-1}"; shift 2 ;;
 		--) shift; break ;;
+		*) die "Error: unexpected output from $GETOPT; passage needs GNU getopt." ;;
 	esac done
 
 	[[ $err -ne 0 || ( $qrcode -eq 1 && $clip -eq 1 ) ]] && die "Usage: $PROGRAM $COMMAND [--clip[=line-number],-c[line-number]] [--qrcode[=line-number],-q[line-number]] [pass-name]"
@@ -374,6 +376,7 @@ cmd_insert() {
 		-e|--echo) noecho=0; shift ;;
 		-f|--force) force=1; shift ;;
 		--) shift; break ;;
+		*) die "Error: unexpected output from $GETOPT; passage needs GNU getopt." ;;
 	esac done
 
 	[[ $err -ne 0 || ( $multiline -eq 1 && $noecho -eq 0 ) || $# -ne 1 ]] && die "Usage: $PROGRAM $COMMAND [--echo,-e | --multiline,-m] [--force,-f] pass-name"
@@ -452,6 +455,7 @@ cmd_generate() {
 		-f|--force) force=1; shift ;;
 		-i|--in-place) inplace=1; shift ;;
 		--) shift; break ;;
+		*) die "Error: unexpected output from $GETOPT; passage needs GNU getopt." ;;
 	esac done
 
 	[[ $err -ne 0 || ( $# -ne 2 && $# -ne 1 ) || ( $force -eq 1 && $inplace -eq 1 ) || ( $qrcode -eq 1 && $clip -eq 1 ) ]] && die "Usage: $PROGRAM $COMMAND [--no-symbols,-n] [--clip,-c] [--qrcode,-q] [--in-place,-i | --force,-f] pass-name [pass-length]"
@@ -502,6 +506,7 @@ cmd_delete() {
 		-r|--recursive) recursive="-r"; shift ;;
 		-f|--force) force=1; shift ;;
 		--) shift; break ;;
+		*) die "Error: unexpected output from $GETOPT; passage needs GNU getopt." ;;
 	esac done
 	[[ $# -ne 1 ]] && die "Usage: $PROGRAM $COMMAND [--recursive,-r] [--force,-f] pass-name"
 	local path="$1"
@@ -535,6 +540,7 @@ cmd_copy_move() {
 	while true; do case $1 in
 		-f|--force) force=1; shift ;;
 		--) shift; break ;;
+		*) die "Error: unexpected output from $GETOPT; passage needs GNU getopt." ;;
 	esac done
 	[[ $# -ne 2 ]] && die "Usage: $PROGRAM $COMMAND [--force,-f] old-path new-path"
 	check_sneaky_paths "$@"
